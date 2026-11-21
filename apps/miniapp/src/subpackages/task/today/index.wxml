@@ -1,0 +1,117 @@
+<view class="offer-page">
+  <view wx:if="{{error}}" class="offer-feedback" aria-role="alert">{{error}}</view>
+  <view wx:elif="{{!loading && blocked && !today}}" class="offer-feedback">你的账号已暂停领取营销任务。已发布的任务可在工作台查看。</view>
+
+  <view class="offer-summary">
+    <view class="offer-heading">
+      <view class="offer-icon">
+        <image class="offer-icon-image" src="/assets/marketing-white.png" mode="aspectFit" />
+      </view>
+      <view class="offer-heading-text">
+        <view class="offer-title">今日营销分发</view>
+        <text class="offer-tag">营销分发</text>
+      </view>
+      <view class="offer-stats">
+        <view>
+          <view>每个平台</view>
+          <text class="offer-stat-value">¥{{price}}</text>
+        </view>
+        <view>
+          <view>每天</view>
+          <text class="offer-stat-value">1 条</text>
+        </view>
+      </view>
+    </view>
+    <view class="offer-description">
+      报名并通过审核后，即可查看任务。平台会提供视频或图文素材，并注明发布要求。按要求发布到抖音、小红书（大多数任务需要两个平台都发），提交发布链接即可结算。
+    </view>
+  </view>
+
+  <view class="offer-section">
+    <view class="offer-section-title">能拿到什么</view>
+    <view class="offer-subheading">怎么算钱</view>
+    <view class="offer-bullet">
+      <text>按领取任务时显示的单价计费。以 <text class="offer-strong">¥{{price}}／平台</text> 为例，每有一个平台发布并通过审核，就计 <text class="offer-strong">¥{{price}}</text>。</text>
+    </view>
+    <view class="offer-bullet">
+      <text>抖音和小红书都通过审核，合计 <text class="offer-strong">¥{{twoPlatformPrice}}</text>。</text>
+    </view>
+    <view class="offer-bullet">
+      <text>只有一个平台通过审核，或任务只要求发一个平台且已通过审核，计 <text class="offer-strong">¥{{price}}</text>。</text>
+    </view>
+
+    <view class="offer-subheading offer-subheading-spaced">怎么结算</view>
+    <view class="offer-bullet">
+      <text><text class="offer-strong">每周一</text>结算，结算后进入你的余额，可自己提现到微信零钱。</text>
+    </view>
+    <view class="offer-bullet">
+      <text>结算前会检查提交的链接。视频须能正常播放，图文须公开可见，发布账号须未被封禁，符合条件才结算。</text>
+    </view>
+    <view class="offer-bullet">
+      <text>如果视频被判违规或限流，平台工作人员可重新派发任务。新任务按要求完成并通过审核后照常结算。若逾期未发布或未配合重发，则对应任务的费用不予结算。</text>
+    </view>
+  </view>
+
+  <view class="offer-section">
+    <view class="offer-section-title">要做什么</view>
+    <view class="offer-stages">
+      <view wx:for="{{stages}}" wx:key="*this" class="offer-stage">
+        <text class="offer-stage-number">{{index + 1}}</text>
+        <text>{{item}}</text>
+      </view>
+    </view>
+    <view class="offer-data-note">播放数据：每周一 12:00 前，把上周所有任务的播放量截图一起交（在「工作台」交）</view>
+  </view>
+
+  <view class="offer-section">
+    <view class="offer-section-title">发布要求</view>
+    <view class="offer-subheading">发布</view>
+    <view class="offer-bullet">
+      <text><text class="offer-strong">素材由系统分配。</text>领取任务后，系统会分配一条视频或图文，按分到的素材发布即可。</text>
+    </view>
+    <view class="offer-bullet">
+      <text><text class="offer-strong">按时提交发布链接。</text>默认领取后 1 小时内提交，以任务显示的截止时间为准。逾期未交，任务失效，当天不能再领。</text>
+    </view>
+    <view class="offer-bullet">
+      <text><text class="offer-strong">按任务指定的平台发布。</text>大多数任务需要在抖音和小红书都发，部分任务只需发其中一个平台。</text>
+    </view>
+    <view class="offer-bullet">
+      <text><text class="offer-strong">按任务要求填写视频标题、添加指定话题，并 @ 指定账号。</text>发布视频时，按任务要求使用视频文件名作为标题。</text>
+    </view>
+    <view class="offer-bullet">
+      <text><text class="offer-strong">话题数量需根据平台要求带够。</text>先加上任务指定的话题，再自选其他话题，补足规定数量。</text>
+    </view>
+  </view>
+
+  <view class="offer-section">
+    <view class="offer-section-title">领取前检查</view>
+    <view wx:if="{{loading}}" class="offer-check">正在检查领取资格…</view>
+    <view wx:elif="{{error}}" class="offer-check">暂时无法确认领取资格</view>
+    <view wx:elif="{{!signedIn}}" class="offer-check">登录后检查领取资格</view>
+    <block wx:else>
+      <view class="offer-check">
+        <text class="offer-check-mark {{ready ? 'offer-check-passed' : ''}}">{{ready ? '✓' : '!'}}</text>
+        <text>报名营销分发员</text>
+      </view>
+      <view class="offer-check">
+        <text class="offer-check-mark {{!today ? 'offer-check-passed' : ''}}">{{!today ? '✓' : '!'}}</text>
+        <text>{{today ? '今天已获得任务' : '今天还没领过'}}</text>
+      </view>
+    </block>
+  </view>
+  <view class="offer-copyright">内容版权归平台，不得二次分发或转售。不做互赞互关刷量。</view>
+</view>
+
+<view class="offer-footer">
+  <view class="offer-footer-rate">
+    <view>每个平台</view>
+    <text class="offer-footer-price">¥{{price}}</text>
+  </view>
+  <button
+    class="offer-button"
+    disabled="{{loading || claiming || (!action && !error)}}"
+    loading="{{claiming}}"
+    bindtap="followAction"
+    hover-class="offer-button-pressed"
+  >{{loading ? '正在检查…' : error ? '重新加载' : claiming ? '正在领取…' : actionLabel}}</button>
+</view>

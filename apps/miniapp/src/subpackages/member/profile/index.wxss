@@ -1,0 +1,77 @@
+.profile-fields {
+  margin-bottom: 36rpx;
+  padding: 0 28rpx;
+  border-radius: 28rpx;
+  background: #fff;
+}
+
+.profile-field {
+  display: flex;
+  min-height: 112rpx;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.profile-field + .profile-field {
+  border-top: 1rpx solid #eeebf5;
+}
+
+.profile-label {
+  flex: 0 0 96rpx;
+}
+
+.profile-value {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16rpx;
+}
+
+.profile-fields .profile-choice {
+  display: inline-flex;
+  flex: none;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 80rpx;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12rpx;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: #6f639d;
+  font-size: 24rpx;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.profile-chevron {
+  width: 12rpx;
+  color: #9d97b8;
+  font-size: 30rpx;
+  text-align: right;
+}
+
+.profile-phone {
+  color: #8c83a9;
+  font-size: 25rpx;
+  white-space: nowrap;
+}
+
+.profile-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  color: #85838d;
+  font-size: 32rpx;
+}
+
+.profile-nickname {
+  width: 100%;
+  min-width: 0;
+  height: 88rpx;
+  color: #3b3568;
+  text-align: right;
+}

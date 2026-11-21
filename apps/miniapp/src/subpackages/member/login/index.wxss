@@ -1,0 +1,23 @@
+.login-page {
+  padding: 136rpx 56rpx 48rpx;
+  text-align: center;
+}
+
+.login-avatar {
+  display: grid;
+  place-items: center;
+  width: 132rpx;
+  height: 132rpx;
+  margin: 0 auto 26rpx;
+  border-radius: 42rpx;
+  background: linear-gradient(145deg, #7d74a9, #bd9cbe);
+  color: #fff;
+  font-size: 56rpx;
+  font-weight: 700;
+}
+
+.login-title {
+  margin-bottom: 64rpx;
+  font-size: 42rpx;
+  font-weight: 700;
+}

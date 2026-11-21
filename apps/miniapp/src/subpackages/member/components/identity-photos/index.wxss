@@ -1,0 +1,101 @@
+.photo-grid {
+  display: flex;
+  gap: 20rpx;
+}
+
+.photo-tile {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  max-width: none;
+  min-height: 168rpx;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  margin: 0;
+  padding: 12rpx 4rpx;
+  overflow: hidden;
+  border: 1rpx dashed #c9c1e3;
+  border-radius: 23rpx;
+  background: #f4f2f9;
+  color: #82769f;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.photo-tile::after,
+.photo-retry::after {
+  border: 0;
+}
+
+.photo-tile.photo-tile-disabled {
+  background: #f4f2f9;
+  color: #82769f;
+}
+
+.photo-tile.photo-tile-confirmed {
+  border: 1rpx solid #a8e8c6;
+  background: #ecf8f1;
+  color: #22814f;
+}
+
+.photo-tile-confirmed .photo-caption {
+  color: #74688f;
+}
+
+.photo-label {
+  font-size: 23rpx;
+}
+
+.photo-caption {
+  font-size: 21rpx;
+}
+
+.photo-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.photo-action {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 6rpx;
+  background: rgba(45, 38, 84, 0.72);
+  color: #fff;
+  font-size: 21rpx;
+}
+
+.photo-error {
+  margin-top: 12rpx;
+  color: #a54545;
+  font-size: 23rpx;
+  line-height: 1.5;
+}
+
+.photo-retry {
+  display: inline-block;
+  margin: 6rpx 0 0 8rpx;
+  padding: 0 12rpx;
+  border-radius: 10rpx;
+  background: #f0edf8;
+  color: #655692;
+  font-size: 22rpx;
+  line-height: 40rpx;
+}
+
+.identity-canvas {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}

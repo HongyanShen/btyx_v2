@@ -1,0 +1,139 @@
+.distributor-table .distributor-name {
+  height: auto;
+  padding: 0;
+  font-weight: 600;
+  white-space: normal;
+}
+
+.distributor-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.distributor-dialog-body {
+  display: grid;
+  gap: 12px;
+  overflow-wrap: anywhere;
+}
+
+.distributor-profile-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.distributor-modal .ant-modal-body {
+  max-height: 66vh;
+  overflow-y: auto;
+  padding-block: 8px;
+}
+
+.distributor-modal h5.ant-typography {
+  margin-bottom: 8px;
+}
+
+.distributor-today-tasks {
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+.distributor-block-modal .ant-modal-container {
+  padding: 20px 22px;
+  border-radius: 12px;
+}
+
+.distributor-block-modal .ant-modal-header {
+  margin-bottom: 10px;
+}
+
+.distributor-block-modal .ant-modal-title {
+  font-size: 16px;
+}
+
+.distributor-block-modal .ant-modal-body {
+  padding-block: 0;
+}
+
+.distributor-block-modal .ant-modal-footer {
+  margin-top: 20px;
+}
+
+.distributor-block-body {
+  display: grid;
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+
+.distributor-block-impact {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.distributor-today-summary {
+  padding: 9px 10px;
+  border: 2px dashed #0b8496;
+  border-radius: 10px;
+  background: #f7f6fa;
+  font-size: 13px;
+}
+
+.distributor-today-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 4px;
+}
+
+.distributor-today-line .ant-typography {
+  font-size: inherit;
+}
+
+.distributor-today-label {
+  flex: none;
+}
+
+.distributor-today-line .distributor-today-tasks {
+  min-width: 0;
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.distributor-today-warning {
+  margin-top: 4px;
+  color: #a65308;
+}
+
+.distributor-block-error {
+  margin-top: 4px;
+  color: #c52626;
+  font-size: 12px;
+}
+
+.distributor-block-modal .ant-btn-sm {
+  min-height: 27px;
+  padding-inline: 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distributor-block-modal .distributor-block-cancel:not(:disabled) {
+  border-color: transparent;
+  background: #eee;
+  color: #333;
+}
+
+.distributor-block-modal .distributor-block-cancel:not(:disabled):hover {
+  background: #e2e2e2;
+}
+
+.distributor-block-modal .distributor-block-confirm:not(:disabled) {
+  background: #d33;
+}
+
+.distributor-block-modal .distributor-block-confirm:not(:disabled):hover {
+  background: #be2727;
+}

@@ -1,0 +1,13 @@
+<view class="page">
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view wx:if="{{loading}}" class="empty">正在加载协议…</view>
+  <view wx:if="{{agreement}}" class="card">
+    <view class="title">{{agreement.title}}</view>
+    <view class="requirements">{{agreement.body}}</view>
+  </view>
+  <view wx:if="{{consented}}" class="notice">你已确认当前版本协议。</view>
+  <block wx:elif="{{agreement}}">
+    <checkbox-group bindchange="toggle"><label><checkbox value="agree" color="#7b72aa" />我已阅读并同意以上合作协议</label></checkbox-group>
+    <button class="primary spaced" loading="{{submitting}}" disabled="{{!checked || submitting}}" bindtap="confirm">确认合作协议</button>
+  </block>
+</view>

@@ -1,0 +1,326 @@
+<page-meta page-style="{{galleryOpen ? 'overflow: hidden;' : ''}}" />
+
+<template name="material-save">
+  <button
+    class="execution-outline material-save {{saved ? 'material-saved' : ''}}"
+    data-id="{{id}}"
+    bindtap="save"
+    loading="{{savingFile === id}}"
+    disabled="{{!!savingFile}}"
+  >{{saved ? '✓ 已保存' : label}}</button>
+</template>
+
+<template name="task-requirements">
+  <view class="execution-field">
+    <text class="execution-label">发布平台</text>
+    <text class="execution-value execution-strong">{{task.platformText}}</text>
+  </view>
+  <view wx:for="{{task.requirements.fields}}" wx:key="label" class="execution-field">
+    <text class="execution-label">
+      {{item.label}} <text wx:if="{{task.bodyUpdated}}" class="execution-updated">已更新</text>
+    </text>
+    <text class="execution-value">{{item.value}}</text>
+    <button class="execution-outline execution-copy" data-value="{{item.value}}" bindtap="copy">复制</button>
+  </view>
+</template>
+
+<view class="task-execution">
+  <view wx:if="{{error}}" class="error">
+    <view>{{error}}</view>
+    <button class="secondary-button small-button spaced" bindtap="load">重试</button>
+  </view>
+  <view wx:elif="{{loading && !task}}" class="empty">正在加载任务…</view>
+  <block wx:elif="{{task}}">
+    <view class="execution-card execution-overview">
+      <view class="execution-icon">
+        <image class="execution-icon-image" src="/assets/marketing-white.png" mode="aspectFit" />
+      </view>
+      <view class="execution-heading">
+        <view class="execution-title">今日营销分发</view>
+        <view class="execution-meta">
+          营销分发 · {{task.platformText}}
+          <text wx:if="{{deadline}}"> · 截止 {{deadline.time}} · 还剩 <text class="execution-countdown">{{deadline.remaining}}</text></text>
+        </view>
+        <view class="execution-meta">
+          每个平台 ¥{{task.price}}
+          <text wx:if="{{task.showSource}}"> · {{task.sourceLabel}}</text>
+        </view>
+      </view>
+      <text class="execution-status">{{task.statusLabel}}</text>
+    </view>
+
+    <view class="execution-card progress-card">
+      <view class="progress-track">
+        <view
+          wx:for="{{task.progress.items}}"
+          wx:key="label"
+          class="progress-point point-{{item.state}}"
+        >
+          <view class="progress-dot">{{item.mark}}</view>
+          <view class="progress-label">{{item.label}}</view>
+        </view>
+      </view>
+      <view class="progress-hint">{{task.timeline.active === steps.StepSettle || task.closed || task.progress.items[2].state === 'rejected' ? task.progress.hint : '前 3 步你来做，交了链接就等运营审核'}}</view>
+    </view>
+
+    <view wx:if="{{task.closed}}" class="execution-alert execution-alert-closed">
+      {{task.expired ? '这条任务已失效' : '工作人员已撤回这条任务'}}
+    </view>
+    <view wx:elif="{{deadline}}" class="execution-alert">
+      <block wx:if="{{deadline.remaining === '等待系统确认'}}">已到提交截止时间，等待系统确认。</block>
+      <block wx:else>还剩 <text class="execution-countdown">{{deadline.remaining}}</text>，{{deadline.time}} 前交发布链接。到期未交，这条任务会失效。</block>
+    </view>
+    <view wx:elif="{{task.due_date}}" class="execution-meta execution-due">
+      发布日期 {{task.due_date}}（北京时间）
+    </view>
+
+    <view class="execution-card execution-timeline">
+      <view
+        wx:for="{{task.timeline.items}}"
+        wx:for-item="stage"
+        wx:key="key"
+        id="stage-{{stage.key}}"
+        class="execution-stage stage-{{stage.state}}"
+      >
+        <view class="execution-stage-dot">{{stage.mark}}</view>
+        <view class="execution-stage-body">
+          <view
+            class="execution-stage-heading"
+            data-stage="{{stage.key}}"
+            data-state="{{stage.state}}"
+            bindtap="toggleStage"
+          >
+            <text>{{stage.title}}</text>
+            <text wx:if="{{stage.state === 'done'}}" class="execution-stage-done">已完成</text>
+            <text wx:if="{{stage.state === 'done'}}" class="execution-stage-link">{{openStage === stage.key ? '收起' : (task.timeline.active === steps.StepLinks ? '返回查看' : '查看')}}</text>
+          </view>
+
+          <block wx:if="{{openStage === stage.key}}">
+            <block wx:if="{{stage.key === steps.StepContent}}">
+              <view class="{{task.files.length ? 'execution-material-layout' : ''}}">
+                <view wx:if="{{task.files.length}}" class="execution-material-column">
+                  <button
+                    wx:if="{{materials.images.length}}"
+                    class="execution-cover-button {{materials.images.length > 1 ? 'execution-cover-stack' : ''}}"
+                    bindtap="openGallery"
+                    aria-label="查看 {{materials.images.length}} 张图片"
+                  >
+                    <view class="execution-material-tile execution-cover">
+                      <image
+                        wx:if="{{materials.images[0].imageURL}}"
+                        class="execution-cover-image"
+                        src="{{materials.images[0].imageURL}}"
+                        mode="aspectFill"
+                        data-index="{{0}}"
+                        binderror="imageUnavailable"
+                      />
+                      <text wx:else>图片</text>
+                      <text class="execution-cover-count">{{materials.images.length}} 张</text>
+                    </view>
+                    <text class="execution-cover-label">查看大图</text>
+                  </button>
+                  <view wx:if="{{materials.videos.length}}" class="execution-material-tile execution-video-thumb" aria-hidden="true">▶</view>
+                  <view wx:if="{{!materials.images.length && !materials.videos.length}}" class="execution-material-tile execution-material-placeholder">
+                    {{loadingMaterials ? '读取素材…' : '附件'}}
+                  </view>
+                </view>
+
+                <view class="execution-requirements">
+                  <block wx:for="{{materials.videos}}" wx:key="id">
+                    <view class="execution-field">
+                      <text class="execution-label">视频 <text wx:if="{{task.filesUpdated}}" class="execution-updated">已更新</text></text>
+                      <text class="execution-value">{{item.name}}</text>
+                      <view><template is="material-save" data="{{id: item.id, saved: savedFiles[item.id], savingFile: savingFile, label: '下载'}}" /></view>
+                    </view>
+                    <view class="execution-field">
+                      <text class="execution-label">标题（就是文件名）</text>
+                      <text class="execution-value">{{item.title}}</text>
+                      <button class="execution-outline execution-copy" data-value="{{item.title}}" bindtap="copy">复制</button>
+                    </view>
+                  </block>
+                  <view wx:for="{{materials.attachments}}" wx:key="id" class="execution-field">
+                    <text class="execution-value">{{item.name}}</text>
+                    <view><template is="material-save" data="{{id: item.id, saved: savedFiles[item.id], savingFile: savingFile, label: '保存'}}" /></view>
+                  </view>
+                  <view wx:if="{{task.title && (materials.videos.length !== 1 || materials.images.length || materials.attachments.length)}}" class="execution-field">
+                    <text class="execution-label">标题</text>
+                    <text class="execution-value">{{task.title}}</text>
+                    <button class="execution-outline execution-copy" data-value="{{task.title}}" bindtap="copy">复制</button>
+                  </view>
+                  <template is="task-requirements" data="{{task: task}}" />
+                </view>
+              </view>
+
+              <view wx:if="{{task.files.length}}" class="execution-note">
+                <text wx:if="{{materials.images.length}}">图片按顺序发 · </text>
+                已保存 {{savedFileCount}} / {{task.files.length}}
+                <text wx:if="{{task.filesUpdated}}" class="execution-updated">素材已更新</text>
+              </view>
+              <view wx:if="{{task.requirements.topicNote}}" class="execution-note">{{task.requirements.topicNote}}</view>
+              <button
+                wx:if="{{!task.closed && !task.contentDone}}"
+                class="execution-primary"
+                data-step="{{steps.StepContent}}"
+                bindtap="complete"
+                disabled="{{loading || loadingMaterials || completing}}"
+              >{{materials.images.length && !materials.videos.length ? '图片保存好了，下一步' : materials.videos.length && !materials.images.length ? '视频下载好了，下一步' : '已拿到内容和要求，下一步'}}</button>
+            </block>
+
+            <block wx:elif="{{stage.key === steps.StepPublish}}">
+              <view class="execution-note">
+                打开{{task.appNames}} App，按要求使用保存的素材发布。图文请按顺序选图，发完后回来提交作品链接。
+              </view>
+              <button
+                wx:if="{{!task.closed && !task.publishDone}}"
+                class="execution-primary"
+                data-step="{{steps.StepPublish}}"
+                bindtap="complete"
+                disabled="{{loading || completing || !task.contentDone}}"
+              >{{platforms.length === 2 ? '两个平台都发好了' : task.appNames + '发好了'}}</button>
+              <button
+                wx:elif="{{!task.closed && task.timeline.active === steps.StepLinks}}"
+                class="execution-primary"
+                data-stage="{{steps.StepLinks}}"
+                bindtap="goToStage"
+              >返回交链接</button>
+            </block>
+
+            <block wx:elif="{{stage.key === steps.StepLinks}}">
+              <view
+                wx:if="{{task.dualPlatformPrice && !task.closed && stage.state === 'current'}}"
+                class="execution-links-tip"
+              >两个平台都发好 ¥{{task.dualPlatformPrice}}；只发成一个，就只交那一条，按 1 个平台 ¥{{task.price}} 算</view>
+              <view wx:for="{{platforms}}" wx:key="key" class="execution-link-field">
+                <view class="execution-link-label">
+                  <text>{{item.label}}发布链接</text>
+                  <text wx:if="{{item.status}}" class="execution-status {{item.rejected ? 'execution-rejected' : ''}}">{{item.status}}</text>
+                </view>
+                <view wx:if="{{item.reason}}" class="execution-note">原因：{{item.reason}}</view>
+                <button
+                  wx:if="{{item.reissued}}"
+                  class="execution-outline execution-reissue"
+                  data-platform="{{item.key}}"
+                  bindtap="openReissue"
+                >查看重新派发的任务</button>
+                <textarea
+                  wx:if="{{!item.linkLocked}}"
+                  class="execution-link-input"
+                  value="{{links[item.key]}}"
+                  data-platform="{{item.key}}"
+                  bindinput="changeLink"
+                  disabled="{{saving}}"
+                  maxlength="-1"
+                  show-confirm-bar="{{false}}"
+                  placeholder-class="execution-link-placeholder"
+                  placeholder="{{item.placeholder}}"
+                  aria-label="{{item.label}}发布链接"
+                />
+                <view wx:elif="{{links[item.key]}}" class="execution-link-input execution-link-readonly">{{links[item.key]}}</view>
+              </view>
+
+              <view wx:if="{{task.canSubmitLinks}}" class="execution-link-actions">
+                <button
+                  wx:if="{{task.publishDone && task.timeline.active === steps.StepLinks}}"
+                  class="execution-outline execution-previous"
+                  data-stage="{{steps.StepPublish}}"
+                  bindtap="goToStage"
+                  disabled="{{saving || !!uploading}}"
+                >‹ 上一步</button>
+                <button
+                  class="execution-primary"
+                  bindtap="submitLinks"
+                  disabled="{{loading || saving || !!uploading}}"
+                  loading="{{saving === 'links'}}"
+                >{{stage.state === 'rejected' ? '重新提交' : '提交审核'}}</button>
+              </view>
+
+              <view wx:if="{{screenshotsOpen && task.hasSubmittedLinks}}" id="screenshots" class="execution-screenshots">
+                <view class="execution-link-label">播放量截图</view>
+                <block wx:for="{{platforms}}" wx:key="key">
+                  <view wx:if="{{item.submittedURL}}" class="execution-screenshot-row">
+                    <text class="execution-link-label">{{item.label}}</text>
+                    <button
+                      wx:if="{{!item.readOnly}}"
+                      class="execution-outline"
+                      data-platform="{{item.key}}"
+                      bindtap="uploadScreenshot"
+                      disabled="{{loading || !!uploading || saving}}"
+                      loading="{{uploading === item.key}}"
+                    >{{screenshots[item.key] ? '更换截图' : '上传截图'}}</button>
+                    <button
+                      wx:if="{{!item.readOnly && !item.rejected && item.submittedURL && screenshots[item.key] && screenshots[item.key] !== item.submittedScreenshot}}"
+                      class="execution-outline"
+                      data-platform="{{item.key}}"
+                      bindtap="submitScreenshot"
+                      disabled="{{loading || !!uploading || saving}}"
+                      loading="{{saving === item.key}}"
+                    >提交截图</button>
+                    <text wx:if="{{item.submittedScreenshot && screenshots[item.key] === item.submittedScreenshot}}" class="execution-note">已提交</text>
+                    <text wx:elif="{{screenshots[item.key]}}" class="execution-note">待提交</text>
+                  </view>
+                </block>
+              </view>
+            </block>
+
+            <block wx:else>
+              <view class="execution-note">{{task.progress.hint}}</view>
+              <view class="execution-note">上周的播放量截图请在周一 12:00 前提交，晚交顺延。周结算入账后可在「收益」提现到微信零钱。</view>
+            </block>
+          </block>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>
+
+<view wx:if="{{galleryOpen}}" class="material-viewer" aria-role="dialog" aria-label="图片预览">
+  <view class="material-viewer-header">
+    <view class="material-viewer-info">
+      <view class="material-viewer-count">{{galleryIndex + 1}} / {{materials.images.length}}</view>
+      <view class="material-viewer-name">{{materials.images[galleryIndex].name}}</view>
+    </view>
+    <button class="material-viewer-close" bindtap="closeGallery">关闭</button>
+  </view>
+
+  <swiper class="material-viewer-main" current="{{galleryIndex}}" bindchange="selectGalleryImage">
+    <swiper-item wx:for="{{materials.images}}" wx:key="id" class="material-viewer-slide">
+      <image
+        wx:if="{{item.imageURL}}"
+        class="material-viewer-image"
+        src="{{item.imageURL}}"
+        mode="aspectFit"
+        data-index="{{index}}"
+        binderror="imageUnavailable"
+      />
+      <button wx:else class="material-viewer-close" data-index="{{index}}" bindtap="retryGalleryImage" disabled="{{!!refreshingImage}}">
+        {{refreshingImage === item.id ? '正在加载…' : '重新加载图片'}}
+      </button>
+    </swiper-item>
+  </swiper>
+
+  <view class="material-viewer-bottom">
+    <scroll-view class="material-viewer-strip" scroll-x scroll-into-view="material-thumb-{{galleryIndex}}" scroll-with-animation>
+      <view class="material-viewer-thumbs">
+        <button
+          wx:for="{{materials.images}}"
+          wx:key="id"
+          id="material-thumb-{{index}}"
+          class="material-viewer-thumb {{galleryIndex === index ? 'material-viewer-selected' : ''}}"
+          data-index="{{index}}"
+          bindtap="selectGalleryImage"
+          aria-label="第 {{index + 1}} 张图片"
+          aria-selected="{{galleryIndex === index}}"
+        >
+          <image wx:if="{{item.imageURL}}" class="material-viewer-thumb-image" src="{{item.imageURL}}" mode="aspectFill" />
+          <text wx:else>{{index + 1}}</text>
+        </button>
+      </view>
+    </scroll-view>
+    <button
+      class="material-viewer-download"
+      bindtap="saveGalleryImage"
+      loading="{{savingFile === materials.images[galleryIndex].id}}"
+      disabled="{{!!savingFile}}"
+    >{{savedFiles[materials.images[galleryIndex].id] ? '已保存 · 再次下载' : '下载到相册'}}</button>
+  </view>
+</view>

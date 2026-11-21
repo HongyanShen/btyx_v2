@@ -1,0 +1,67 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/work/index",
+    "pages/wallet/index",
+    "pages/me/index"
+  ],
+  "subpackages": [
+    {
+      "root": "subpackages/member",
+      "pages": [
+        "login/index",
+        "profile/index",
+        "identity/index",
+        "enrollment/index",
+        "agreement/index",
+        "feedback/index",
+        "notifications/index",
+        "withdrawal/index"
+      ]
+    },
+    {
+      "root": "subpackages/task",
+      "pages": ["detail/index", "today/index"]
+    }
+  ],
+  "window": {
+    "navigationBarTitleText": "白兔严选",
+    "navigationBarBackgroundColor": "#f6f5fa",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f6f5fa"
+  },
+  "tabBar": {
+    "color": "#9d97b8",
+    "selectedColor": "#2d2654",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "任务",
+        "iconPath": "assets/tab-home.png",
+        "selectedIconPath": "assets/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/work/index",
+        "text": "工作台",
+        "iconPath": "assets/tab-work.png",
+        "selectedIconPath": "assets/tab-work-active.png"
+      },
+      {
+        "pagePath": "pages/wallet/index",
+        "text": "收益",
+        "iconPath": "assets/tab-wallet.png",
+        "selectedIconPath": "assets/tab-wallet-active.png"
+      },
+      {
+        "pagePath": "pages/me/index",
+        "text": "我的",
+        "iconPath": "assets/tab-me.png",
+        "selectedIconPath": "assets/tab-me-active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

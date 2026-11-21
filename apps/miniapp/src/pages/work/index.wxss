@@ -1,0 +1,84 @@
+.data-entry {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  background: #fff5e7;
+  border: 1rpx solid #f1d7ae;
+  color: #865019;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.data-entry-title {
+  font-weight: 700;
+}
+
+.work-tabs {
+  white-space: nowrap;
+  margin-bottom: 22rpx;
+}
+
+.work-tab {
+  display: inline-block;
+  margin-right: 12rpx;
+  padding: 0 22rpx;
+  line-height: 62rpx;
+  font-size: 25rpx;
+  background: #eeeaf6;
+  color: #6b6285;
+}
+
+.work-tab-active {
+  background: #7b72aa;
+  color: #fff;
+  font-weight: 700;
+}
+
+.work-card {
+  border-radius: 30rpx;
+  padding: 23rpx;
+}
+
+.work-card-header,
+.work-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.work-icon {
+  display: grid;
+  place-items: center;
+  width: 74rpx;
+  height: 74rpx;
+  background: linear-gradient(135deg, #b3aacf, #8377ad);
+  border-radius: 22rpx;
+}
+
+.work-icon image {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.work-card-header .badge {
+  flex: none;
+  margin: 0;
+}
+
+.work-card-footer {
+  margin-top: 16rpx;
+  padding-top: 15rpx;
+  border-top: 1rpx solid #f0edf7;
+}
+
+.work-arrow {
+  color: #796caa;
+  font-size: 35rpx;
+}
+
+.work-rejection {
+  margin-top: 12rpx;
+  color: #a34450;
+  white-space: pre-line;
+  font-size: 24rpx;
+}

@@ -1,0 +1,7 @@
+.withdraw-link {
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  color: #433863;
+  font-weight: 700;
+}

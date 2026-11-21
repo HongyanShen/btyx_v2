@@ -1,0 +1,17 @@
+.account-search-link {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  color: #484074;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.account-search-link:hover,
+.account-search-link:focus-visible {
+  color: #67599e;
+  text-decoration: underline;
+}

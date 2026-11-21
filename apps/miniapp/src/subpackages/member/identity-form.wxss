@@ -1,0 +1,70 @@
+page {
+  background: #f4f3f9;
+}
+
+.identity-page {
+  padding: 24rpx 28rpx calc(32rpx + env(safe-area-inset-bottom));
+  color: #292249;
+}
+
+.identity-card {
+  margin-bottom: 24rpx;
+  padding: 28rpx;
+  border-radius: 34rpx;
+  background: #fff;
+  box-shadow: 0 3rpx 8rpx rgba(45, 38, 84, 0.045);
+}
+
+.identity-field {
+  margin-bottom: 24rpx;
+}
+
+.identity-label {
+  display: block;
+  margin-bottom: 12rpx;
+  font-size: 28rpx;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.identity-input {
+  width: 100%;
+  height: 84rpx;
+  padding: 0 24rpx;
+  border: 1rpx solid #ded8f1;
+  border-radius: 20rpx;
+  background: #fff;
+  font-size: 27rpx;
+}
+
+.identity-hint {
+  color: #746b92;
+  font-size: 23rpx;
+  line-height: 1.55;
+}
+
+.identity-validation {
+  margin-top: 10rpx;
+  color: #a54545;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.identity-submit {
+  display: block;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 88rpx;
+  padding: 0 24rpx;
+  border-radius: 48rpx;
+  background: linear-gradient(100deg, #8b81ba, #8075ae);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 650;
+  line-height: 88rpx;
+}
+
+.identity-submit[disabled] {
+  background: #e4e0ef;
+  color: #807793;
+}

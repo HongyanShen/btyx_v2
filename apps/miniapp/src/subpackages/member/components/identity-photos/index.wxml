@@ -1,0 +1,69 @@
+<view class="photo-grid">
+  <button
+    class="photo-tile {{disabled || busy ? 'photo-tile-disabled' : ''}} {{retainedFront && !front && !savedFront && busy !== 'front' ? 'photo-tile-confirmed' : ''}}"
+    data-side="front"
+    disabled="{{disabled || !!busy}}"
+    bindtap="choosePhoto"
+    aria-label="上传或更换身份证人像面"
+  >
+    <image
+      wx:if="{{front || savedFront}}"
+      class="photo-preview"
+      src="{{front || savedFront}}"
+      mode="aspectFill"
+    />
+    <view wx:elif="{{busy === 'front'}}" class="photo-label"
+      >人像面上传中…</view
+    >
+    <block wx:elif="{{retainedFront}}">
+      <text class="photo-label">✓ 人像面已上传</text>
+      <text class="photo-caption">点击重新上传</text>
+    </block>
+    <block wx:else>
+      <text class="photo-label">＋ 身份证人像面</text>
+      <text class="photo-caption">拍照或从相册选</text>
+    </block>
+    <text wx:if="{{front || savedFront}}" class="photo-action"
+      >{{recognizing ? '识别中…' : busy === 'front' ? '上传中…' :
+      '更换人像面'}}</text
+    >
+  </button>
+  <button
+    class="photo-tile {{disabled || busy ? 'photo-tile-disabled' : ''}} {{retainedBack && !back && !savedBack && busy !== 'back' ? 'photo-tile-confirmed' : ''}}"
+    data-side="back"
+    disabled="{{disabled || !!busy}}"
+    bindtap="choosePhoto"
+    aria-label="上传或更换身份证国徽面"
+  >
+    <image
+      wx:if="{{back || savedBack}}"
+      class="photo-preview"
+      src="{{back || savedBack}}"
+      mode="aspectFill"
+    />
+    <view wx:elif="{{busy === 'back'}}" class="photo-label">国徽面上传中…</view>
+    <block wx:elif="{{retainedBack}}">
+      <text class="photo-label">✓ 国徽面已上传</text>
+      <text class="photo-caption">点击重新上传</text>
+    </block>
+    <block wx:else>
+      <text class="photo-label">＋ 身份证国徽面</text>
+      <text class="photo-caption">拍照或从相册选</text>
+    </block>
+    <text wx:if="{{back || savedBack}}" class="photo-action"
+      >{{busy === 'back' ? '上传中…' : '更换国徽面'}}</text
+    >
+  </button>
+</view>
+<view wx:if="{{uploadError}}" class="photo-error">{{uploadError}}</view>
+<view wx:if="{{recognitionError}}" class="photo-error">
+  <text>{{recognitionError}}</text>
+  <button
+    class="photo-retry"
+    bindtap="retryRecognition"
+    disabled="{{disabled || !!busy}}"
+  >
+    重试识别
+  </button>
+</view>
+<canvas type="2d" class="identity-canvas" />

@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+*.local.yaml
+node_modules/
+dist/
+coverage/
+*.exe
+*.log
+*.log.gz
+tmp/
+artifacts/
+apps/miniapp/project.private.config.json

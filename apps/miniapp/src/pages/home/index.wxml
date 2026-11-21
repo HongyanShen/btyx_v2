@@ -1,0 +1,110 @@
+<view class="home">
+  <view class="home-hero">
+    <view class="welcome">欢迎来到白兔严选</view>
+    <view class="hero-heading">用 AI 帮普通人赚钱</view>
+    <view class="welcome">官方授权 · 现成货盘 · 不用会剪</view>
+
+    <view class="onboarding-steps">
+      <view wx:for="{{guide.steps}}" wx:key="label" class="onboarding-step {{item.done ? 'onboarding-done' : ''}}">
+        <view class="onboarding-mark">{{item.done ? '✓' : index + 1}}</view>
+        <view class="onboarding-label">
+          <text class="onboarding-line">{{item.label}}</text>
+          <text wx:if="{{item.labelEnd}}" class="onboarding-line">{{item.labelEnd}}</text>
+        </view>
+      </view>
+    </view>
+    <view
+      class="guide-button {{loading ? 'guide-loading' : ''}}"
+      aria-role="button"
+      aria-disabled="{{loading}}"
+      bindtap="followGuide"
+      hover-class="{{loading ? 'none' : 'home-action-pressed'}}"
+      hover-stay-time="80"
+    >
+      {{loading && !user ? '正在加载…' : error ? '重新加载' : guide.label}}
+    </view>
+  </view>
+
+  <view class="home-body">
+    <view class="entry-grid">
+      <view
+        wx:for="{{entries}}"
+        wx:key="key"
+        class="entry {{item.soon ? 'entry-soon' : ''}}"
+        aria-role="button"
+        bindtap="{{item.soon ? 'soon' : 'marketing'}}"
+        hover-class="home-action-pressed"
+        hover-stay-time="80"
+      >
+        <image class="entry-icon" src="/assets/{{item.key}}.png" mode="aspectFit" />
+        <text wx:if="{{item.soon}}" class="soon-tag entry-tag">即将上线</text>
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+
+    <view class="tools-entry" aria-role="button" bindtap="soon" hover-class="home-action-pressed" hover-stay-time="80">
+      <view class="grow">
+        <view class="tools-title">AI 工具专区</view>
+        <view class="tools-caption">创作灵感、AI 剪辑、文案仿写</view>
+      </view>
+      <text class="soon-tag">即将上线</text>
+    </view>
+
+    <view class="recommend-tabs">
+      <view class="recommend-selected">为你推荐</view>
+      <view class="recommend-soon" aria-role="button" bindtap="soon" hover-class="home-action-pressed" hover-stay-time="80">
+        <view class="recommend-label">
+          <text>爆品榜单</text>
+          <text class="soon-tag recommend-tag">即将上线</text>
+        </view>
+      </view>
+    </view>
+
+    <view id="marketing" class="card marketing-card">
+      <view class="marketing-header">
+        <view class="marketing-icon">
+          <image src="/assets/marketing-white.png" mode="aspectFit" />
+        </view>
+        <view class="grow">
+          <view class="marketing-title">{{!user || guide.action === 'enrollment' ? '营销分发员招募' : '今日营销分发'}}</view>
+          <text class="marketing-tag">营销分发</text>
+        </view>
+        <view class="marketing-stats">
+          <view class="marketing-stat">
+            <view>{{today ? '每个平台' : '每个平台 · 参考'}}</view>
+            <text class="marketing-stat-value">¥{{today ? today.price : referencePrice}}</text>
+          </view>
+          <view class="marketing-stat">
+            <view>每天</view>
+            <text class="marketing-stat-value">1 条</text>
+          </view>
+        </view>
+      </view>
+      <view class="marketing-description">
+        审核通过并确认协议后，每天可领取一条。系统优先匹配符合标签的内容。按任务要求发布并提交链接，审核通过后按周结算。
+      </view>
+
+      <view wx:if="{{error}}" class="home-feedback">
+        <view>{{error}}</view>
+        <button wx:if="{{localDemo}}" class="secondary-button small-button spaced" bindtap="demoLogin">本地联调登录</button>
+      </view>
+      <view wx:elif="{{guide.action === 'blocked'}}" class="home-feedback">账号已暂停领取。已发布的任务仍可在工作台查看。</view>
+      <view wx:elif="{{today}}" class="marketing-footer">
+        <view class="grow marketing-status">{{today.cardStatus.message}}</view>
+        <view class="marketing-pill" aria-role="button" bindtap="openAssignment" hover-class="home-action-pressed">{{today.cardStatus.button}}</view>
+      </view>
+      <view wx:elif="{{!loading && guide.action !== 'tasks'}}" class="marketing-footer">
+        <view class="grow marketing-status">审核通过后可领取</view>
+        <view class="marketing-pill" aria-role="button" bindtap="followGuide" hover-class="home-action-pressed">
+          {{guide.action === 'login' ? '去登录' : guide.action === 'agreement' ? '去确认协议' : user.status === 'pending' ? '查看审核' : '查看报名'}}
+        </view>
+      </view>
+      <view wx:elif="{{!loading}}" class="marketing-footer">
+        <view class="grow marketing-status">{{hasContent ? '今日可领 1 条' : '暂无可领取任务'}}</view>
+        <button class="marketing-pill" bindtap="openTodayTask" hover-class="home-action-pressed">{{hasContent ? '领取任务' : '查看详情'}}</button>
+      </view>
+      <button wx:if="{{localDemo && !error}}" class="secondary-button small-button spaced" bindtap="demoLogin">本地联调登录</button>
+    </view>
+
+  </view>
+</view>

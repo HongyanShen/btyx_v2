@@ -1,0 +1,101 @@
+<view class="me-page">
+  <view class="me-hero">
+    <view class="me-summary" aria-role="button" bindtap="openProfile" hover-class="me-pressed">
+      <view class="member-avatar me-avatar">
+        <image wx:if="{{avatar}}" class="member-avatar-image" src="{{avatar}}" mode="aspectFill" />
+        <text wx:else>兔</text>
+      </view>
+      <view class="grow">
+        <view class="me-name">{{user ? user.nickname : loading ? '正在加载…' : '未登录'}}</view>
+        <block wx:if="{{user}}">
+          <view class="me-phone">{{user.verified_phone || '未验证手机号'}}</view>
+          <text class="me-identity">{{identityTag}}</text>
+        </block>
+      </view>
+      <text wx:if="{{user && !user.avatar_file_id}}" class="me-avatar-action">用微信头像</text>
+    </view>
+  </view>
+
+  <view class="me-content">
+    <view wx:if="{{error}}" class="error" bindtap="load">{{error}} · 点击重试</view>
+    <view wx:if="{{user.blocked}}" class="notice">
+      <view>账号已暂停领取和接收新任务，请通过我的反馈联系工作人员。</view>
+      <view wx:if="{{user.block_reason}}">原因：{{user.block_reason}}</view>
+    </view>
+
+    <view class="me-feature" aria-role="button" bindtap="soon" hover-class="me-pressed">
+      <view class="me-feature-icon douyin-icon">
+        <image src="/assets/me/douyin.png" mode="aspectFit" />
+      </view>
+      <view class="grow">
+        <view class="me-feature-name">抖音号管理</view>
+        <view class="me-feature-caption">{{user.douyin ? '报名资料已填写抖音号' : '还没绑定'}}</view>
+      </view>
+      <text class="me-feature-action">即将上线 ›</text>
+    </view>
+
+    <view class="me-feature invite-feature" aria-role="button" bindtap="soon" hover-class="me-pressed">
+      <image class="me-feature-icon invite-icon" src="/assets/me/invite.png" mode="aspectFit" />
+      <view class="grow">
+        <view class="me-feature-name">邀请好友一起赚</view>
+        <view class="me-feature-caption">好友领任务，你得点数</view>
+      </view>
+      <text class="me-feature-action">即将上线 ›</text>
+    </view>
+
+    <view class="me-row" aria-role="button" bindtap="navigate" data-page="identity" hover-class="me-pressed">
+      <image src="/assets/me/identity.png" mode="aspectFit" />
+      <text class="grow">实名认证</text>
+      <text class="me-row-detail">{{identityAction}}</text>
+      <text class="me-chevron">›</text>
+    </view>
+    <view class="me-row" aria-role="button" bindtap="soon" hover-class="me-pressed">
+      <image src="/assets/me/record.png" mode="aspectFit" />
+      <text class="grow">达人授权申请记录</text>
+      <text class="me-soon-label">即将上线</text>
+      <text class="me-chevron">›</text>
+    </view>
+    <view class="me-row" aria-role="button" bindtap="soon" hover-class="me-pressed">
+      <image src="/assets/me/order.png" mode="aspectFit" />
+      <text class="grow">订单明细</text>
+      <text class="me-soon-label">即将上线</text>
+      <text class="me-chevron">›</text>
+    </view>
+    <view class="me-row me-future" aria-role="button" bindtap="soon" hover-class="me-pressed">
+      <image src="/assets/me/hot.png" mode="aspectFit" />
+      <text class="grow">爆单通知</text>
+      <text class="me-soon-label">即将上线</text>
+      <text class="me-chevron">›</text>
+    </view>
+    <view class="me-row" aria-role="button" bindtap="soon" hover-class="me-pressed">
+      <image src="/assets/me/points.png" mode="aspectFit" />
+      <text class="grow">我的点数</text>
+      <text class="me-soon-label">即将上线</text>
+      <text class="me-chevron">›</text>
+    </view>
+    <view class="me-row" aria-role="button" bindtap="navigate" data-page="notifications" hover-class="me-pressed">
+      <image src="/assets/me/notification.png" mode="aspectFit" />
+      <text class="grow">消息通知</text>
+      <text wx:if="{{unread}}" class="me-unread">{{unread > 99 ? '99+' : unread}}</text>
+      <text class="me-chevron">›</text>
+    </view>
+    <view class="me-row" aria-role="button" bindtap="navigate" data-page="feedback" hover-class="me-pressed">
+      <image src="/assets/me/feedback.png" mode="aspectFit" />
+      <text class="grow">我的反馈</text>
+      <text class="me-chevron">›</text>
+    </view>
+    <view class="me-row" aria-role="button" bindtap="navigate" data-page="agreement" hover-class="me-pressed">
+      <image src="/assets/me/record.png" mode="aspectFit" />
+      <text class="grow">营销分发任务协议</text>
+      <text wx:if="{{user}}" class="me-row-detail">{{user.consented ? '已确认' : '待确认'}}</text>
+      <text class="me-chevron">›</text>
+    </view>
+    <view class="me-row" aria-role="button" bindtap="subscribe" hover-class="me-pressed">
+      <image src="/assets/me/notification.png" mode="aspectFit" />
+      <text class="grow">订阅任务提醒</text>
+      <text class="me-chevron">›</text>
+    </view>
+
+    <button wx:if="{{!signedIn && !loading}}" class="primary me-session" bindtap="openLogin">登录</button>
+  </view>
+</view>

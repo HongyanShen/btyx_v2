@@ -1,0 +1,52 @@
+<view class="page">
+  <view class="card">
+    <view class="card-title">提现到微信零钱</view>
+    <view class="muted">可提现余额 ¥{{wallet ? wallet.available : '—'}}</view>
+    <view class="field spaced">
+      <text class="field-label">提现金额（元）</text>
+      <input
+        class="input"
+        type="digit"
+        placeholder="请输入提现金额"
+        value="{{amount}}"
+        bindinput="changeAmount"
+        disabled="{{submitting}}"
+      />
+    </view>
+    <button
+      class="primary"
+      loading="{{submitting}}"
+      disabled="{{submitting || !wallet.canWithdraw}}"
+      bindtap="withdraw"
+    >
+      申请提现
+    </button>
+    <view class="muted spaced">
+      申请后金额会暂时冻结。显示「待确认收款」时，点「去收款」进入微信确认。
+    </view>
+  </view>
+  <view wx:if="{{error}}" class="error" bindtap="load">
+    {{error}} · 点击刷新
+  </view>
+  <view class="section-title">提现记录</view>
+  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <view wx:elif="{{!error && !withdrawals.length}}" class="empty">
+    暂无提现记录
+  </view>
+  <view wx:for="{{withdrawals}}" wx:key="id" class="card">
+    <view class="row">
+      <text class="card-title">¥{{item.amount}}</text>
+      <text class="badge">{{item.label}}</text>
+    </view>
+    <view class="muted">{{item.time}}</view>
+    <view wx:if="{{item.reason}}" class="muted">{{item.reason}}</view>
+    <button
+      wx:if="{{item.canConfirm}}"
+      class="primary spaced"
+      data-id="{{item.id}}"
+      bindtap="confirmReceipt"
+    >
+      去收款
+    </button>
+  </view>
+</view>

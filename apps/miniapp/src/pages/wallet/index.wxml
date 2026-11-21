@@ -1,0 +1,40 @@
+<view class="page">
+  <view wx:if="{{!signedIn && !loading}}" class="card">
+    <view class="muted">登录后查看营销收益</view>
+    <button class="primary spaced" bindtap="openLogin">登录</button>
+  </view>
+  <block wx:else>
+    <view class="hero">
+      <view class="muted">营销奖励余额（可提现）</view>
+      <view class="row">
+        <view class="amount-large">¥{{wallet ? wallet.available : '—'}}</view>
+        <button class="withdraw-link small-button" bindtap="openWithdrawals">提现</button>
+      </view>
+      <view class="row">
+        <text>提现处理中 ¥{{wallet ? wallet.frozen : '—'}}</text>
+        <text>已提现 ¥{{wallet ? wallet.withdrawn : '—'}}</text>
+      </view>
+    </view>
+    <view class="notice">营销奖励每周一结算上周的任务。审核通过后进入待结算，入账后可从余额提现到微信零钱。</view>
+    <view wx:if="{{error}}" class="error" bindtap="load">{{error}} · 点击刷新</view>
+    <view class="card">
+      <view class="link-row" bindtap="openWithdrawals">
+        <text>提现记录</text>
+        <text class="muted">查看 ›</text>
+      </view>
+    </view>
+    <view class="section-title">收益明细</view>
+    <view wx:if="{{loading}}" class="empty">正在加载…</view>
+    <view wx:elif="{{!error && !ledger.length}}" class="empty">暂无余额变动</view>
+    <block wx:if="{{!loading && !error}}">
+      <view wx:for="{{ledger}}" wx:key="id" class="card">
+        <view class="row">
+          <text>{{item.label}}</text>
+          <text>¥{{item.amount}}</text>
+        </view>
+        <view class="muted">{{item.time}}</view>
+        <view wx:if="{{item.reason}}" class="muted">{{item.reason}}</view>
+      </view>
+    </block>
+  </block>
+</view>

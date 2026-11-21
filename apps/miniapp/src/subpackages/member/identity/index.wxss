@@ -1,0 +1,130 @@
+@import "../identity-form.wxss";
+
+.identity-phone {
+  display: flex;
+  align-items: center;
+  height: 84rpx;
+  border: 1rpx solid #ded8f1;
+  border-radius: 20rpx;
+  background: #fff;
+}
+
+.identity-contact-label {
+  display: flex;
+  align-items: baseline;
+  gap: 10rpx;
+}
+
+.identity-phone .identity-input {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.identity-optional {
+  color: #746b92;
+  font-size: 22rpx;
+}
+
+.identity-phone-button {
+  flex: none;
+  margin: 0;
+  padding: 0 20rpx;
+  border-left: 1rpx solid #ded8f1;
+  border-radius: 0;
+  background: transparent;
+  color: #655692;
+  font-size: 24rpx;
+  font-weight: 650;
+  line-height: 48rpx;
+}
+
+.identity-phone-button::after {
+  border: 0;
+}
+
+.identity-phone-button[disabled] {
+  background: transparent;
+  color: #9d93b4;
+}
+
+.identity-note {
+  margin: 0 0 24rpx;
+}
+
+.identity-result-success {
+  color: #27704c;
+  background: #edf8f1;
+}
+
+.identity-result-failed {
+  color: #a54545;
+  background: #fff1f1;
+}
+
+.identity-result-resubmission {
+  color: #835619;
+  background: #fff6e8;
+}
+
+.identity-result-title {
+  font-size: 29rpx;
+  font-weight: 650;
+}
+
+.identity-result-message {
+  margin-top: 10rpx;
+  font-size: 25rpx;
+  line-height: 1.55;
+}
+
+.identity-saved-value {
+  font-size: 27rpx;
+  overflow-wrap: anywhere;
+}
+
+.identity-saved-photos {
+  display: flex;
+  gap: 20rpx;
+}
+
+.identity-saved-photo {
+  flex: 1;
+  min-width: 0;
+  min-height: 112rpx;
+  margin: 0;
+  padding: 12rpx;
+  border-radius: 20rpx;
+  background: #f4f2f9;
+  color: #6b6494;
+  font-size: 23rpx;
+  line-height: 1.6;
+}
+
+.identity-saved-photo::after {
+  border: 0;
+}
+
+.identity-saved-photo image {
+  display: block;
+  width: 100%;
+  height: 146rpx;
+  margin-bottom: 6rpx;
+}
+
+.identity-photo-reload {
+  margin-top: 10rpx;
+}
+
+.identity-contact-save {
+  margin: 0 0 20rpx;
+  border: 1rpx solid #ded8f1;
+  border-radius: 40rpx;
+  background: #fff;
+  color: #5e527e;
+  font-size: 26rpx;
+  line-height: 70rpx;
+}

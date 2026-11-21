@@ -1,0 +1,225 @@
+<view class="identity-page">
+  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <view wx:elif="{{!signedIn}}">
+    <view wx:if="{{error}}" class="error">{{error}}</view>
+    <button class="identity-submit" bindtap="openLogin">登录后认证</button>
+  </view>
+  <view wx:elif="{{!user}}" class="error" bindtap="load"
+    >{{error}} · 点击重试</view
+  >
+  <view wx:elif="{{user.blocked}}" class="error"
+    >账号已暂停，请通过我的反馈联系工作人员。</view
+  >
+  <block wx:else>
+    <view
+      wx:if="{{verificationResult || (user.identity_verified && !editingIdentity)}}"
+      class="identity-card identity-result {{verificationResult.status === 'failed' ? 'identity-result-failed' : 'identity-result-success'}}"
+    >
+      <view class="identity-result-title">
+        {{verificationResult.status === 'failed' ? '实名认证未成功' :
+        '实名认证成功'}}
+      </view>
+      <view wx:if="{{verificationResult.status === 'failed'}}" class="identity-result-message">
+        {{verificationResult.message}}
+        <view wx:if="{{user.identity_verified}}">原实名信息仍有效。</view>
+      </view>
+    </view>
+    <view
+      wx:elif="{{user.identity_resubmission_required}}"
+      class="identity-card identity-result identity-result-resubmission"
+    >
+      <view class="identity-result-title">曾通过实名认证</view>
+      <view class="identity-result-message"
+        >当前实名资料缺失，请重新上传身份证正反面并提交核验。</view
+      >
+    </view>
+    <view class="identity-card" hidden="{{verificationResult && !user.identity_verified}}">
+      <view wx:if="{{editingIdentity || !user.identity_verified}}" hidden="{{!!verificationResult}}">
+        <view class="identity-field">
+          <view class="identity-label">身份证照片</view>
+          <identity-photos
+            id="identity-photos"
+            disabled="{{submitting}}"
+            saved-front="{{document.front_file_id === user.identity_document.front_file_id ? savedPhotos.front : ''}}"
+            saved-back="{{document.back_file_id === user.identity_document.back_file_id ? savedPhotos.back : ''}}"
+            bind:photo="photoChanged"
+            bind:busy="photoBusy"
+            bind:recognize="identityRecognized"
+          />
+        </view>
+        <view class="identity-field">
+          <label for="name" class="identity-label">真实姓名</label>
+          <input
+            id="name"
+            class="identity-input"
+            value="{{document.name || ''}}"
+            placeholder="和身份证一致"
+            maxlength="30"
+            bindinput="changeName"
+            disabled="{{uploading || submitting}}"
+          />
+        </view>
+        <view class="identity-field">
+          <label for="identity" class="identity-label">身份证号</label>
+          <input
+            id="identity"
+            class="identity-input"
+            value="{{document.identity || ''}}"
+            placeholder="{{editingIdentity && document.front_file_id === user.identity_document.front_file_id && user.identity_document.number || '18 位身份证号'}}"
+            maxlength="18"
+            bindinput="changeIdentity"
+            disabled="{{uploading || submitting}}"
+          />
+          <view wx:if="{{ageError}}" class="identity-validation"
+            >{{ageError}}</view
+          >
+        </view>
+      </view>
+      <block wx:elif="{{user.identity_verified}}">
+        <view class="identity-field">
+          <text class="identity-label">真实姓名</text>
+          <text class="identity-saved-value">{{user.name || '未留存'}}</text>
+        </view>
+        <view class="identity-field">
+          <text class="identity-label">身份证号</text>
+          <text class="identity-saved-value"
+            >{{user.identity_document.number || '未留存'}}</text
+          >
+        </view>
+        <view class="identity-field">
+          <view class="identity-label">身份证照片</view>
+          <view class="identity-saved-photos">
+            <button
+              class="identity-saved-photo"
+              aria-label="查看身份证人像面大图"
+              data-side="front"
+              disabled="{{!savedPhotos.front}}"
+              bindtap="previewSavedPhoto"
+            >
+              <image
+                wx:if="{{savedPhotos.front}}"
+                src="{{savedPhotos.front}}"
+                data-side="front"
+                binderror="savedPhotoFailed"
+                mode="aspectFit"
+              />
+              <text>{{!savedPhotos.front && !user.identity_document.front_file_id ? '人像面未留存' : '人像面'}}</text>
+            </button>
+            <button
+              class="identity-saved-photo"
+              aria-label="查看身份证国徽面大图"
+              data-side="back"
+              disabled="{{!savedPhotos.back}}"
+              bindtap="previewSavedPhoto"
+            >
+              <image
+                wx:if="{{savedPhotos.back}}"
+                src="{{savedPhotos.back}}"
+                data-side="back"
+                binderror="savedPhotoFailed"
+                mode="aspectFit"
+              />
+              <text>{{!savedPhotos.back && !user.identity_document.back_file_id ? '国徽面未留存' : '国徽面'}}</text>
+            </button>
+          </view>
+          <view
+            wx:if="{{(user.identity_document.front_file_id && !savedPhotos.front) || (user.identity_document.back_file_id && !savedPhotos.back)}}"
+            class="identity-hint identity-photo-reload"
+            bindtap="refreshSavedPhotos"
+            aria-role="button"
+          >重新加载照片</view>
+        </view>
+      </block>
+
+      <block wx:if="{{!verificationResult && (editingIdentity || !user.identity_verified)}}">
+        <view class="identity-field">
+          <view class="identity-contact-label">
+            <label for="phone" class="identity-label">手机号</label>
+            <text class="identity-optional">选填</text>
+          </view>
+          <view class="identity-phone">
+            <input
+              id="phone"
+              class="identity-input"
+              value="{{phone}}"
+              placeholder="{{((editingIdentity && user.identity_verified) || phoneReceipt) && (user.contact_phone || user.verified_phone) || '填写联系手机号'}}"
+              maxlength="16"
+              bindinput="changePhone"
+              disabled="{{submitting || verifyingPhone}}"
+            />
+            <button
+              class="identity-phone-button"
+              open-type="getPhoneNumber"
+              bindgetphonenumber="getPhone"
+              loading="{{verifyingPhone}}"
+              disabled="{{submitting || verifyingPhone}}"
+            >
+              微信一键获取
+            </button>
+          </view>
+        </view>
+        <view>
+          <view class="identity-contact-label">
+            <label for="wechat" class="identity-label">微信号</label>
+            <text class="identity-optional">选填</text>
+          </view>
+          <input
+            id="wechat"
+            class="identity-input"
+            value="{{wechat}}"
+            placeholder="微信 → 我 → 名字下面的「微信号」"
+            maxlength="50"
+            bindinput="changeWechat"
+            disabled="{{submitting}}"
+          />
+        </view>
+      </block>
+      <block wx:elif="{{user.identity_verified}}">
+        <view class="identity-field">
+          <text class="identity-label">手机号</text>
+          <text class="identity-saved-value"
+            >{{user.contact_phone || user.verified_phone || '未填写'}}</text
+          >
+        </view>
+        <view>
+          <text class="identity-label">微信号</text>
+          <text class="identity-saved-value">{{user.wechat || '未填写'}}</text>
+        </view>
+      </block>
+    </view>
+    <view
+      wx:if="{{!verificationResult && (editingIdentity || !user.identity_verified)}}"
+      class="identity-hint identity-note"
+    >
+      领取任务前需完成实名，满 18
+      周岁方可领取。实名资料也用于结算及相关税务处理。
+    </view>
+    <view wx:if="{{error}}" class="error">{{error}}</view>
+    <button
+      wx:if="{{user.identity_verified && editingIdentity && !verificationResult && (phoneEdited || wechat !== (user.wechat || ''))}}"
+      class="identity-contact-save"
+      loading="{{submitting}}"
+      disabled="{{submitting || verifyingPhone}}"
+      bindtap="saveContacts"
+    >
+      保存联系方式
+    </button>
+    <button
+      wx:if="{{verificationResult || (user.identity_verified && !editingIdentity)}}"
+      class="identity-submit"
+      disabled="{{submitting || verifyingPhone}}"
+      bindtap="correctIdentity"
+    >
+      更正实名信息
+    </button>
+    <button
+      wx:else
+      class="identity-submit"
+      loading="{{submitting}}"
+      disabled="{{submitting || uploading || verifyingPhone || !!ageError}}"
+      bindtap="submit"
+    >
+      提交认证
+    </button>
+  </block>
+</view>

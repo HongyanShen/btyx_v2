@@ -1,0 +1,153 @@
+@import "../identity-form.wxss";
+
+.enrollment-banner {
+  margin-bottom: 24rpx;
+  padding: 24rpx 28rpx;
+  border-radius: 33rpx;
+  background: linear-gradient(120deg, #b3a8d2, #8177af);
+  color: #fff;
+}
+
+.enrollment-title {
+  margin-bottom: 4rpx;
+  font-size: 31rpx;
+  font-weight: 700;
+}
+
+.enrollment-description {
+  font-size: 24rpx;
+  font-weight: 550;
+  line-height: 1.6;
+}
+
+.after-photos {
+  margin-top: 14rpx;
+}
+
+.platform-account-hint {
+  margin-top: 8rpx;
+}
+
+.enrollment-rejection {
+  margin-bottom: 24rpx;
+  padding: 19rpx 25rpx;
+  border: 1rpx solid #ffa9a5;
+  border-radius: 24rpx;
+  background: #ffeded;
+  color: #a9302a;
+  font-size: 25rpx;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.enrollment-rejection-title {
+  font-weight: 700;
+}
+
+.enrollment-feedback-link {
+  color: inherit;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.enrollment-agreement-overlay {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 32rpx;
+}
+
+.enrollment-agreement-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 24, 40, 0.52);
+}
+
+.enrollment-agreement-dialog {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 680rpx;
+  padding: 36rpx;
+  border-radius: 36rpx;
+  background: #fff;
+  color: #292249;
+}
+
+.enrollment-agreement-heading {
+  margin-bottom: 20rpx;
+  text-align: center;
+  font-size: 33rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.enrollment-agreement-terms {
+  width: 100%;
+  height: 500rpx;
+  max-height: 48vh;
+  margin-bottom: 24rpx;
+  border-radius: 24rpx;
+  background: #f4f2f9;
+}
+
+.enrollment-agreement-text {
+  padding: 24rpx;
+  font-size: 26rpx;
+  line-height: 1.75;
+}
+
+.enrollment-agreement-title {
+  margin-bottom: 12rpx;
+  font-size: 29rpx;
+  font-weight: 700;
+}
+
+.enrollment-agreement-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.enrollment-agreement-error,
+.enrollment-agreement-state {
+  margin: 16rpx 0;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.enrollment-agreement-error {
+  color: #a9302a;
+}
+
+.enrollment-agreement-retry {
+  margin-bottom: 18rpx;
+  color: #6e639c;
+  font-size: 26rpx;
+}
+
+.enrollment-agreement-decline {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 80rpx;
+  margin-top: 14rpx;
+  padding: 0 24rpx;
+  border: 1rpx solid #8b81ba;
+  border-radius: 44rpx;
+  background: #fff;
+  color: #7d72ad;
+  font-size: 28rpx;
+  font-weight: 650;
+  line-height: 78rpx;
+}
+
+.enrollment-agreement-decline::after {
+  border: 0;
+}
+
+.enrollment-agreement-decline[disabled] {
+  opacity: 0.55;
+}

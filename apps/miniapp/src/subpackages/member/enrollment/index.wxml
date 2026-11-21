@@ -1,0 +1,169 @@
+<page-meta page-style="{{agreementOpen ? 'overflow: hidden;' : ''}}" />
+<view class="identity-page">
+  <view
+    wx:if="{{!loading && signedIn && user && rejected}}"
+    class="enrollment-rejection"
+  >
+    <view>
+      <text class="enrollment-rejection-title">上次报名没通过：</text>
+      <text>{{user.reason}}</text>
+    </view>
+    <view>
+      <text wx:if="{{editable}}">改好后重新提交；</text>
+      <text>对结果有疑问，可以去</text>
+      <text class="enrollment-feedback-link" role="link" bindtap="openFeedback"
+        >「我的反馈」咨询</text
+      >
+    </view>
+  </view>
+  <view class="enrollment-banner">
+    <view class="enrollment-title">成为营销分发员</view>
+    <view class="enrollment-description">
+      平台每天给你分配 1 条视频或图文，按要求发到抖音、小红书，每个平台参考收益
+      ¥{{referencePrice}}，两个平台可累计。
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <view wx:elif="{{!signedIn}}">
+    <view wx:if="{{error}}" class="error">{{error}}</view>
+    <button class="identity-submit" bindtap="openLogin">登录后报名</button>
+  </view>
+  <view wx:elif="{{!user}}" class="error" bindtap="load"
+    >{{error}} · 点击重试</view
+  >
+  <block wx:else>
+    <view class="identity-card">
+      <block wx:if="{{editable}}">
+        <view class="identity-field">
+          <label for="douyin" class="identity-label">抖音号</label>
+          <input
+            id="douyin"
+            class="identity-input"
+            value="{{douyin}}"
+            maxlength="100"
+            placeholder="填写抖音号，或粘贴抖音主页链接"
+            data-field="douyin"
+            bindinput="change"
+            disabled="{{submitting}}"
+          />
+        </view>
+        <view class="identity-field">
+          <label for="xhs" class="identity-label">小红书号</label>
+          <input
+            id="xhs"
+            class="identity-input"
+            value="{{xhs}}"
+            maxlength="512"
+            placeholder="在小红书「我」页面查看小红书号"
+            data-field="xhs"
+            bindinput="change"
+            disabled="{{submitting}}"
+          />
+          <view
+            wx:if="{{needsXiaohongshuNumber && !xhs}}"
+            class="identity-hint platform-account-hint"
+            >之前的资料需要补填小红书号。</view
+          >
+        </view>
+        <view wx:if="{{!user.identity_verified}}" class="identity-field">
+          <view class="identity-label">实名认证</view>
+          <identity-photos
+            id="identity-photos"
+            disabled="{{submitting}}"
+            retained-front="{{rejected && !!user.enrollment_document.front_file_id}}"
+            retained-back="{{rejected && !!user.enrollment_document.back_file_id}}"
+            bind:photo="photoChanged"
+            bind:busy="photoBusy"
+            bind:recognize="identityRecognized"
+          />
+          <view wx:if="{{ageError}}" class="identity-validation"
+            >{{ageError}}，请核对身份证照片。</view
+          >
+          <view class="identity-hint after-photos"
+            >报名审核通过后即完成实名认证，领任务时不用再认证。</view
+          >
+        </view>
+        <view class="identity-hint"
+          >粉丝数不限，两个平台的账号都需要填写。请确保抖音、小红书账号已实名，未实名或被封禁的相关发布不结算。</view
+        >
+      </block>
+      <block wx:else>
+        <view class="identity-label"
+          >{{user.blocked ? '账号已暂停' : statusLabel}}</view
+        >
+        <view class="identity-hint" wx:if="{{user.blocked}}"
+          >如有疑问，请通过我的反馈联系工作人员。</view
+        >
+        <view class="identity-hint" wx:elif="{{user.status === 'pending'}}"
+          >资料已提交，请等待工作人员审核。</view
+        >
+        <view class="identity-hint" wx:elif="{{user.consented}}"
+          >报名已通过，可以领取营销分发任务。</view
+        >
+        <view class="identity-hint" wx:else
+          >报名已通过，请在领取任务前确认营销分发任务协议。</view
+        >
+      </block>
+    </view>
+    <view wx:if="{{error}}" class="error">{{error}}</view>
+    <button
+      wx:if="{{editable}}"
+      class="identity-submit"
+      loading="{{submitting}}"
+      disabled="{{submitting || uploading || !!ageError}}"
+      bindtap="submit"
+    >
+      {{rejected ? '重新提交报名' : '提交报名'}}
+    </button>
+  </block>
+</view>
+
+<view wx:if="{{agreementOpen}}" class="enrollment-agreement-overlay">
+  <view class="enrollment-agreement-backdrop" />
+  <view
+    class="enrollment-agreement-dialog"
+    aria-role="dialog"
+    aria-label="报名前请阅读并同意"
+  >
+    <view class="enrollment-agreement-heading">报名前请阅读并同意</view>
+    <scroll-view
+      wx:if="{{agreement}}"
+      class="enrollment-agreement-terms"
+      scroll-y="{{true}}"
+    >
+      <view class="enrollment-agreement-text">
+        <view class="enrollment-agreement-title">{{agreement.title}}</view>
+        <view class="enrollment-agreement-body">{{agreement.body}}</view>
+      </view>
+    </scroll-view>
+    <view wx:elif="{{agreementLoading}}" class="enrollment-agreement-state"
+      >正在加载协议…</view
+    >
+    <view wx:if="{{agreementError}}" class="enrollment-agreement-error"
+      >{{agreementError}}</view
+    >
+    <button
+      wx:if="{{!agreement && !agreementLoading}}"
+      class="enrollment-agreement-retry"
+      bindtap="loadEnrollmentAgreement"
+    >
+      重新加载协议
+    </button>
+    <button
+      class="identity-submit"
+      disabled="{{!agreement || agreementLoading || submitting}}"
+      loading="{{submitting}}"
+      bindtap="confirmEnrollment"
+    >
+      同意并提交报名
+    </button>
+    <button
+      class="enrollment-agreement-decline"
+      disabled="{{submitting}}"
+      bindtap="dismissAgreement"
+    >
+      不同意
+    </button>
+  </view>
+</view>
