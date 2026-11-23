@@ -15,6 +15,7 @@ type DTO struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
 	Body      string    `json:"body"`
+	BodyHTML  string    `json:"body_html,omitempty"`
 	CreatorID string    `json:"creator_id"`
 	Active    bool      `json:"active"`
 	CreatedAt time.Time `json:"created_at"`
@@ -33,9 +34,10 @@ func (s *Service) Agreements(ctx context.Context) ([]DTO, error) {
 	for _, record := range records {
 		result = append(result, DTO{
 
-			ID:    record.ID,
-			Title: record.Title,
-			Body:  record.Body,
+			ID:       record.ID,
+			Title:    record.Title,
+			Body:     record.Body,
+			BodyHTML: record.BodyHTML,
 
 			CreatorID: record.CreatorID,
 			Active:    record.Active,
@@ -47,6 +49,19 @@ func (s *Service) Agreements(ctx context.Context) ([]DTO, error) {
 }
 
 func (s *Service) PublishAgreement(ctx context.Context, actorID, title, body string) error {
+	return s.publish(ctx, actorID, title, body, "")
+}
+
+func (s *Service) PublishRichAgreement(ctx context.Context, actorID, title, markup string) error {
+	body, rich, err := agreementBody(markup)
+	if err != nil {
+		return err
+	}
+
+	return s.publish(ctx, actorID, title, body, rich)
+}
+
+func (s *Service) publish(ctx context.Context, actorID, title, body, rich string) error {
 	if strings.TrimSpace(title) == "" || strings.TrimSpace(body) == "" {
 		return app.Invalid("协议标题和正文不能为空")
 	}
@@ -68,6 +83,7 @@ func (s *Service) PublishAgreement(ctx context.Context, actorID, title, body str
 		record, err := tx.Agreement.Create().
 			SetTitle(title).
 			SetBody(body).
+			SetBodyHTML(rich).
 			SetCreatorID(actorID).
 			Save(ctx)
 		if err != nil {

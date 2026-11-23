@@ -246,11 +246,15 @@
 }
 
 button.offer-button {
+  display: flex;
   flex: 1;
   min-width: 0;
+  align-items: center;
+  justify-content: center;
   height: 88rpx;
   font-size: 30rpx;
   font-weight: 700;
+  line-height: 1.4;
   color: #fff;
   background: linear-gradient(135deg, #8b82be, #7b72aa);
 }

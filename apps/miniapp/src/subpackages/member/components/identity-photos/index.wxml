@@ -66,4 +66,4 @@
     重试识别
   </button>
 </view>
-<canvas type="2d" class="identity-canvas" />
+<canvas wx:if="{{watermarking}}" type="2d" class="identity-canvas" />

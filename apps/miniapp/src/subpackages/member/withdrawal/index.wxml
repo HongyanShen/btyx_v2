@@ -1,3 +1,4 @@
+<import src="/templates/loading.wxml" />
 <view class="page">
   <view class="card">
     <view class="card-title">提现到微信零钱</view>
@@ -29,7 +30,7 @@
     {{error}} · 点击刷新
   </view>
   <view class="section-title">提现记录</view>
-  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <template wx:if="{{loading}}" is="loading-card" />
   <view wx:elif="{{!error && !withdrawals.length}}" class="empty">
     暂无提现记录
   </view>

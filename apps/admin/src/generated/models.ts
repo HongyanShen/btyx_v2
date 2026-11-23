@@ -6,6 +6,7 @@ export interface Agreement {
   id: string;
   title: string;
   body: string;
+  body_html?: string;
   creator_id: string;
   active: boolean;
   created_at: string;

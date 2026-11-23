@@ -19,6 +19,8 @@ const (
 	FieldTitle = "title"
 	// FieldBody holds the string denoting the body field in the database.
 	FieldBody = "body"
+	// FieldBodyHTML holds the string denoting the body_html field in the database.
+	FieldBodyHTML = "body_html"
 	// FieldCreatorID holds the string denoting the creator_id field in the database.
 	FieldCreatorID = "creator_id"
 	// FieldActive holds the string denoting the active field in the database.
@@ -33,6 +35,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldTitle,
 	FieldBody,
+	FieldBodyHTML,
 	FieldCreatorID,
 	FieldActive,
 }
@@ -79,6 +82,11 @@ func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 // ByBody orders the results by the body field.
 func ByBody(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBody, opts...).ToFunc()
+}
+
+// ByBodyHTML orders the results by the body_html field.
+func ByBodyHTML(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBodyHTML, opts...).ToFunc()
 }
 
 // ByCreatorID orders the results by the creator_id field.

@@ -14,8 +14,9 @@ type replyFeedbackInput struct {
 }
 
 type publishAgreementInput struct {
-	Title string `json:"title"`
-	Body  string `json:"body"`
+	Title    string  `json:"title"`
+	Body     string  `json:"body"`
+	BodyHTML *string `json:"body_html"`
 }
 
 func (handler *Handler) contents(ctx *gin.Context) ([]content.DTO, error) {
@@ -43,5 +44,9 @@ func (handler *Handler) agreements(ctx *gin.Context) ([]agreement.DTO, error) {
 }
 
 func (handler *Handler) publishAgreement(ctx *gin.Context, input publishAgreementInput) (*httpx.NoData, error) {
+	if input.BodyHTML != nil {
+		return nil, handler.services.PublishRichAgreement(ctx.Request.Context(), httpapi.CurrentUser(ctx), input.Title, *input.BodyHTML)
+	}
+
 	return nil, handler.services.PublishAgreement(ctx.Request.Context(), httpapi.CurrentUser(ctx), input.Title, input.Body)
 }

@@ -16,12 +16,11 @@
     <view
       class="guide-button {{loading ? 'guide-loading' : ''}}"
       aria-role="button"
-      aria-disabled="{{loading}}"
       bindtap="followGuide"
-      hover-class="{{loading ? 'none' : 'home-action-pressed'}}"
+      hover-class="home-action-pressed"
       hover-stay-time="80"
     >
-      {{loading && !user ? '正在加载…' : error ? '重新加载' : guide.label}}
+      {{guidePending ? '正在确认入口…' : loading ? '查看报名与任务' : error ? '重新加载' : guide.label}}
     </view>
   </view>
 

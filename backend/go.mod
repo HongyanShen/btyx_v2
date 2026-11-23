@@ -17,6 +17,7 @@ require (
 	github.com/volcengine/ve-tos-golang-sdk/v2 v2.9.10
 	github.com/wechatpay-apiv3/wechatpay-go v0.2.21
 	golang.org/x/crypto v0.59.0
+	golang.org/x/net v0.62.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
@@ -78,7 +79,6 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.22.0 // indirect
 	golang.org/x/mod v0.42.0 // indirect
-	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/telemetry v0.0.0-20261009151841-97e8ea77aa2a // indirect

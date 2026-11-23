@@ -415,3 +415,55 @@ test("identity image export uses the watermarked canvas and keeps the photo rati
     delete global.wx;
   }
 });
+
+test("证件水印画布在选图后才挂载，获取失败可再次选择", async () => {
+  const template = require("node:fs").readFileSync(
+    require("node:path").join(__dirname, "../src/subpackages/member/components/identity-photos/index.wxml"),
+    "utf8",
+  );
+  assert.match(template, /<canvas\s+wx:if="{{watermarking}}"/);
+
+  let definition;
+  let pick;
+  let lookups = 0;
+  const previous = { wx: global.wx, Component: global.Component };
+  try {
+    global.Component = (value) => { definition = value; };
+    require("../src/subpackages/member/components/identity-photos/index");
+    global.wx = { chooseMedia(options) { pick = options; } };
+    const component = {
+      ...definition.methods,
+      data: { ...definition.data },
+      setData(values, callback) {
+        Object.assign(this.data, values);
+        callback?.();
+      },
+      triggerEvent() {},
+      createSelectorQuery() {
+        assert.equal(this.data.watermarking, true);
+        lookups++;
+        return {
+          select() { return this; },
+          fields(options, callback) { callback(null); return this; },
+          exec() {},
+        };
+      },
+    };
+    const event = { currentTarget: { dataset: { side: "front" } } };
+    const cancelled = component.choosePhoto(event);
+    assert.equal(component.data.watermarking, false);
+    pick.fail();
+    await cancelled;
+    assert.equal(lookups, 0);
+    const selected = component.choosePhoto(event);
+    pick.success({ tempFiles: [{ tempFilePath: "local-photo" }] });
+    await selected;
+    assert.equal(lookups, 1);
+    assert.equal(component.data.watermarking, false);
+    assert.equal(component.data.busy, "");
+    assert.ok(component.data.uploadError);
+  } finally {
+    global.wx = previous.wx;
+    global.Component = previous.Component;
+  }
+});

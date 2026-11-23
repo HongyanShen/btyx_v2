@@ -23,7 +23,7 @@ Go DTO 和枚举生成的前端类型分别在 `apps/admin/src/generated/models.
 | POST /me/identity/recognize | `{file_id}` 为本人已确认的人像面图片。返回 `{name,identity}` |
 | POST /me/identity | 提交 `{name,identity,front_file_id,back_file_id}`。联系方式可选，按本次实际填写传 `wechat` 和 `contact_phone`，或用 `contact_phone_receipt` 传本次微信取号结果。校验年龄并通过腾讯云核验后保存实名状态。更正时传 `correct_identity: true`，沿用当前已认证人像面时可省略 `identity`，由服务端读取原号码。更正核验通过后更新当前档案，被替换的照片从当前档案退役，历史核验保留各自的照片引用。已实名可单独更新微信号和联系手机号，手填号码仅作联系使用 |
 | POST /enrollment | 提交 `{douyin,xhs,agreement_id}`，其中 `xhs` 填写小红书号，`agreement_id` 填写报名人刚确认的协议版本。报名与协议确认一并保存，版本已更新或尚未发布时返回 409。未实名时额外提交识别的 `name,identity` 及照片 `front_file_id,back_file_id`。驳回后重新报名须传当前已驳回报名的 `previous_enrollment_id`，服务端创建新的待审核记录。沿用这次驳回报名的人像面时可以只传两张照片的 ID。提交时自动核验实名资料，审核通过后完成实名认证 |
-| GET /agreement | 当前协议 `{id,title,body}`，尚未发布时返回 409 |
+| GET /agreement | 当前协议 `{id,title,body,body_html?}`。富文本版本同时返回可供旧客户端显示的纯文本；历史纯文本原样展示。尚未发布时返回 409 |
 | POST /agreement/consent | `{agreement_id}`；版本变更返回 409 |
 | GET /tasks/today | `{has_content,price_fen}`，表示营销开放且有可领取内容，以及当前营销每平台参考单价 |
 | POST /tasks/claim | 空对象，要求 Idempotency-Key。后端按当前分发员标签选一条，返回任务详情快照 |
@@ -83,7 +83,7 @@ Go DTO 和枚举生成的前端类型分别在 `apps/admin/src/generated/models.
 | GET /withdrawals、GET /ledger | 跨用户资金记录，含 user_id |
 | POST /ledger/:id/adjust | `{delta_fen,reason}`，要求 Idempotency-Key；关联原流水调整 |
 | GET /agreements | 协议历史 |
-| POST /agreements | `{title,body}`；发布新协议版本 |
+| POST /agreements | 发布新协议版本。纯文本传 `{title,body}`，富文本传 `{title,body_html}`。服务端校验段落、标题、粗体、斜体、下划线、列表及换行，并生成纯文本正文 |
 | GET /feedback | 全部分发员反馈 |
 | POST /feedback/:id/reply | `{reply}`，同步创建站内通知 |
 | GET /audits | 操作人、枚举动作、关联记录、原因与时间 |

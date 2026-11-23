@@ -1,3 +1,4 @@
+<import src="/templates/loading.wxml" />
 <view class="page work-page">
   <view wx:if="{{!signedIn && !loading}}" class="card">
     <view class="muted">登录后查看任务进度</view>
@@ -22,7 +23,7 @@
       <view>{{error}}</view>
       <button class="secondary-button small-button spaced" bindtap="load">重试</button>
     </view>
-    <view wx:elif="{{loading}}" class="empty">正在加载任务…</view>
+    <template wx:elif="{{loading}}" is="loading-card" />
     <view wx:elif="{{!tasks.length}}" class="empty">{{needsScreenshots ? '暂无待补截图的任务' : '暂无此类任务'}}</view>
 
     <block wx:if="{{!error && !loading}}">

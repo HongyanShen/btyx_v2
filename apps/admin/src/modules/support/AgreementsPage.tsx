@@ -1,21 +1,11 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  App,
-  Alert,
-  Button,
-  Card,
-  Form,
-  Input,
-  Modal,
-  Table,
-  Tag,
-  Typography,
-} from "antd";
+import { App, Alert, Button, Card, Form, Input, Modal, Table, Tag } from "antd";
 import { get, post } from "../../api/client";
 import { useSession } from "../../app/Auth";
 import { Page, QueryState } from "../../components/Page";
 import type { Agreement } from "../../generated/models";
+import { AgreementContent, AgreementEditor } from "./AgreementEditor";
 
 export function AgreementsPage() {
   const canPublish = useSession().canCall("POST /agreements");
@@ -26,9 +16,11 @@ export function AgreementsPage() {
     queryFn: () => get<Agreement[]>("/agreements"),
   });
   const [opened, setOpened] = useState(false);
-  const [form] = Form.useForm<{ title: string; body: string }>();
+  const [form] = Form.useForm<{ title: string; body_html: string }>();
+  const preview = Form.useWatch("body_html", form);
+  const title = Form.useWatch("title", form);
   const mutation = useMutation({
-    mutationFn: (input: { title: string; body: string }) =>
+    mutationFn: (input: { title: string; body_html: string }) =>
       post("/agreements", input),
     onSuccess: () => {
       message.success("新协议已发布");
@@ -67,9 +59,10 @@ export function AgreementsPage() {
             dataSource={query.data}
             expandable={{
               expandedRowRender: (agreement) => (
-                <Typography.Paragraph className="requirements">
-                  {agreement.body}
-                </Typography.Paragraph>
+                <AgreementContent
+                  body={agreement.body}
+                  html={agreement.body_html}
+                />
               ),
             }}
             columns={[
@@ -100,6 +93,7 @@ export function AgreementsPage() {
         onOk={() => form.submit()}
         confirmLoading={mutation.isPending}
         width={720}
+        destroyOnHidden
       >
         <Alert
           type="warning"
@@ -110,14 +104,26 @@ export function AgreementsPage() {
         <Form
           form={form}
           layout="vertical"
+          preserve={false}
           onFinish={(values) => mutation.mutate(values)}
         >
           <Form.Item name="title" label="协议标题" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="body" label="协议正文" rules={[{ required: true }]}>
-            <Input.TextArea rows={12} />
+          <Form.Item
+            name="body_html"
+            label="协议正文"
+            rules={[{ required: true, message: "请输入协议正文" }]}
+          >
+            <AgreementEditor />
           </Form.Item>
+          <details className="agreement-preview">
+            <summary>预览小程序排版</summary>
+            <article>
+              <h3>{title}</h3>
+              <AgreementContent html={preview} />
+            </article>
+          </details>
         </Form>
       </Modal>
     </Page>

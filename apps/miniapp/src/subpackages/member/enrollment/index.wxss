@@ -1,4 +1,5 @@
 @import "../identity-form.wxss";
+@import "../agreement/body.wxss";
 
 .enrollment-banner {
   margin-bottom: 24rpx;
@@ -105,11 +106,6 @@
   margin-bottom: 12rpx;
   font-size: 29rpx;
   font-weight: 700;
-}
-
-.enrollment-agreement-body {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
 }
 
 .enrollment-agreement-error,

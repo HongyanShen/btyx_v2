@@ -79,6 +79,11 @@ func Body(v string) predicate.Agreement {
 	return predicate.Agreement(sql.FieldEQ(FieldBody, v))
 }
 
+// BodyHTML applies equality check predicate on the "body_html" field. It's identical to BodyHTMLEQ.
+func BodyHTML(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldEQ(FieldBodyHTML, v))
+}
+
 // CreatorID applies equality check predicate on the "creator_id" field. It's identical to CreatorIDEQ.
 func CreatorID(v string) predicate.Agreement {
 	return predicate.Agreement(sql.FieldEQ(FieldCreatorID, v))
@@ -257,6 +262,81 @@ func BodyEqualFold(v string) predicate.Agreement {
 // BodyContainsFold applies the ContainsFold predicate on the "body" field.
 func BodyContainsFold(v string) predicate.Agreement {
 	return predicate.Agreement(sql.FieldContainsFold(FieldBody, v))
+}
+
+// BodyHTMLEQ applies the EQ predicate on the "body_html" field.
+func BodyHTMLEQ(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldEQ(FieldBodyHTML, v))
+}
+
+// BodyHTMLNEQ applies the NEQ predicate on the "body_html" field.
+func BodyHTMLNEQ(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldNEQ(FieldBodyHTML, v))
+}
+
+// BodyHTMLIn applies the In predicate on the "body_html" field.
+func BodyHTMLIn(vs ...string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldIn(FieldBodyHTML, vs...))
+}
+
+// BodyHTMLNotIn applies the NotIn predicate on the "body_html" field.
+func BodyHTMLNotIn(vs ...string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldNotIn(FieldBodyHTML, vs...))
+}
+
+// BodyHTMLGT applies the GT predicate on the "body_html" field.
+func BodyHTMLGT(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldGT(FieldBodyHTML, v))
+}
+
+// BodyHTMLGTE applies the GTE predicate on the "body_html" field.
+func BodyHTMLGTE(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldGTE(FieldBodyHTML, v))
+}
+
+// BodyHTMLLT applies the LT predicate on the "body_html" field.
+func BodyHTMLLT(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldLT(FieldBodyHTML, v))
+}
+
+// BodyHTMLLTE applies the LTE predicate on the "body_html" field.
+func BodyHTMLLTE(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldLTE(FieldBodyHTML, v))
+}
+
+// BodyHTMLContains applies the Contains predicate on the "body_html" field.
+func BodyHTMLContains(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldContains(FieldBodyHTML, v))
+}
+
+// BodyHTMLHasPrefix applies the HasPrefix predicate on the "body_html" field.
+func BodyHTMLHasPrefix(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldHasPrefix(FieldBodyHTML, v))
+}
+
+// BodyHTMLHasSuffix applies the HasSuffix predicate on the "body_html" field.
+func BodyHTMLHasSuffix(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldHasSuffix(FieldBodyHTML, v))
+}
+
+// BodyHTMLIsNil applies the IsNil predicate on the "body_html" field.
+func BodyHTMLIsNil() predicate.Agreement {
+	return predicate.Agreement(sql.FieldIsNull(FieldBodyHTML))
+}
+
+// BodyHTMLNotNil applies the NotNil predicate on the "body_html" field.
+func BodyHTMLNotNil() predicate.Agreement {
+	return predicate.Agreement(sql.FieldNotNull(FieldBodyHTML))
+}
+
+// BodyHTMLEqualFold applies the EqualFold predicate on the "body_html" field.
+func BodyHTMLEqualFold(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldEqualFold(FieldBodyHTML, v))
+}
+
+// BodyHTMLContainsFold applies the ContainsFold predicate on the "body_html" field.
+func BodyHTMLContainsFold(v string) predicate.Agreement {
+	return predicate.Agreement(sql.FieldContainsFold(FieldBodyHTML, v))
 }
 
 // CreatorIDEQ applies the EQ predicate on the "creator_id" field.

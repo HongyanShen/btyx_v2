@@ -1,0 +1,7 @@
+<template name="loading-card">
+  <view class="loading-card" aria-label="正在加载">
+    <view class="skeleton-line skeleton-heading"></view>
+    <view class="skeleton-line"></view>
+    <view class="skeleton-line skeleton-short"></view>
+  </view>
+</template>

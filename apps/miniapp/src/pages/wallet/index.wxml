@@ -1,3 +1,4 @@
+<import src="/templates/loading.wxml" />
 <view class="page">
   <view wx:if="{{!signedIn && !loading}}" class="card">
     <view class="muted">登录后查看营销收益</view>
@@ -24,7 +25,7 @@
       </view>
     </view>
     <view class="section-title">收益明细</view>
-    <view wx:if="{{loading}}" class="empty">正在加载…</view>
+    <template wx:if="{{loading}}" is="loading-card" />
     <view wx:elif="{{!error && !ledger.length}}" class="empty">暂无余额变动</view>
     <block wx:if="{{!loading && !error}}">
       <view wx:for="{{ledger}}" wx:key="id" class="card">

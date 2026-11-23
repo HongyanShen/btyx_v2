@@ -73,6 +73,33 @@ button::after {
   font-weight: 600;
   line-height: 1.55;
 }
+.loading-card {
+  padding: 32rpx;
+  margin-bottom: 22rpx;
+  border-radius: 24rpx;
+  background: #fff;
+}
+.skeleton-line,
+.skeleton-value {
+  display: block;
+  height: 22rpx;
+  border-radius: 9rpx;
+  background: #eeebf3;
+}
+.skeleton-line + .skeleton-line {
+  margin-top: 20rpx;
+}
+.skeleton-heading {
+  width: 44%;
+  height: 32rpx;
+}
+.skeleton-short {
+  width: 72%;
+}
+.skeleton-value {
+  width: 84rpx;
+  margin: 10rpx 0;
+}
 .muted {
   color: #9d97b8;
   font-size: 24rpx;

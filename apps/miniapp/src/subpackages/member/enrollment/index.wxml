@@ -1,4 +1,6 @@
 <page-meta page-style="{{agreementOpen ? 'overflow: hidden;' : ''}}" />
+<import src="/templates/loading.wxml" />
+<import src="../agreement/body.wxml" />
 <view class="identity-page">
   <view
     wx:if="{{!loading && signedIn && user && rejected}}"
@@ -24,7 +26,7 @@
     </view>
   </view>
 
-  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <template wx:if="{{loading}}" is="loading-card" />
   <view wx:elif="{{!signedIn}}">
     <view wx:if="{{error}}" class="error">{{error}}</view>
     <button class="identity-submit" bindtap="openLogin">登录后报名</button>
@@ -134,7 +136,7 @@
     >
       <view class="enrollment-agreement-text">
         <view class="enrollment-agreement-title">{{agreement.title}}</view>
-        <view class="enrollment-agreement-body">{{agreement.body}}</view>
+        <template is="agreement-body" data="{{agreement: agreement}}" />
       </view>
     </scroll-view>
     <view wx:elif="{{agreementLoading}}" class="enrollment-agreement-state"

@@ -101,11 +101,7 @@ Page({
   openLogin,
 
   openProfile() {
-    if (!hasSession()) {
-      if (!this.data.loading) openLogin();
-
-      return;
-    }
+    if (!hasSession() && !pendingSession()) return openLogin();
 
     wx.navigateTo({ url: "/subpackages/member/profile/index" });
   },

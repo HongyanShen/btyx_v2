@@ -18,6 +18,9 @@ func (Agreement) Fields() []ent.Field {
 
 		field.String("body"),
 
+		field.Text("body_html").
+			Optional(),
+
 		field.String("creator_id"),
 
 		field.Bool("active").

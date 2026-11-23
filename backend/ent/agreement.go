@@ -23,6 +23,8 @@ type Agreement struct {
 	Title string `json:"title,omitempty"`
 	// Body holds the value of the "body" field.
 	Body string `json:"body,omitempty"`
+	// BodyHTML holds the value of the "body_html" field.
+	BodyHTML string `json:"body_html,omitempty"`
 	// CreatorID holds the value of the "creator_id" field.
 	CreatorID string `json:"creator_id,omitempty"`
 	// Active holds the value of the "active" field.
@@ -37,7 +39,7 @@ func (*Agreement) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case agreement.FieldActive:
 			values[i] = new(sql.NullBool)
-		case agreement.FieldID, agreement.FieldTitle, agreement.FieldBody, agreement.FieldCreatorID:
+		case agreement.FieldID, agreement.FieldTitle, agreement.FieldBody, agreement.FieldBodyHTML, agreement.FieldCreatorID:
 			values[i] = new(sql.NullString)
 		case agreement.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -79,6 +81,12 @@ func (_m *Agreement) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field body", values[i])
 			} else if value.Valid {
 				_m.Body = value.String
+			}
+		case agreement.FieldBodyHTML:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field body_html", values[i])
+			} else if value.Valid {
+				_m.BodyHTML = value.String
 			}
 		case agreement.FieldCreatorID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -136,6 +144,9 @@ func (_m *Agreement) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("body=")
 	builder.WriteString(_m.Body)
+	builder.WriteString(", ")
+	builder.WriteString("body_html=")
+	builder.WriteString(_m.BodyHTML)
 	builder.WriteString(", ")
 	builder.WriteString("creator_id=")
 	builder.WriteString(_m.CreatorID)

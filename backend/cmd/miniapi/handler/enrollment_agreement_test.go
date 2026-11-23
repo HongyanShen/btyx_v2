@@ -44,16 +44,22 @@ func TestEnrollmentConfirmsCurrentAgreement(t *testing.T) {
 		return response
 	}
 
-	readAgreement := func() string {
+	readAgreement := func(wantBody, wantHTML string) string {
 		t.Helper()
 		response := request(http.MethodGet, "/agreement", "", http.StatusOK)
 		var envelope struct {
 			Data struct {
-				ID string `json:"id"`
+				ID   string `json:"id"`
+				Body string `json:"body"`
+				HTML string `json:"body_html"`
 			} `json:"data"`
 		}
 		if err := json.Unmarshal(response.Body.Bytes(), &envelope); err != nil || envelope.Data.ID == "" {
 			t.Fatal("no agreement version returned")
+		}
+
+		if envelope.Data.Body != wantBody || envelope.Data.HTML != wantHTML {
+			t.Fatalf("agreement text %q, rich body %q", envelope.Data.Body, envelope.Data.HTML)
 		}
 
 		return envelope.Data.ID
@@ -71,8 +77,9 @@ func TestEnrollmentConfirmsCurrentAgreement(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	old := readAgreement()
-	if err := services.PublishAgreement(ctx, "admin", "新版营销分发任务协议", "本版本由报名人提交前确认。"); err != nil {
+	old := readAgreement("首版报名协议。", "")
+	const rich = "<h2>报名须知</h2><p>提交前<strong>确认</strong>。</p>"
+	if err := services.PublishRichAgreement(ctx, "admin", "新版营销分发任务协议", rich); err != nil {
 		t.Fatal(err)
 	}
 
@@ -82,7 +89,7 @@ func TestEnrollmentConfirmsCurrentAgreement(t *testing.T) {
 		t.Fatal("an unsigned or stale submission changed enrollment or consent")
 	}
 
-	current := readAgreement()
+	current := readAgreement("报名须知\n提交前确认。", rich)
 	_, err = services.DB.ExecContext(ctx, `
 		ALTER TABLE user_enrollments ADD CHECK (douyin <> 'failed-application')
 	`)
@@ -120,7 +127,7 @@ func TestEnrollmentConfirmsCurrentAgreement(t *testing.T) {
 	}
 
 	apply(current, http.StatusOK)
-	apply(readAgreement(), http.StatusConflict)
+	apply(readAgreement("新版本须再次阅读。", ""), http.StatusConflict)
 	profile, err = services.User(ctx, login.UserID)
 	if err != nil || profile.Status != enum.EnrollmentPending || profile.Consented {
 		t.Fatal("a repeated application unexpectedly agreed to a newer version")

@@ -90,6 +90,7 @@ type AgreementMutation struct {
 	created_at    *time.Time
 	title         *string
 	body          *string
+	body_html     *string
 	creator_id    *string
 	active        *bool
 	clearedFields map[string]struct{}
@@ -310,6 +311,55 @@ func (m *AgreementMutation) ResetBody() {
 	m.body = nil
 }
 
+// SetBodyHTML sets the "body_html" field.
+func (m *AgreementMutation) SetBodyHTML(s string) {
+	m.body_html = &s
+}
+
+// BodyHTML returns the value of the "body_html" field in the mutation.
+func (m *AgreementMutation) BodyHTML() (r string, exists bool) {
+	v := m.body_html
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBodyHTML returns the old "body_html" field's value of the Agreement entity.
+// If the Agreement object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AgreementMutation) OldBodyHTML(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBodyHTML is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBodyHTML requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBodyHTML: %w", err)
+	}
+	return oldValue.BodyHTML, nil
+}
+
+// ClearBodyHTML clears the value of the "body_html" field.
+func (m *AgreementMutation) ClearBodyHTML() {
+	m.body_html = nil
+	m.clearedFields[agreement.FieldBodyHTML] = struct{}{}
+}
+
+// BodyHTMLCleared returns if the "body_html" field was cleared in this mutation.
+func (m *AgreementMutation) BodyHTMLCleared() bool {
+	_, ok := m.clearedFields[agreement.FieldBodyHTML]
+	return ok
+}
+
+// ResetBodyHTML resets all changes to the "body_html" field.
+func (m *AgreementMutation) ResetBodyHTML() {
+	m.body_html = nil
+	delete(m.clearedFields, agreement.FieldBodyHTML)
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (m *AgreementMutation) SetCreatorID(s string) {
 	m.creator_id = &s
@@ -416,7 +466,7 @@ func (m *AgreementMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AgreementMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, agreement.FieldCreatedAt)
 	}
@@ -425,6 +475,9 @@ func (m *AgreementMutation) Fields() []string {
 	}
 	if m.body != nil {
 		fields = append(fields, agreement.FieldBody)
+	}
+	if m.body_html != nil {
+		fields = append(fields, agreement.FieldBodyHTML)
 	}
 	if m.creator_id != nil {
 		fields = append(fields, agreement.FieldCreatorID)
@@ -446,6 +499,8 @@ func (m *AgreementMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case agreement.FieldBody:
 		return m.Body()
+	case agreement.FieldBodyHTML:
+		return m.BodyHTML()
 	case agreement.FieldCreatorID:
 		return m.CreatorID()
 	case agreement.FieldActive:
@@ -465,6 +520,8 @@ func (m *AgreementMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldTitle(ctx)
 	case agreement.FieldBody:
 		return m.OldBody(ctx)
+	case agreement.FieldBodyHTML:
+		return m.OldBodyHTML(ctx)
 	case agreement.FieldCreatorID:
 		return m.OldCreatorID(ctx)
 	case agreement.FieldActive:
@@ -498,6 +555,13 @@ func (m *AgreementMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBody(v)
+		return nil
+	case agreement.FieldBodyHTML:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBodyHTML(v)
 		return nil
 	case agreement.FieldCreatorID:
 		v, ok := value.(string)
@@ -542,7 +606,11 @@ func (m *AgreementMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *AgreementMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(agreement.FieldBodyHTML) {
+		fields = append(fields, agreement.FieldBodyHTML)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -555,6 +623,11 @@ func (m *AgreementMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AgreementMutation) ClearField(name string) error {
+	switch name {
+	case agreement.FieldBodyHTML:
+		m.ClearBodyHTML()
+		return nil
+	}
 	return fmt.Errorf("unknown Agreement nullable field %s", name)
 }
 
@@ -570,6 +643,9 @@ func (m *AgreementMutation) ResetField(name string) error {
 		return nil
 	case agreement.FieldBody:
 		m.ResetBody()
+		return nil
+	case agreement.FieldBodyHTML:
+		m.ResetBodyHTML()
 		return nil
 	case agreement.FieldCreatorID:
 		m.ResetCreatorID()

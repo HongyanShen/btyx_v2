@@ -11,12 +11,23 @@ Page({
   },
 
   async onShow() {
+    const previous = this.data.agreement;
+    this.setData({
+      loading: true,
+      error: "",
+      agreement: null,
+      consented: false,
+    });
     try {
       const [agreement, user] = await Promise.all([
         request("/agreement"),
         request("/me"),
       ]);
-      this.setData({ agreement, consented: user.consented });
+      this.setData({
+        agreement,
+        consented: user.consented,
+        checked: previous?.id === agreement.id && this.data.checked,
+      });
     } catch (error) {
       this.setData({ error: error.message });
     } finally {
@@ -29,7 +40,7 @@ Page({
   },
 
   async confirm() {
-    if (!this.data.checked || this.data.submitting) {
+    if (!this.data.agreement || !this.data.checked || this.data.submitting) {
       return;
     }
 

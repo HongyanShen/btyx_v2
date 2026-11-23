@@ -55,6 +55,26 @@ func (_u *AgreementUpdate) SetNillableBody(v *string) *AgreementUpdate {
 	return _u
 }
 
+// SetBodyHTML sets the "body_html" field.
+func (_u *AgreementUpdate) SetBodyHTML(v string) *AgreementUpdate {
+	_u.mutation.SetBodyHTML(v)
+	return _u
+}
+
+// SetNillableBodyHTML sets the "body_html" field if the given value is not nil.
+func (_u *AgreementUpdate) SetNillableBodyHTML(v *string) *AgreementUpdate {
+	if v != nil {
+		_u.SetBodyHTML(*v)
+	}
+	return _u
+}
+
+// ClearBodyHTML clears the value of the "body_html" field.
+func (_u *AgreementUpdate) ClearBodyHTML() *AgreementUpdate {
+	_u.mutation.ClearBodyHTML()
+	return _u
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (_u *AgreementUpdate) SetCreatorID(v string) *AgreementUpdate {
 	_u.mutation.SetCreatorID(v)
@@ -130,6 +150,12 @@ func (_u *AgreementUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Body(); ok {
 		_spec.SetField(agreement.FieldBody, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.BodyHTML(); ok {
+		_spec.SetField(agreement.FieldBodyHTML, field.TypeString, value)
+	}
+	if _u.mutation.BodyHTMLCleared() {
+		_spec.ClearField(agreement.FieldBodyHTML, field.TypeString)
+	}
 	if value, ok := _u.mutation.CreatorID(); ok {
 		_spec.SetField(agreement.FieldCreatorID, field.TypeString, value)
 	}
@@ -181,6 +207,26 @@ func (_u *AgreementUpdateOne) SetNillableBody(v *string) *AgreementUpdateOne {
 	if v != nil {
 		_u.SetBody(*v)
 	}
+	return _u
+}
+
+// SetBodyHTML sets the "body_html" field.
+func (_u *AgreementUpdateOne) SetBodyHTML(v string) *AgreementUpdateOne {
+	_u.mutation.SetBodyHTML(v)
+	return _u
+}
+
+// SetNillableBodyHTML sets the "body_html" field if the given value is not nil.
+func (_u *AgreementUpdateOne) SetNillableBodyHTML(v *string) *AgreementUpdateOne {
+	if v != nil {
+		_u.SetBodyHTML(*v)
+	}
+	return _u
+}
+
+// ClearBodyHTML clears the value of the "body_html" field.
+func (_u *AgreementUpdateOne) ClearBodyHTML() *AgreementUpdateOne {
+	_u.mutation.ClearBodyHTML()
 	return _u
 }
 
@@ -288,6 +334,12 @@ func (_u *AgreementUpdateOne) sqlSave(ctx context.Context) (_node *Agreement, er
 	}
 	if value, ok := _u.mutation.Body(); ok {
 		_spec.SetField(agreement.FieldBody, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.BodyHTML(); ok {
+		_spec.SetField(agreement.FieldBodyHTML, field.TypeString, value)
+	}
+	if _u.mutation.BodyHTMLCleared() {
+		_spec.ClearField(agreement.FieldBodyHTML, field.TypeString)
 	}
 	if value, ok := _u.mutation.CreatorID(); ok {
 		_spec.SetField(agreement.FieldCreatorID, field.TypeString, value)

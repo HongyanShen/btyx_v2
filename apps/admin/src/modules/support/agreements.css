@@ -1,0 +1,46 @@
+.agreement-editor .ql-toolbar.ql-snow,
+.agreement-editor .ql-container.ql-snow {
+  border-color: #d9d9d9;
+}
+.agreement-editor .ql-toolbar {
+  border-radius: 6px 6px 0 0;
+}
+.agreement-editor .ql-container {
+  border-radius: 0 0 6px 6px;
+}
+.agreement-editor .ql-editor {
+  min-height: 180px;
+  max-height: 42vh;
+  overflow-y: auto;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.agreement-editor .ql-container {
+  font-family: inherit;
+}
+.agreement-preview summary {
+  cursor: pointer;
+  color: #5f5586;
+}
+.agreement-preview article {
+  max-width: 390px;
+  margin: 12px auto;
+  padding: 20px;
+  border: 1px solid #e9e6ee;
+  border-radius: 12px;
+}
+.agreement-content {
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.agreement-plain {
+  white-space: pre-wrap;
+}
+.agreement-content p {
+  margin: 0 0 0.65em;
+}
+.agreement-content ol,
+.agreement-content ul {
+  padding-inline-start: 1.8em;
+}

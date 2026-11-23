@@ -17,6 +17,7 @@ Component({
     front: "",
     back: "",
     busy: "",
+    watermarking: false,
     recognizing: false,
     uploadError: "",
     recognitionError: "",
@@ -44,10 +45,12 @@ Component({
 
         this.setData({ uploadError: "" });
         const canvas = await new Promise((resolve) => {
-          this.createSelectorQuery()
-            .select(".identity-canvas")
-            .fields({ node: true }, (result) => resolve(result?.node))
-            .exec();
+          this.setData({ watermarking: true }, () => {
+            this.createSelectorQuery()
+              .select(".identity-canvas")
+              .fields({ node: true }, (result) => resolve(result?.node))
+              .exec();
+          });
         });
         const watermarked = await addIdentityWatermark(canvas, source);
         const fileID = await upload(watermarked);
@@ -61,6 +64,7 @@ Component({
       } catch (error) {
         this.setData({ uploadError: error.message });
       } finally {
+        this.setData({ watermarking: false });
         this.setBusy("");
       }
     },

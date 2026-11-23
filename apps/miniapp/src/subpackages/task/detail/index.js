@@ -1,4 +1,5 @@
 const { request, post } = require("../../../services/request");
+const { takeClaimedAssignment } = require("../../../services/marketing-tasks");
 const { doubleFen, formatFen } = require("../../../services/money");
 const {
   chooseImage,
@@ -58,6 +59,8 @@ Page({
 
   onLoad(options) {
     this.id = options.id;
+    this.reissueOf = options.reissueOf;
+    this.reissuePlatform = options.platform;
     this.section = options.section;
     this.drafts = {};
     this.submittedShareTexts = {};
@@ -87,13 +90,10 @@ Page({
     clearInterval(this.deadlineTimer);
     this.setData({ loading: true, error: "" });
     try {
-      const task = await request(`/assignments/${this.id}`);
+      const { task, original } = await this.loadAssignment();
+      if (this.unloaded || !task) return;
       const closed = isClosed(task);
       const reissued = task.source === AssignmentSource.SourceReissued;
-      const original =
-        reissued && task.source_id
-          ? await request(`/assignments/${task.source_id}`).catch(() => null)
-          : null;
       const files = task.files || [];
       const links = {};
       const screenshots = {};
@@ -202,9 +202,10 @@ Page({
         }, 1000);
       }
     } catch (error) {
-      this.setData({ error: error.message });
+      if (!this.unloaded) this.setData({ error: error.message });
     } finally {
       this.refreshing = false;
+      if (this.unloaded) return;
       this.setData({ loading: false }, () => {
         const target =
           this.section === "screenshots" && this.data.task?.hasSubmittedLinks
@@ -572,24 +573,39 @@ Page({
     wx.setClipboardData({ data: value });
   },
 
-  async openReissue(event) {
-    try {
+  async loadAssignment() {
+    let task;
+    let original;
+    if (this.id) {
+      task = takeClaimedAssignment(this.id) || (await request(`/assignments/${this.id}`));
+    } else if (this.reissueOf) {
       const assignments = await request("/assignments");
-      const reissued = assignments.find(
-        (task) =>
-          task.source === AssignmentSource.SourceReissued &&
-          task.source_id === this.id &&
-          task.platforms.includes(event.currentTarget.dataset.platform),
+      task = assignments.find(
+        (item) =>
+          item.source === AssignmentSource.SourceReissued &&
+          item.source_id === this.reissueOf &&
+          item.platforms.includes(this.reissuePlatform),
       );
-      if (reissued) {
-        wx.redirectTo({
-          url: `/subpackages/task/detail/index?id=${reissued.id}`,
-        });
-      } else {
-        wx.switchTab({ url: "/pages/work/index" });
+      if (!task) {
+        if (this.visible) wx.switchTab({ url: "/pages/work/index" });
+        return {};
       }
-    } catch (error) {
-      wx.showToast({ title: error.message, icon: "none" });
+      this.id = task.id;
+      original = assignments.find((item) => item.id === this.reissueOf);
+    } else {
+      throw new Error("缺少任务信息");
     }
+    if (!original && task.source === AssignmentSource.SourceReissued && task.source_id) {
+      original = await request(`/assignments/${task.source_id}`).catch(() => null);
+    }
+    return { task, original };
+  },
+
+  openReissue(event) {
+    const platform = event.currentTarget.dataset.platform;
+    wx.redirectTo({
+      url: `/subpackages/task/detail/index?reissueOf=${encodeURIComponent(this.id)}&platform=${encodeURIComponent(platform)}`,
+      fail: () => wx.showToast({ title: "任务打开失败，请重试", icon: "none" }),
+    });
   },
 });

@@ -28,9 +28,10 @@ type recognizeIdentityInput struct {
 }
 
 type agreementDTO struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
-	Body  string `json:"body"`
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Body     string `json:"body"`
+	BodyHTML string `json:"body_html,omitempty"`
 }
 
 type consentAgreementInput struct {
@@ -88,9 +89,10 @@ func (handler *Handler) currentAgreement(ctx *gin.Context) (agreementDTO, error)
 	}
 
 	return agreementDTO{
-		ID:    record.ID,
-		Title: record.Title,
-		Body:  record.Body,
+		ID:       record.ID,
+		Title:    record.Title,
+		Body:     record.Body,
+		BodyHTML: record.BodyHTML,
 	}, nil
 }
 

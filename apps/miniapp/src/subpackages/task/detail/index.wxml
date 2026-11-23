@@ -1,4 +1,5 @@
 <page-meta page-style="{{galleryOpen ? 'overflow: hidden;' : ''}}" />
+<import src="/templates/loading.wxml" />
 
 <template name="material-save">
   <button
@@ -29,7 +30,7 @@
     <view>{{error}}</view>
     <button class="secondary-button small-button spaced" bindtap="load">重试</button>
   </view>
-  <view wx:elif="{{loading && !task}}" class="empty">正在加载任务…</view>
+  <template wx:elif="{{loading && !task}}" is="loading-card" />
   <block wx:elif="{{task}}">
     <view class="execution-card execution-overview">
       <view class="execution-icon">

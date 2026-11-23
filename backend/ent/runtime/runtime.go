@@ -49,7 +49,7 @@ func init() {
 	// agreement.DefaultCreatedAt holds the default value on creation for the created_at field.
 	agreement.DefaultCreatedAt = agreementDescCreatedAt.Default.(func() time.Time)
 	// agreementDescActive is the schema descriptor for active field.
-	agreementDescActive := agreementFields[3].Descriptor()
+	agreementDescActive := agreementFields[4].Descriptor()
 	// agreement.DefaultActive holds the default value on creation for the active field.
 	agreement.DefaultActive = agreementDescActive.Default.(bool)
 	// agreementDescID is the schema descriptor for id field.

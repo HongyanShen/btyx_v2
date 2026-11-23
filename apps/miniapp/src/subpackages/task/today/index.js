@@ -3,10 +3,11 @@ const { EnrollmentStatus } = require("../../../services/generated/enums");
 const {
   loadMarketingTasks,
   marketingBusinessDate,
+  rememberClaimedAssignment,
 } = require("../../../services/marketing-tasks");
 const { doubleFen, formatFen } = require("../../../services/money");
 const { newKey, post } = require("../../../services/request");
-const { openLogin } = require("../../../services/session");
+const { isCurrentSession, openLogin, tokenKey } = require("../../../services/session");
 
 function claimAction(user, ready, today, hasContent) {
   if (today) {
@@ -61,6 +62,14 @@ Page({
     actionLabel: "",
   },
 
+  onLoad() {
+    const pages = getCurrentPages();
+    const previous = pages[pages.length - 2];
+    if (previous?.route === "pages/home/index") {
+      this.initialOverview = previous.recentOverview();
+    }
+  },
+
   onShow() {
     if (!this.data.claiming) {
       return this.load();
@@ -80,7 +89,9 @@ Page({
     this.setData({ loading: true, error: "" });
 
     try {
-      const { user, today, hasContent, priceFen } = await loadMarketingTasks();
+      const overview = this.initialOverview || loadMarketingTasks();
+      this.initialOverview = null;
+      const { user, today, hasContent, priceFen } = await overview;
       if (this.unloaded) {
         return;
       }
@@ -141,12 +152,18 @@ Page({
     this.setData({ claiming: true });
 
     try {
+      const token = wx.getStorageSync(tokenKey);
       const assignment = await post("/tasks/claim", {}, this.claimAttempt.key);
       if (this.unloaded) {
         return;
       }
 
       this.claimAttempt = null;
+      if (!isCurrentSession(token)) {
+        await this.load();
+        return;
+      }
+      rememberClaimedAssignment(assignment, token);
 
       this.setData({
         ...displayPrices(assignment.price_fen),

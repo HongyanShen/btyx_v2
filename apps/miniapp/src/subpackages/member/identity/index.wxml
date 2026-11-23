@@ -1,5 +1,6 @@
+<import src="/templates/loading.wxml" />
 <view class="identity-page">
-  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <template wx:if="{{loading}}" is="loading-card" />
   <view wx:elif="{{!signedIn}}">
     <view wx:if="{{error}}" class="error">{{error}}</view>
     <button class="identity-submit" bindtap="openLogin">登录后认证</button>

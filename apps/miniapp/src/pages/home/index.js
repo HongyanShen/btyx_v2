@@ -1,9 +1,15 @@
 const {
   canUseLocalDemo,
+  isCurrentSession,
   localLogin,
   openLogin,
+  tokenKey,
 } = require("../../services/session");
-const { loadMarketingTasks } = require("../../services/marketing-tasks");
+const {
+  loadMarketingTasks,
+  marketingBusinessDate,
+  taskSnapshotMaxAgeMs,
+} = require("../../services/marketing-tasks");
 const { formatFen } = require("../../services/money");
 const { homeGuide, marketingTaskStatus } = require("./guide");
 const config = require("../../services/config");
@@ -11,6 +17,7 @@ const config = require("../../services/config");
 Page({
   data: {
     loading: true,
+    guidePending: false,
     error: "",
     hasContent: false,
     user: null,
@@ -28,20 +35,63 @@ Page({
   },
 
   onShow() {
-    this.load();
+    return this.load();
+  },
+
+  onHide() {
+    if (this.data.guidePending) this.setData({ guidePending: false });
+  },
+
+  onUnload() {
+    this.onHide();
+    this.overview = null;
+  },
+
+  matchesOverview() {
+    const overview = this.overview;
+    if (!overview || overview.date !== marketingBusinessDate()) return false;
+
+    const token = wx.getStorageSync(tokenKey) || "";
+    return overview.token === token || isCurrentSession(overview.token);
+  },
+
+  recentOverview() {
+    if (!this.matchesOverview()) return;
+    const { pending, completedAt } = this.overview;
+    if (!completedAt || Date.now() - completedAt < taskSnapshotMaxAgeMs) return pending;
   },
 
   async load() {
-    if (this.refreshing) {
+    const sameContext = this.matchesOverview();
+    if (sameContext && !this.overview.completedAt) {
+      await this.overview.pending.catch(() => {});
       return;
     }
 
-    this.refreshing = true;
-    this.setData({ loading: true, error: "" });
+    if (!sameContext) {
+      this.setData({
+        loading: true,
+        user: null,
+        today: null,
+        guide: homeGuide(null),
+      });
+    }
+    this.setData({ error: "" });
+    const overview = {
+      token: wx.getStorageSync(tokenKey) || "",
+      date: marketingBusinessDate(),
+      pending: loadMarketingTasks(),
+    };
+    this.overview = overview;
 
     try {
-      const { user, hasContent, today, priceFen } = await loadMarketingTasks();
+      const { user, hasContent, today, priceFen } = await overview.pending;
+      if (this.overview !== overview) return;
+
+      overview.token = wx.getStorageSync(tokenKey) || "";
+      overview.completedAt = Date.now();
       this.setData({
+        loading: false,
         user,
         guide: homeGuide(user, today),
         today: today
@@ -51,8 +101,16 @@ Page({
         hasContent,
         referencePrice: formatFen(priceFen || config.marketingReferencePriceFen),
       });
+      if (this.data.guidePending) {
+        this.setData({ guidePending: false });
+        this.followGuide();
+      }
     } catch (error) {
+      if (this.overview !== overview) return;
+      this.overview = null;
       this.setData({
+        loading: false,
+        guidePending: false,
         error: error.message,
         user: null,
         guide: homeGuide(null),
@@ -60,9 +118,6 @@ Page({
         hasContent: false,
         localDemo: canUseLocalDemo(),
       });
-    } finally {
-      this.refreshing = false;
-      this.setData({ loading: false });
     }
   },
 
@@ -92,10 +147,6 @@ Page({
   },
 
   openTodayTask() {
-    if (this.data.loading || this.data.guide.action !== "tasks") {
-      return;
-    }
-
     wx.navigateTo({
       url: "/subpackages/task/today/index",
       fail: () => wx.showToast({ title: "任务详情打开失败，请重试", icon: "none" }),
@@ -118,6 +169,7 @@ Page({
 
   followGuide() {
     if (this.data.loading) {
+      this.setData({ guidePending: true });
       return;
     }
 

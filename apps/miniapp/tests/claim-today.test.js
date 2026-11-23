@@ -6,6 +6,7 @@ const test = require("node:test");
 test("首页第二步打开领取前详情，只在详情确认后提交并以同一幂等键重试", async () => {
   const prior = { wx: global.wx, Page: global.Page };
   const requests = [];
+  const assignmentReads = [];
   const destinations = [];
   const redirects = [];
   const toasts = [];
@@ -35,6 +36,11 @@ test("首页第二步打开领取前详情，只在详情确认后提交并以�
         return;
       }
 
+      if (requestedPath === "/api/v1/assignments/allocated") {
+        assignmentReads.push(requestedPath);
+        options.success({ statusCode: 200, data: { code: 0, data: assignments[0] } });
+        return;
+      }
       const data = {
         "/api/v1/me": user,
         "/api/v1/tasks/today": { has_content: hasContent, price_fen: "825" },
@@ -117,6 +123,9 @@ test("首页第二步打开领取前详情，只在详情确认后提交并以�
     assert.equal(original.header["Idempotency-Key"], repeated.header["Idempotency-Key"]);
     const assignment = {
       id: "allocated",
+      steps: [],
+      submissions: [],
+      platforms: ["dy"],
       date: require("../src/services/marketing-tasks").marketingBusinessDate(),
       price_fen: "825",
       status: "in_progress",
@@ -132,6 +141,14 @@ test("首页第二步打开领取前详情，只在详情确认后提交并以�
     await retry;
 
     assert.deepEqual(redirects, ["/subpackages/task/detail/index?id=allocated"]);
+    require("../src/subpackages/task/detail/index");
+    const execution = page;
+    execution.onLoad({ id: "allocated" });
+    await execution.load();
+    assert.equal(execution.data.task.id, "allocated");
+    assert.equal(assignmentReads.length, 0);
+    await execution.load();
+    assert.equal(assignmentReads.length, 1);
     await home.load();
     assert.equal(home.data.today.id, "allocated");
     assert.equal(home.data.guide.label, "第三步：把任务做完，交链接");

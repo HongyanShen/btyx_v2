@@ -3,8 +3,10 @@ const { profilePhotoURL } = require("../../../services/profile");
 const { request, post } = require("../../../services/request");
 const {
   hasSession,
+  isCurrentSession,
   openLogin,
   pendingSession,
+  tokenKey,
 } = require("../../../services/session");
 
 Page({
@@ -19,26 +21,37 @@ Page({
   },
 
   onShow() {
-    if (!this.data.user) this.load();
+    if (!this.data.user) return this.load();
+  },
+
+  onUnload() {
+    this.unloaded = true;
   },
 
   async load() {
+    if (this.refreshing) return;
+    this.refreshing = true;
     this.setData({ loading: true, error: "" });
-
-    await pendingSession();
-    const signedIn = hasSession();
-    this.setData({ loading: signedIn, signedIn });
-    if (!signedIn) return;
-
     try {
+      await pendingSession();
+      if (this.unloaded) return;
+      const token = wx.getStorageSync(tokenKey);
+      if (!token) {
+        this.setData({ signedIn: false, loading: false });
+        return;
+      }
       const user = await request("/me");
-      this.setData({ user });
+      if (this.unloaded || !isCurrentSession(token)) return;
+      this.setData({ user, signedIn: true, loading: false });
       const avatar = await profilePhotoURL(user.avatar_file_id);
-      if (!this.avatarPath) this.setData({ avatar });
+      if (!this.unloaded && !this.avatarPath && isCurrentSession(token)) {
+        this.setData({ avatar });
+      }
     } catch (error) {
-      this.setData({ error: error.message, signedIn: hasSession() });
+      if (!this.unloaded) this.handleError(error);
     } finally {
-      this.setData({ loading: false });
+      this.refreshing = false;
+      if (!this.unloaded && this.data.loading) this.setData({ loading: false });
     }
   },
 

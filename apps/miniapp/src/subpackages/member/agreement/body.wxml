@@ -1,0 +1,4 @@
+<template name="agreement-body">
+  <rich-text wx:if="{{agreement.body_html}}" class="agreement-rich-body" nodes="{{agreement.body_html}}" />
+  <view wx:else class="agreement-plain-body">{{agreement.body}}</view>
+</template>

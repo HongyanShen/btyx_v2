@@ -1,0 +1,8 @@
+.agreement-rich-body,
+.agreement-plain-body {
+  display: block;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.agreement-plain-body { white-space: pre-wrap; }

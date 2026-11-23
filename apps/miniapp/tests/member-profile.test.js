@@ -292,3 +292,170 @@ test("个人信息 submits the native form nickname and exchanges only the WeCha
   await save;
   assert.equal(wentBack, true);
 });
+
+function finishOverview(requests, user = { status: "approved", consented: true }) {
+  for (const req of requests) {
+    const result = {
+      "/api/v1/me": user,
+      "/api/v1/tasks/today": { has_content: true, price_fen: "825" },
+      "/api/v1/assignments": [],
+    }[new URL(req.url).pathname];
+    assert.ok(result);
+    ok(req, result);
+  }
+}
+
+test("首页首次点击只执行一次，离开首页后取消待跳转", async () => {
+  const fake = mockWx();
+  fake.storage.set(tokenKey, "cold");
+  const home = page("../src/pages/home/index");
+  const first = home.load();
+  home.followGuide();
+  home.followGuide();
+  assert.deepEqual(fake.navigations, []);
+  await flushRequests();
+  finishOverview(fake.requests);
+  await first;
+  assert.deepEqual(fake.navigations, ["/subpackages/task/today/index"]);
+
+  const other = page("../src/pages/home/index");
+  const next = other.load();
+  other.followGuide();
+  other.onHide();
+  await flushRequests();
+  finishOverview(fake.requests.slice(3));
+  await next;
+  assert.equal(fake.navigations.length, 1);
+});
+
+test("首页刷新时直接打开详情，复用在途或刚完成的查询，返回详情重新检查", async () => {
+  const fake = mockWx();
+  fake.storage.set(tokenKey, "warm");
+  const home = page("../src/pages/home/index");
+  home.route = "pages/home/index";
+  const first = home.load();
+  await flushRequests();
+  finishOverview(fake.requests);
+  await first;
+
+  const previous = global.getCurrentPages;
+  try {
+    const detail = page("../src/subpackages/task/today/index");
+    global.getCurrentPages = () => [home, detail];
+    const refresh = home.load();
+    home.followGuide();
+    assert.deepEqual(fake.navigations, ["/subpackages/task/today/index"]);
+    detail.onLoad();
+    const opened = detail.onShow();
+    await flushRequests();
+    assert.equal(fake.requests.length, 6);
+    finishOverview(fake.requests.slice(3));
+    await Promise.all([refresh, opened]);
+    assert.equal(detail.data.action, "claim");
+
+    const reopened = page("../src/subpackages/task/today/index");
+    global.getCurrentPages = () => [home, reopened];
+    reopened.onLoad();
+    await reopened.onShow();
+    assert.equal(fake.requests.length, 6);
+    assert.equal(reopened.data.price, "8.25");
+    const returned = reopened.onShow();
+    await flushRequests();
+    assert.equal(fake.requests.length, 9);
+    finishOverview(fake.requests.slice(6), { blocked: true });
+    await returned;
+    assert.equal(reopened.data.actionLabel, "账号已暂停领取");
+  } finally {
+    global.getCurrentPages = previous;
+  }
+});
+
+test("个人资料在头像返回前可以编辑，迟到的头像保留用户已选图片", async () => {
+  const fake = mockWx();
+  fake.storage.set(tokenKey, "profile");
+  const profile = page("../src/subpackages/member/profile/index");
+  const load = profile.load();
+  await flushRequests();
+  ok(fake.requests[0], { nickname: "联调兔", avatar_file_id: "old-avatar" });
+  await flushRequests();
+  assert.equal(profile.data.user.nickname, "联调兔");
+  assert.equal(profile.data.loading, false);
+  assert.equal(fake.requests.length, 2);
+  profile.chooseAvatar({ detail: { avatarUrl: "wxfile://new-avatar" } });
+  ok(fake.requests[1], { url: "https://example.test/old-avatar" });
+  await load;
+  await flushRequests();
+  assert.equal(profile.data.avatar, "wxfile://new-avatar");
+});
+
+test("详情只复用同一会话、同一业务日内的新鲜首页结果", async () => {
+  const fake = mockWx();
+  const home = page("../src/pages/home/index");
+  home.route = "pages/home/index";
+  const clock = Date.now;
+  const pages = global.getCurrentPages;
+  let now = Date.parse("2026-11-21T12:00:00+08:00");
+  Date.now = () => now;
+  async function openAndExpectRequests() {
+    const detail = page("../src/subpackages/task/today/index");
+    global.getCurrentPages = () => [home, detail];
+    const before = fake.requests.length;
+    detail.onLoad();
+    const load = detail.onShow();
+    await flushRequests();
+    assert.equal(fake.requests.length - before, 3);
+    finishOverview(fake.requests.slice(before));
+    await load;
+  }
+  async function refreshHome() {
+    const before = fake.requests.length;
+    const load = home.load();
+    await flushRequests();
+    finishOverview(fake.requests.slice(before));
+    await load;
+  }
+  try {
+    fake.storage.set(tokenKey, "account-a");
+    await refreshHome();
+    fake.storage.set(tokenKey, "account-b");
+    await openAndExpectRequests();
+    await refreshHome();
+    now += 60000;
+    await openAndExpectRequests();
+    now = Date.parse("2026-11-21T23:59:59+08:00");
+    await refreshHome();
+    now += 2000;
+    await openAndExpectRequests();
+  } finally {
+    Date.now = clock;
+    global.getCurrentPages = pages;
+  }
+});
+
+test("查看重派任务先跳转，目标页从一次列表查询中取得重派与原任务", async () => {
+  const fake = mockWx();
+  fake.storage.set(tokenKey, "reissued");
+  const source = page("../src/subpackages/task/detail/index");
+  source.onLoad({ id: "original" });
+  let route = "";
+  wx.redirectTo = ({ url }) => { route = url; };
+  source.openReissue({ currentTarget: { dataset: { platform: "dy" } } });
+  assert.equal(fake.requests.length, 0);
+  const target = new URL(route, "https://example.test");
+  assert.equal(target.pathname, "/subpackages/task/detail/index");
+  const detail = page("../src/subpackages/task/detail/index");
+  detail.onLoad(Object.fromEntries(target.searchParams));
+  const load = detail.load();
+  await flushRequests();
+  const original = { id: "original", body: "旧要求", files: [] };
+  ok(fake.requests[0], [
+    original,
+    { ...original, id: "new", source: "reissued", source_id: original.id,
+      platforms: ["dy"], steps: [], submissions: [], status: "in_progress",
+      body: "新要求", price_fen: "750" },
+  ]);
+  await load;
+  assert.equal(detail.data.task.id, "new");
+  assert.equal(detail.data.task.bodyUpdated, true);
+  assert.equal(fake.requests.length, 1);
+});

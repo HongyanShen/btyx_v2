@@ -49,6 +49,20 @@ func (_c *AgreementCreate) SetBody(v string) *AgreementCreate {
 	return _c
 }
 
+// SetBodyHTML sets the "body_html" field.
+func (_c *AgreementCreate) SetBodyHTML(v string) *AgreementCreate {
+	_c.mutation.SetBodyHTML(v)
+	return _c
+}
+
+// SetNillableBodyHTML sets the "body_html" field if the given value is not nil.
+func (_c *AgreementCreate) SetNillableBodyHTML(v *string) *AgreementCreate {
+	if v != nil {
+		_c.SetBodyHTML(*v)
+	}
+	return _c
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (_c *AgreementCreate) SetCreatorID(v string) *AgreementCreate {
 	_c.mutation.SetCreatorID(v)
@@ -202,6 +216,10 @@ func (_c *AgreementCreate) createSpec() (*Agreement, *sqlgraph.CreateSpec) {
 		_spec.SetField(agreement.FieldBody, field.TypeString, value)
 		_node.Body = value
 	}
+	if value, ok := _c.mutation.BodyHTML(); ok {
+		_spec.SetField(agreement.FieldBodyHTML, field.TypeString, value)
+		_node.BodyHTML = value
+	}
 	if value, ok := _c.mutation.CreatorID(); ok {
 		_spec.SetField(agreement.FieldCreatorID, field.TypeString, value)
 		_node.CreatorID = value
@@ -283,6 +301,24 @@ func (u *AgreementUpsert) SetBody(v string) *AgreementUpsert {
 // UpdateBody sets the "body" field to the value that was provided on create.
 func (u *AgreementUpsert) UpdateBody() *AgreementUpsert {
 	u.SetExcluded(agreement.FieldBody)
+	return u
+}
+
+// SetBodyHTML sets the "body_html" field.
+func (u *AgreementUpsert) SetBodyHTML(v string) *AgreementUpsert {
+	u.Set(agreement.FieldBodyHTML, v)
+	return u
+}
+
+// UpdateBodyHTML sets the "body_html" field to the value that was provided on create.
+func (u *AgreementUpsert) UpdateBodyHTML() *AgreementUpsert {
+	u.SetExcluded(agreement.FieldBodyHTML)
+	return u
+}
+
+// ClearBodyHTML clears the value of the "body_html" field.
+func (u *AgreementUpsert) ClearBodyHTML() *AgreementUpsert {
+	u.SetNull(agreement.FieldBodyHTML)
 	return u
 }
 
@@ -386,6 +422,27 @@ func (u *AgreementUpsertOne) SetBody(v string) *AgreementUpsertOne {
 func (u *AgreementUpsertOne) UpdateBody() *AgreementUpsertOne {
 	return u.Update(func(s *AgreementUpsert) {
 		s.UpdateBody()
+	})
+}
+
+// SetBodyHTML sets the "body_html" field.
+func (u *AgreementUpsertOne) SetBodyHTML(v string) *AgreementUpsertOne {
+	return u.Update(func(s *AgreementUpsert) {
+		s.SetBodyHTML(v)
+	})
+}
+
+// UpdateBodyHTML sets the "body_html" field to the value that was provided on create.
+func (u *AgreementUpsertOne) UpdateBodyHTML() *AgreementUpsertOne {
+	return u.Update(func(s *AgreementUpsert) {
+		s.UpdateBodyHTML()
+	})
+}
+
+// ClearBodyHTML clears the value of the "body_html" field.
+func (u *AgreementUpsertOne) ClearBodyHTML() *AgreementUpsertOne {
+	return u.Update(func(s *AgreementUpsert) {
+		s.ClearBodyHTML()
 	})
 }
 
@@ -660,6 +717,27 @@ func (u *AgreementUpsertBulk) SetBody(v string) *AgreementUpsertBulk {
 func (u *AgreementUpsertBulk) UpdateBody() *AgreementUpsertBulk {
 	return u.Update(func(s *AgreementUpsert) {
 		s.UpdateBody()
+	})
+}
+
+// SetBodyHTML sets the "body_html" field.
+func (u *AgreementUpsertBulk) SetBodyHTML(v string) *AgreementUpsertBulk {
+	return u.Update(func(s *AgreementUpsert) {
+		s.SetBodyHTML(v)
+	})
+}
+
+// UpdateBodyHTML sets the "body_html" field to the value that was provided on create.
+func (u *AgreementUpsertBulk) UpdateBodyHTML() *AgreementUpsertBulk {
+	return u.Update(func(s *AgreementUpsert) {
+		s.UpdateBodyHTML()
+	})
+}
+
+// ClearBodyHTML clears the value of the "body_html" field.
+func (u *AgreementUpsertBulk) ClearBodyHTML() *AgreementUpsertBulk {
+	return u.Update(func(s *AgreementUpsert) {
+		s.ClearBodyHTML()
 	})
 }
 

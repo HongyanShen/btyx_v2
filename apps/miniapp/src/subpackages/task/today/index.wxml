@@ -14,7 +14,8 @@
       <view class="offer-stats">
         <view>
           <view>每个平台</view>
-          <text class="offer-stat-value">¥{{price}}</text>
+          <view wx:if="{{loading}}" class="skeleton-value" aria-label="正在加载单价"></view>
+          <text wx:else class="offer-stat-value">¥{{price}}</text>
         </view>
         <view>
           <view>每天</view>
@@ -30,16 +31,21 @@
   <view class="offer-section">
     <view class="offer-section-title">能拿到什么</view>
     <view class="offer-subheading">怎么算钱</view>
-    <view class="offer-bullet">
-      <text>按领取任务时显示的单价计费。以 <text class="offer-strong">¥{{price}}／平台</text> 为例，每有一个平台发布并通过审核，就计 <text class="offer-strong">¥{{price}}</text>。</text>
+    <view wx:if="{{loading}}" class="loading-card" aria-label="正在加载计费示例">
+      <view class="skeleton-line"></view>
+      <view class="skeleton-line skeleton-short"></view>
     </view>
-    <view class="offer-bullet">
-      <text>抖音和小红书都通过审核，合计 <text class="offer-strong">¥{{twoPlatformPrice}}</text>。</text>
-    </view>
-    <view class="offer-bullet">
-      <text>只有一个平台通过审核，或任务只要求发一个平台且已通过审核，计 <text class="offer-strong">¥{{price}}</text>。</text>
-    </view>
-
+    <block wx:else>
+      <view class="offer-bullet">
+        <text>按领取任务时显示的单价计费。以 <text class="offer-strong">¥{{price}}／平台</text> 为例，每有一个平台发布并通过审核，就计 <text class="offer-strong">¥{{price}}</text>。</text>
+      </view>
+      <view class="offer-bullet">
+        <text>抖音和小红书都通过审核，合计 <text class="offer-strong">¥{{twoPlatformPrice}}</text>。</text>
+      </view>
+      <view class="offer-bullet">
+        <text>只有一个平台通过审核，或任务只要求发一个平台且已通过审核，计 <text class="offer-strong">¥{{price}}</text>。</text>
+      </view>
+    </block>
     <view class="offer-subheading offer-subheading-spaced">怎么结算</view>
     <view class="offer-bullet">
       <text><text class="offer-strong">每周一</text>结算，结算后进入你的余额，可自己提现到微信零钱。</text>
@@ -105,7 +111,8 @@
 <view class="offer-footer">
   <view class="offer-footer-rate">
     <view>每个平台</view>
-    <text class="offer-footer-price">¥{{price}}</text>
+    <view wx:if="{{loading}}" class="skeleton-value" aria-label="正在加载单价"></view>
+    <text wx:else class="offer-footer-price">¥{{price}}</text>
   </view>
   <button
     class="offer-button"

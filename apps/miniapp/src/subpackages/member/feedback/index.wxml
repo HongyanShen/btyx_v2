@@ -1,3 +1,4 @@
+<import src="/templates/loading.wxml" />
 <view class="page">
   <view class="title">意见反馈</view>
   <view wx:if="{{error}}" class="error">{{error}}</view>
@@ -6,7 +7,7 @@
     <button class="primary spaced" disabled="{{submitting || !body}}" loading="{{submitting}}" bindtap="submit">提交反馈</button>
   </view>
   <view class="section-title">历史反馈</view>
-  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <template wx:if="{{loading}}" is="loading-card" />
   <view wx:elif="{{!items.length}}" class="empty">还没有反馈记录</view>
   <view wx:for="{{items}}" wx:key="id" class="card">
     <view class="requirements">{{item.body}}</view>
