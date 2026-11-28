@@ -37,20 +37,19 @@
         <image class="execution-icon-image" src="/assets/marketing-white.png" mode="aspectFit" />
       </view>
       <view class="execution-heading">
-        <view class="execution-title">今日营销分发</view>
-        <view class="execution-meta">
-          营销分发 · {{task.platformText}}
-          <text wx:if="{{deadline}}"> · 截止 {{deadline.time}} · 还剩 <text class="execution-countdown">{{deadline.remaining}}</text></text>
+        <view class="execution-title">
+          今日营销分发 <text wx:if="{{task.showSource}}" class="execution-source {{task.reissued ? 'execution-source-reissued' : ''}}">{{task.sourceLabel}}</text>
         </view>
         <view class="execution-meta">
-          每个平台 ¥{{task.price}}
-          <text wx:if="{{task.showSource}}"> · {{task.sourceLabel}}</text>
+          营销分发 · {{task.summary.platformText || task.platformText}}
+          <text wx:if="{{deadline}}"> · 截止 {{task.summary.deadline.time || deadline.time}} · 还剩 <text class="execution-countdown">{{deadline.remaining}}</text></text>
+          <text wx:elif="{{!task.closed && task.due_date}}"> · 截止 {{task.due_date}}</text>
         </view>
       </view>
-      <text class="execution-status">{{task.statusLabel}}</text>
+      <text class="execution-status execution-status-{{task.summary.tone}}">{{task.summary.statusLabel || task.statusLabel}}</text>
     </view>
 
-    <view class="execution-card progress-card">
+    <view wx:if="{{!task.closed}}" class="execution-card progress-card">
       <view class="progress-track">
         <view
           wx:for="{{task.progress.items}}"
@@ -64,18 +63,25 @@
       <view class="progress-hint">{{task.timeline.active === steps.StepSettle || task.closed || task.progress.items[2].state === 'rejected' ? task.progress.hint : '前 3 步你来做，交了链接就等运营审核'}}</view>
     </view>
 
-    <view wx:if="{{task.closed}}" class="execution-alert execution-alert-closed">
-      {{task.expired ? '这条任务已失效' : '工作人员已撤回这条任务'}}
-    </view>
-    <view wx:elif="{{deadline}}" class="execution-alert">
+    <block wx:if="{{task.closed}}">
+      <view class="execution-alert execution-alert-closed">
+        <view>{{task.expired ? '这条任务已失效' : '工作人员已撤回这条任务'}}</view>
+        <view wx:if="{{task.expired}}">超过截止时间未交发布链接，今日领取名额已使用。</view>
+      </view>
+      <button class="execution-outline execution-return" bindtap="goWork">回工作台</button>
+    </block>
+    <view wx:elif="{{deadline || task.showSource}}" class="execution-alert {{task.showSource && !task.reissued ? 'execution-alert-assigned' : ''}}">
+      <text wx:if="{{task.showSource}}" class="execution-alert-source">{{task.sourceLabel}} · </text>
       <block wx:if="{{deadline.remaining === '等待系统确认'}}">已到提交截止时间，等待系统确认。</block>
-      <block wx:else>还剩 <text class="execution-countdown">{{deadline.remaining}}</text>，{{deadline.time}} 前交发布链接。到期未交，这条任务会失效。</block>
+      <block wx:elif="{{deadline}}">还剩 <text class="execution-countdown">{{deadline.remaining}}</text>，{{task.summary.deadline.time || deadline.time}} 前交发布链接。到期未交，这条任务会失效。</block>
+      <block wx:elif="{{task.reissued}}">按这次给的素材和要求发布。</block>
+      <block wx:else>平台工作人员指派的任务。</block>
     </view>
-    <view wx:elif="{{task.due_date}}" class="execution-meta execution-due">
-      发布日期 {{task.due_date}}（北京时间）
+    <view wx:if="{{task.summary.tone === 'danger'}}" class="execution-alert execution-alert-closed execution-reasons">
+      {{task.summary.footer}}
     </view>
 
-    <view class="execution-card execution-timeline">
+    <view wx:if="{{!task.closed}}" class="execution-card execution-timeline">
       <view
         wx:for="{{task.timeline.items}}"
         wx:for-item="stage"
@@ -130,8 +136,10 @@
                   <block wx:for="{{materials.videos}}" wx:key="id">
                     <view class="execution-field">
                       <text class="execution-label">视频 <text wx:if="{{task.filesUpdated}}" class="execution-updated">已更新</text></text>
-                      <text class="execution-value">{{item.name}}</text>
-                      <view><template is="material-save" data="{{id: item.id, saved: savedFiles[item.id], savingFile: savingFile, label: '下载'}}" /></view>
+                      <view class="execution-video-file">
+                        <text class="execution-value">{{item.name}}</text>
+                        <template is="material-save" data="{{id: item.id, saved: savedFiles[item.id], savingFile: savingFile, label: '下载'}}" />
+                      </view>
                     </view>
                     <view class="execution-field">
                       <text class="execution-label">标题（就是文件名）</text>
@@ -165,19 +173,32 @@
                 bindtap="complete"
                 disabled="{{loading || loadingMaterials || completing}}"
               >{{materials.images.length && !materials.videos.length ? '图片保存好了，下一步' : materials.videos.length && !materials.images.length ? '视频下载好了，下一步' : '已拿到内容和要求，下一步'}}</button>
+              <button
+                wx:elif="{{task.timeline.active === steps.StepPublish}}"
+                class="execution-primary"
+                data-stage="{{steps.StepPublish}}"
+                bindtap="goToStage"
+              >继续去发布</button>
             </block>
 
             <block wx:elif="{{stage.key === steps.StepPublish}}">
               <view class="execution-note">
                 打开{{task.appNames}} App，按要求使用保存的素材发布。图文请按顺序选图，发完后回来提交作品链接。
               </view>
-              <button
-                wx:if="{{!task.closed && !task.publishDone}}"
-                class="execution-primary"
-                data-step="{{steps.StepPublish}}"
-                bindtap="complete"
-                disabled="{{loading || completing || !task.contentDone}}"
-              >{{platforms.length === 2 ? '两个平台都发好了' : task.appNames + '发好了'}}</button>
+              <view wx:if="{{!task.closed && !task.publishDone}}" class="execution-link-actions">
+                <button
+                  class="execution-outline execution-previous"
+                  data-stage="{{steps.StepContent}}"
+                  bindtap="goToStage"
+                  disabled="{{loading || completing}}"
+                >‹ 上一步</button>
+                <button
+                  class="execution-primary"
+                  data-step="{{steps.StepPublish}}"
+                  bindtap="complete"
+                  disabled="{{loading || completing || !task.contentDone}}"
+                >{{platforms.length === 2 ? '两个平台都发好了' : task.appNames + '发好了'}}</button>
+              </view>
               <button
                 wx:elif="{{!task.closed && task.timeline.active === steps.StepLinks}}"
                 class="execution-primary"
@@ -235,10 +256,10 @@
                 >{{stage.state === 'rejected' ? '重新提交' : '提交审核'}}</button>
               </view>
 
-              <view wx:if="{{screenshotsOpen && task.hasSubmittedLinks}}" id="screenshots" class="execution-screenshots">
+              <view wx:if="{{screenshotsOpen && task.hasPlaybackPlatforms}}" id="screenshots" class="execution-screenshots">
                 <view class="execution-link-label">播放量截图</view>
                 <block wx:for="{{platforms}}" wx:key="key">
-                  <view wx:if="{{item.submittedURL}}" class="execution-screenshot-row">
+                  <view wx:if="{{item.showPlayback}}" class="execution-screenshot-row">
                     <text class="execution-link-label">{{item.label}}</text>
                     <button
                       wx:if="{{!item.readOnly}}"
@@ -249,7 +270,7 @@
                       loading="{{uploading === item.key}}"
                     >{{screenshots[item.key] ? '更换截图' : '上传截图'}}</button>
                     <button
-                      wx:if="{{!item.readOnly && !item.rejected && item.submittedURL && screenshots[item.key] && screenshots[item.key] !== item.submittedScreenshot}}"
+                      wx:if="{{!item.readOnly && screenshots[item.key] && screenshots[item.key] !== item.submittedScreenshot}}"
                       class="execution-outline"
                       data-platform="{{item.key}}"
                       bindtap="submitScreenshot"
@@ -265,12 +286,19 @@
 
             <block wx:else>
               <view class="execution-note">{{task.progress.hint}}</view>
-              <view class="execution-note">上周的播放量截图请在周一 12:00 前提交，晚交顺延。周结算入账后可在「收益」提现到微信零钱。</view>
+              <view class="execution-note">每个平台 ¥{{task.price}}</view>
+              <view class="execution-note"><text wx:if="{{task.playbackDeadline}}">播放量截图请在 {{task.playbackDeadline}} 前提交（北京时间），晚交顺延。</text>结算入账后可在「收益」提现到微信零钱。</view>
+              <button wx:if="{{task.summary.playback}}" class="execution-primary" bindtap="openPlayback">去交数据</button>
             </block>
           </block>
         </view>
       </view>
     </view>
+    <view wx:if="{{task.summary.statusLabel === '已结算'}}" class="execution-result-actions">
+      <button class="execution-outline execution-return" bindtap="goWallet">看收益</button>
+      <button class="execution-primary execution-return" bindtap="goHome">再领一个任务</button>
+    </view>
+    <button wx:elif="{{task.summary.statusLabel === '待审核' || task.summary.statusLabel === '已通过'}}" class="execution-outline execution-return" bindtap="goWork">回工作台</button>
   </block>
 </view>
 

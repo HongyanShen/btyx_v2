@@ -22,17 +22,17 @@ try {
         Pop-Location
     }
 
-    Push-Location (Join-Path $workspacePath 'apps/admin')
+    Push-Location (Join-Path $workspacePath 'backend/cmd/admin/tests')
 
     try {
-        npm exec prettier -- --check src vite.config.ts
+        npm run format:check
         if ($LASTEXITCODE -ne 0) { throw '管理后台格式检查失败' }
+
+        npm run typecheck
+        if ($LASTEXITCODE -ne 0) { throw '管理后台回归代码类型检查失败' }
 
         npm test -- --maxWorkers=1
         if ($LASTEXITCODE -ne 0) { throw '管理后台测试失败' }
-
-        npm run build
-        if ($LASTEXITCODE -ne 0) { throw '管理后台构建失败' }
     }
     finally {
         Pop-Location

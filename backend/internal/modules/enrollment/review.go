@@ -2,6 +2,7 @@ package enrollment
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"strings"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"baituber.cn/yanxuan/v2/internal/modules/identity"
 	"baituber.cn/yanxuan/v2/internal/modules/marketingtags"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 )
 
 func (s *Service) ReviewEnrollment(ctx context.Context, actorID, userID string, ok bool, reason string, tags []string, updatedAt *time.Time) error {
@@ -152,13 +154,16 @@ func (s *Service) SaveEnrollmentReview(ctx context.Context, actorID, userID stri
 		}
 
 		if input.PortraitOnly {
-			return true, app.Audit(ctx, tx, actorID, enum.AuditEnrollmentPortrait, userID, "")
+			return true, app.Audit(ctx, tx, actorID, enum.AuditEnrollmentPortrait, userID, "", fmt.Sprintf("标签：%v", input.Tags))
 		}
 
-		if err = app.Notify(ctx, tx, userID, "报名审核结果", map[bool]string{
-			true:  "报名已通过，请前往小程序查看可领取的任务",
-			false: input.Reason,
-		}[input.Approved], userID); err != nil {
+		message := input.Reason
+		if input.Approved {
+			message = "报名已通过，请前往小程序查看可领取的任务"
+		}
+
+		card := wxnotice.EnrollmentCard(input.Approved, input.Reason)
+		if err = s.Notify(ctx, tx, userID, "报名审核结果", message, enrollment.ID, card); err != nil {
 			return false, err
 		}
 
@@ -167,7 +172,7 @@ func (s *Service) SaveEnrollmentReview(ctx context.Context, actorID, userID stri
 			auditAction = enum.AuditEnrollmentApproved
 		}
 
-		return true, app.Audit(ctx, tx, actorID, auditAction, userID, input.Reason)
+		return true, app.Audit(ctx, tx, actorID, auditAction, userID, input.Reason, fmt.Sprintf("标签：%v", input.Tags))
 	})
 	return err
 }
@@ -212,7 +217,7 @@ func (s *Service) updateEnrollmentTags(ctx context.Context, actorID, userID stri
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditEnrollmentPortrait, userID, "调整标签")
+		return true, app.Audit(ctx, tx, actorID, enum.AuditEnrollmentPortrait, userID, "调整标签", fmt.Sprintf("标签：%v", input.Tags))
 	})
 	return err
 }

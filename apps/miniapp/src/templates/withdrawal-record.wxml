@@ -1,0 +1,16 @@
+<template name="withdrawal-record">
+  <view class="wallet-record withdrawal-record">
+    <view class="row">
+      <text class="wallet-record-title grow">提现到微信零钱</text>
+      <text class="wallet-number">−¥{{item.amount}}</text>
+    </view>
+    <view class="row wallet-record-meta">
+      <text class="wallet-caption">{{item.time}}</text>
+      <button wx:if="{{item.waitingConfirmation}}" class="withdrawal-status withdrawal-status-waiting withdrawal-status-action" data-id="{{item.id}}" bindtap="confirmReceipt" disabled="{{confirming}}">{{item.label}} ›</button>
+      <text wx:else class="withdrawal-status withdrawal-status-{{item.tone}}">{{item.label}}</text>
+    </view>
+    <view wx:if="{{item.reason}}" class="wallet-caption withdrawal-record-note">{{item.reason}}</view>
+    <view wx:elif="{{item.frozen}}" class="wallet-caption withdrawal-record-note">本笔金额已冻结</view>
+    <button wx:if="{{showConfirm && item.canConfirm}}" class="wallet-action withdrawal-confirm" data-id="{{item.id}}" bindtap="confirmReceipt" disabled="{{confirming}}">去收款</button>
+  </view>
+</template>

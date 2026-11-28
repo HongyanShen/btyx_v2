@@ -15,7 +15,11 @@ type Envelope[T any] struct {
 	Data T      `json:"data"`
 }
 
+// AuditFailureMessage holds only the public error message intended for the caller.
+const AuditFailureMessage = "audit_failure_message"
+
 func Abort(ctx *gin.Context, status int, message string) {
+	ctx.Set(AuditFailureMessage, message)
 	ctx.AbortWithStatusJSON(status, Envelope[*NoData]{
 		Code: status,
 		Msg:  message,
@@ -34,7 +38,8 @@ func Respond[T any](ctx *gin.Context, data T) {
 func RespondError(ctx *gin.Context, err error) {
 	var businessError *app.Error
 	if errors.As(err, &businessError) {
-		logging.From(ctx.Request.Context()).Warn().
+		ctx.Set(AuditFailureMessage, businessError.Message)
+		logging.Warn(ctx.Request.Context()).
 			Int("status", businessError.Status).
 			Str("error_code", string(businessError.Code)).
 			Msg("business request rejected")

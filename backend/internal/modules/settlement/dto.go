@@ -1,8 +1,9 @@
 package settlement
 
 type SettlementInput struct {
-	Through string `json:"through"`
-	Key     string `json:"key"`
+	Through     string `json:"through"`
+	ReviewToken string `json:"review_token"`
+	Key         string `json:"key"`
 }
 
 type BatchDTO struct {

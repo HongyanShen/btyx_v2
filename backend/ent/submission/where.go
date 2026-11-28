@@ -125,6 +125,11 @@ func EligibleDate(v string) predicate.Submission {
 	return predicate.Submission(sql.FieldEQ(FieldEligibleDate, v))
 }
 
+// SettlementEligibleAt applies equality check predicate on the "settlement_eligible_at" field. It's identical to SettlementEligibleAtEQ.
+func SettlementEligibleAt(v time.Time) predicate.Submission {
+	return predicate.Submission(sql.FieldEQ(FieldSettlementEligibleAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Submission {
 	return predicate.Submission(sql.FieldEQ(FieldCreatedAt, v))
@@ -873,6 +878,56 @@ func EligibleDateEqualFold(v string) predicate.Submission {
 // EligibleDateContainsFold applies the ContainsFold predicate on the "eligible_date" field.
 func EligibleDateContainsFold(v string) predicate.Submission {
 	return predicate.Submission(sql.FieldContainsFold(FieldEligibleDate, v))
+}
+
+// SettlementEligibleAtEQ applies the EQ predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtEQ(v time.Time) predicate.Submission {
+	return predicate.Submission(sql.FieldEQ(FieldSettlementEligibleAt, v))
+}
+
+// SettlementEligibleAtNEQ applies the NEQ predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtNEQ(v time.Time) predicate.Submission {
+	return predicate.Submission(sql.FieldNEQ(FieldSettlementEligibleAt, v))
+}
+
+// SettlementEligibleAtIn applies the In predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtIn(vs ...time.Time) predicate.Submission {
+	return predicate.Submission(sql.FieldIn(FieldSettlementEligibleAt, vs...))
+}
+
+// SettlementEligibleAtNotIn applies the NotIn predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtNotIn(vs ...time.Time) predicate.Submission {
+	return predicate.Submission(sql.FieldNotIn(FieldSettlementEligibleAt, vs...))
+}
+
+// SettlementEligibleAtGT applies the GT predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtGT(v time.Time) predicate.Submission {
+	return predicate.Submission(sql.FieldGT(FieldSettlementEligibleAt, v))
+}
+
+// SettlementEligibleAtGTE applies the GTE predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtGTE(v time.Time) predicate.Submission {
+	return predicate.Submission(sql.FieldGTE(FieldSettlementEligibleAt, v))
+}
+
+// SettlementEligibleAtLT applies the LT predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtLT(v time.Time) predicate.Submission {
+	return predicate.Submission(sql.FieldLT(FieldSettlementEligibleAt, v))
+}
+
+// SettlementEligibleAtLTE applies the LTE predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtLTE(v time.Time) predicate.Submission {
+	return predicate.Submission(sql.FieldLTE(FieldSettlementEligibleAt, v))
+}
+
+// SettlementEligibleAtIsNil applies the IsNil predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtIsNil() predicate.Submission {
+	return predicate.Submission(sql.FieldIsNull(FieldSettlementEligibleAt))
+}
+
+// SettlementEligibleAtNotNil applies the NotNil predicate on the "settlement_eligible_at" field.
+func SettlementEligibleAtNotNil() predicate.Submission {
+	return predicate.Submission(sql.FieldNotNull(FieldSettlementEligibleAt))
 }
 
 // VisibilityEQ applies the EQ predicate on the "visibility" field.

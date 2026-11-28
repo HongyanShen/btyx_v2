@@ -102,7 +102,7 @@ func (s *Service) CompleteUpload(ctx context.Context, userID, id string) (DTO, e
 
 	if accepted.ObjectKey != destination.Key {
 		if err := s.Store.Delete(ctx, destination); err != nil {
-			logging.From(ctx).Warn().Str("file_id", id).Msg("清理并发上传的未引用对象失败，需后续清理")
+			logging.Warn(ctx).Str("file_id", id).Msg("清理并发上传的未引用对象失败，需后续清理")
 		}
 	}
 

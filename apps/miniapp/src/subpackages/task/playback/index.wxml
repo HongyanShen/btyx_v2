@@ -1,0 +1,93 @@
+<import src="/templates/loading.wxml" />
+
+<template name="playback-screenshot">
+  <image wx:if="{{src}}" class="playback-thumbnail" src="{{src}}" mode="aspectFit" lazy-load="{{true}}" data-file-id="{{fileId}}" data-src="{{src}}" bindtap="previewScreenshot" binderror="screenshotPreviewError" aria-label="查看播放量截图" />
+  <text wx:elif="{{loading}}" class="playback-platform-caption">截图加载中…</text>
+  <button wx:elif="{{fileId}}" class="playback-preview-action" data-file-id="{{fileId}}" bindtap="retryScreenshotPreview">重试预览</button>
+</template>
+
+<template name="playback-row">
+  <view class="playback-row">
+    <view class="playback-row-header">
+      <text class="grow">{{row.title}}</text>
+      <text wx:if="{{row.dateLabel}}" class="playback-row-date">{{row.dateLabel}}</text>
+    </view>
+    <view wx:if="{{row.pending && row.deadlineLabel}}" class="{{row.late ? 'playback-late' : 'playback-note'}}">
+      {{row.late ? '已超过截图截止时间 ' : '截图截止 '}}{{row.deadlineLabel}}
+      <text wx:if="{{row.late && row.nextSettlement}}">，现在补交预计 {{row.nextSettlement}} 起可结算</text>
+    </view>
+    <view class="playback-platforms">
+      <block wx:for="{{row.platforms}}" wx:for-item="platform" wx:key="key">
+        <view wx:if="{{platform.screenshot || drafts[row.id + '_' + platform.key]}}" class="playback-platform playback-platform-done">
+          <text>✓ {{platform.label}}</text>
+          <template wx:if="{{platform.screenshot}}" is="playback-screenshot" data="{{src: screenshotPreviews[platform.screenshot].src, loading: screenshotPreviews[platform.screenshot].loading, fileId: platform.screenshot}}" />
+          <template wx:else is="playback-screenshot" data="{{src: drafts[row.id + '_' + platform.key].preview}}" />
+          <text wx:if="{{platform.screenshot}}" class="playback-platform-caption">播放量截图已提交</text>
+          <text wx:if="{{platform.screenshot && platform.settlementLabel}}" class="playback-platform-caption">可结算时间 {{platform.settlementLabel}}</text>
+          <button wx:else class="playback-preview-action" bindtap="chooseScreenshot" data-slot="{{row.id + '_' + platform.key}}" disabled="{{submitting || !!uploading}}">{{uploading === row.id + '_' + platform.key ? '上传中…' : '更换截图'}}</button>
+        </view>
+        <button wx:else class="playback-platform" bindtap="chooseScreenshot" data-slot="{{row.id + '_' + platform.key}}" disabled="{{submitting || !!uploading}}">
+          <text>{{uploading === row.id + '_' + platform.key ? '上传中…' : '＋ ' + platform.label}}</text>
+          <text class="playback-platform-caption">播放量截图</text>
+        </button>
+      </block>
+    </view>
+  </view>
+</template>
+
+<view class="playback-page">
+  <template wx:if="{{loading}}" is="loading-card" />
+  <view wx:elif="{{error}}" class="error">
+    <view>{{error}}</view>
+    <button class="playback-outline spaced" bindtap="load">重试</button>
+  </view>
+  <view wx:elif="{{!signedIn}}" class="empty">
+    <view>登录后提交播放数据</view>
+    <button class="playback-primary spaced" bindtap="openLogin">登录</button>
+  </view>
+  <block wx:else>
+    <view class="playback-rule">
+      发布链接审核通过后，可提交该平台的<text class="playback-bold">播放量截图</text>。各任务的截止时间以页面为准（北京时间）。晚交仍可补交，按规则顺延结算。
+    </view>
+
+    <view class="playback-card">
+      <view class="playback-heading">
+        <text>{{last.title}} · {{last.rows.length}} 条</text>
+      </view>
+      <view wx:if="{{!last.rows.length}}" class="playback-note">上周暂无可交播放数据的任务</view>
+      <template wx:for="{{last.rows}}" wx:key="id" is="playback-row" data="{{row: item, drafts, screenshotPreviews, submitting, uploading}}" />
+
+      <block wx:if="{{older.length}}">
+        <view class="playback-heading playback-older">更早待补 · {{older.length}} 条</view>
+        <template wx:for="{{older}}" wx:key="id" is="playback-row" data="{{row: item, drafts, screenshotPreviews, submitting, uploading}}" />
+      </block>
+
+      <view wx:if="{{!pendingCount && (last.rows.length || submittedEarlier)}}" class="playback-complete">
+        <view class="playback-complete-title">✓ 播放数据已提交</view>
+        <view class="playback-note">结算入账后进入余额，可提现到微信零钱</view>
+        <view class="playback-actions">
+          <button class="playback-outline" bindtap="goWork">回工作台</button>
+          <button class="playback-primary" bindtap="goWallet">去收益看看</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="playback-card">
+      <view class="playback-heading">{{current.title}}</view>
+      <view wx:if="{{!current.rows.length}}" class="playback-note">本周暂无已通过审核的任务</view>
+      <block wx:for="{{current.rows}}" wx:key="id">
+        <template wx:if="{{item.canSubmit}}" is="playback-row" data="{{row: item, drafts, screenshotPreviews, submitting, uploading}}" />
+        <view wx:else class="playback-current">
+          <text class="grow">{{item.title}} · {{item.platformText}}</text>
+          <text class="playback-current-date">{{item.pending ? '下周交' : '已交'}}<text wx:if="{{item.pending && item.deadlineLabel}}"> · 截止 {{item.deadlineLabel}}</text></text>
+        </view>
+      </block>
+    </view>
+    <view wx:if="{{pendingCount}}" class="playback-card">
+      <view wx:if="{{submitError}}" class="playback-submit-error">{{submitError}}</view>
+      <button class="playback-primary" bindtap="submit" loading="{{submitting}}" disabled="{{submitting || !!uploading}}">
+        <text>提交已上传的播放数据（{{readyCount}}）</text>
+      </button>
+    </view>
+  </block>
+</view>

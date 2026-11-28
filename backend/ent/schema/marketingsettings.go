@@ -27,11 +27,35 @@ func (MarketingSettings) Fields() []ent.Field {
 
 		field.Bool("online").Default(true),
 
+		field.Int("daily_limit").Positive().Default(1),
+
+		field.Int("creative_limit").Positive().Default(1),
+
+		field.Bool("creative_online").Default(true),
+
 		field.Enum("expiry_mode").
 			GoType(enum.MarketingExpiryMode("")).
 			Default(string(enum.MarketingExpiryFixedDuration)),
 
 		field.Int("expiry_minutes").Default(60),
+
+		field.Enum("settlement_frequency").
+			GoType(enum.SettlementFrequency("")).
+			Default(string(enum.SettlementWeekly)),
+
+		field.Int("settlement_weekday").Default(1),
+
+		field.Int("settlement_month_day").Default(1),
+
+		field.String("settlement_clock").Default("00:00"),
+
+		field.Int("settlement_delay_minutes").Default(24 * 60),
+
+		field.String("playback_cutoff_clock").Default("12:00"),
+
+		field.Int("playback_cutoff_minutes").Default(24 * 60),
+
+		field.Int("playback_deferral_periods").Default(1),
 	}
 }
 

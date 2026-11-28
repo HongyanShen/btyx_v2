@@ -1,0 +1,5 @@
+{
+  "menu": [
+    { "label": "按 X-Request-ID 查询", "url": "http://127.0.0.1:16687/", "anchorTarget": "_self" }
+  ]
+}

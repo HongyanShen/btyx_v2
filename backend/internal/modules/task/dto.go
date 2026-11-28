@@ -19,6 +19,7 @@ type TaskInput struct {
 }
 
 type VersionDTO struct {
+	TaskCode    string               `json:"task_code"`
 	ID          string               `json:"id"`
 	TaskID      string               `json:"task_id"`
 	Number      int64                `json:"number"`
@@ -52,8 +53,14 @@ type PoolExpiryDTO struct {
 }
 
 type TodayAvailabilityDTO struct {
-	HasContent bool   `json:"has_content"`
-	PriceFen   string `json:"price_fen"`
+	DailyLimit     int  `json:"daily_limit"`
+	CreativeLimit  int  `json:"creative_limit"`
+	CreativeOnline bool `json:"creative_online"`
+	Used           int  `json:"used"`
+
+	HasContent      bool   `json:"has_content"`
+	PriceFen        string `json:"price_fen"`
+	SettlementLabel string `json:"settlement_label"`
 }
 
 type StepDTO struct {
@@ -71,34 +78,40 @@ type DistributorTaskDTO struct {
 }
 
 type AssignmentDTO struct {
-	ID          string                `json:"id"`
-	UserID      string                `json:"user_id"`
-	TaskID      string                `json:"task_id"`
-	VersionID   string                `json:"version_id"`
-	PriceFen    string                `json:"price_fen"`
-	Title       string                `json:"title"`
-	Body        string                `json:"body"`
-	Files       []string              `json:"files"`
-	Platforms   []enum.Platform       `json:"platforms"`
-	Status      enum.AssignmentStatus `json:"status"`
-	Source      enum.AssignmentSource `json:"source"`
-	SourceID    string                `json:"source_id"`
-	Date        string                `json:"date"`
-	DueDate     string                `json:"due_date"`
-	ExpiresAt   *time.Time            `json:"expires_at,omitempty"`
-	Steps       []StepDTO             `json:"steps"`
-	Submissions []SubmissionDTO       `json:"submissions"`
+	TaskCode             string                   `json:"task_code,omitempty"`
+	ID                   string                   `json:"id"`
+	UserID               string                   `json:"user_id"`
+	TaskID               string                   `json:"task_id"`
+	VersionID            string                   `json:"version_id"`
+	PriceFen             string                   `json:"price_fen"`
+	Title                string                   `json:"title"`
+	Body                 string                   `json:"body"`
+	Files                []string                 `json:"files"`
+	Platforms            []enum.Platform          `json:"platforms"`
+	Status               enum.AssignmentStatus    `json:"status"`
+	Source               enum.AssignmentSource    `json:"source"`
+	SourceID             string                   `json:"source_id"`
+	Date                 string                   `json:"date"`
+	DueDate              string                   `json:"due_date"`
+	ExpiresAt            *time.Time               `json:"expires_at,omitempty"`
+	PlaybackDeadline     *time.Time               `json:"playback_deadline,omitempty"`
+	PlaybackSettlementAt *time.Time               `json:"playback_settlement_at,omitempty"`
+	SettlementFrequency  enum.SettlementFrequency `json:"settlement_frequency,omitempty"`
+	Steps                []StepDTO                `json:"steps"`
+	Submissions          []SubmissionDTO          `json:"submissions"`
 }
 
 type SubmissionDTO struct {
-	ID          string                `json:"id"`
-	Platform    enum.Platform         `json:"platform"`
-	URL         string                `json:"url"`
-	Screenshot  string                `json:"screenshot"`
-	Status      enum.SubmissionStatus `json:"status"`
-	Reason      string                `json:"reason"`
-	Revision    int64                 `json:"revision"`
-	Settled     bool                  `json:"settled"`
-	Visibility  enum.Visibility       `json:"visibility"`
-	SubmittedAt *time.Time            `json:"submitted_at,omitempty"`
+	ID                   string                `json:"id"`
+	Platform             enum.Platform         `json:"platform"`
+	URL                  string                `json:"url"`
+	Screenshot           string                `json:"screenshot"`
+	Status               enum.SubmissionStatus `json:"status"`
+	Reason               string                `json:"reason"`
+	Revision             int64                 `json:"revision"`
+	Settled              bool                  `json:"settled"`
+	Visibility           enum.Visibility       `json:"visibility"`
+	PublishedOn          string                `json:"published_on,omitempty"`
+	SubmittedAt          *time.Time            `json:"submitted_at,omitempty"`
+	SettlementEligibleAt *time.Time            `json:"settlement_eligible_at,omitempty"`
 }

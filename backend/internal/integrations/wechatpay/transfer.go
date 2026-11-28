@@ -10,6 +10,7 @@ import (
 
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/config"
+	"baituber.cn/yanxuan/v2/internal/platform/logging"
 	"baituber.cn/yanxuan/v2/internal/platform/money"
 	"baituber.cn/yanxuan/v2/internal/platform/transfer"
 	"github.com/wechatpay-apiv3/wechatpay-go/core"
@@ -39,6 +40,7 @@ type Bill struct {
 
 func (gateway *Gateway) Submit(ctx context.Context, request transfer.Request) (transfer.Result, error) {
 	if request.OpenID == "" || strings.HasPrefix(request.OpenID, "local:") {
+		logging.Warn(ctx).Msg("wechat transfer requires a real recipient identity")
 		return transfer.Result{}, fmt.Errorf("禁止向本地演示身份发起真实转账")
 	}
 
@@ -60,6 +62,7 @@ func (gateway *Gateway) Submit(ctx context.Context, request transfer.Request) (t
 		SceneReports: gateway.config.SceneReports,
 	})
 	if err != nil {
+		logSubmitError(ctx, err)
 		return transfer.Result{}, fmt.Errorf("微信转账请求未确认，必须按原商户单号查单")
 	}
 
@@ -74,6 +77,47 @@ func (gateway *Gateway) Submit(ctx context.Context, request transfer.Request) (t
 	}
 
 	return bill.result(request.AmountFen, request.OpenID)
+}
+
+func logSubmitError(ctx context.Context, err error) {
+	event := logging.Error(ctx, err)
+	var apiError *core.APIError
+	if errors.As(err, &apiError) {
+		code := apiError.Code
+		switch code {
+		case "PARAM_ERROR", "INVALID_REQUEST", "NO_AUTH", "SIGN_ERROR", "SYSTEM_ERROR", "NOT_ENOUGH", "FREQUENCY_LIMIT_EXCEED", "RATELIMIT_EXCEEDED", "FREQUENCY_LIMIT", "ALREADY_EXISTS":
+		default:
+			code = "UNKNOWN"
+		}
+
+		event.Int("wechat_http_status", apiError.StatusCode).
+			Str("wechat_error_code", code).
+			Str("wechat_rejection", submitRejectionCategory(apiError.Message))
+	}
+
+	event.Msg("wechat transfer submit failed")
+}
+
+func submitRejectionCategory(message string) string {
+	lower := strings.ToLower(message)
+	switch {
+	case strings.Contains(lower, "ip") && (strings.Contains(message, "不允许") || strings.Contains(message, "白名单")):
+		return "ip_not_allowed"
+	case strings.Contains(message, "报备"):
+		return "scene_reporting"
+	case strings.Contains(message, "场景"):
+		return "transfer_scene"
+	case strings.Contains(lower, "openid"):
+		return "recipient_identity"
+	case strings.Contains(lower, "appid"):
+		return "app_identity"
+	case strings.Contains(message, "余额"):
+		return "balance"
+	case strings.Contains(message, "金额"), strings.Contains(message, "限额"):
+		return "amount_limit"
+	default:
+		return "unspecified"
+	}
 }
 
 func (gateway *Gateway) Query(ctx context.Context, id string) (transfer.Result, error) {

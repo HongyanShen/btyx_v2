@@ -78,6 +78,62 @@ func (_u *MarketingSettingsUpdate) SetNillableOnline(v *bool) *MarketingSettings
 	return _u
 }
 
+// SetDailyLimit sets the "daily_limit" field.
+func (_u *MarketingSettingsUpdate) SetDailyLimit(v int) *MarketingSettingsUpdate {
+	_u.mutation.ResetDailyLimit()
+	_u.mutation.SetDailyLimit(v)
+	return _u
+}
+
+// SetNillableDailyLimit sets the "daily_limit" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillableDailyLimit(v *int) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetDailyLimit(*v)
+	}
+	return _u
+}
+
+// AddDailyLimit adds value to the "daily_limit" field.
+func (_u *MarketingSettingsUpdate) AddDailyLimit(v int) *MarketingSettingsUpdate {
+	_u.mutation.AddDailyLimit(v)
+	return _u
+}
+
+// SetCreativeLimit sets the "creative_limit" field.
+func (_u *MarketingSettingsUpdate) SetCreativeLimit(v int) *MarketingSettingsUpdate {
+	_u.mutation.ResetCreativeLimit()
+	_u.mutation.SetCreativeLimit(v)
+	return _u
+}
+
+// SetNillableCreativeLimit sets the "creative_limit" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillableCreativeLimit(v *int) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetCreativeLimit(*v)
+	}
+	return _u
+}
+
+// AddCreativeLimit adds value to the "creative_limit" field.
+func (_u *MarketingSettingsUpdate) AddCreativeLimit(v int) *MarketingSettingsUpdate {
+	_u.mutation.AddCreativeLimit(v)
+	return _u
+}
+
+// SetCreativeOnline sets the "creative_online" field.
+func (_u *MarketingSettingsUpdate) SetCreativeOnline(v bool) *MarketingSettingsUpdate {
+	_u.mutation.SetCreativeOnline(v)
+	return _u
+}
+
+// SetNillableCreativeOnline sets the "creative_online" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillableCreativeOnline(v *bool) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetCreativeOnline(*v)
+	}
+	return _u
+}
+
 // SetExpiryMode sets the "expiry_mode" field.
 func (_u *MarketingSettingsUpdate) SetExpiryMode(v enum.MarketingExpiryMode) *MarketingSettingsUpdate {
 	_u.mutation.SetExpiryMode(v)
@@ -110,6 +166,153 @@ func (_u *MarketingSettingsUpdate) SetNillableExpiryMinutes(v *int) *MarketingSe
 // AddExpiryMinutes adds value to the "expiry_minutes" field.
 func (_u *MarketingSettingsUpdate) AddExpiryMinutes(v int) *MarketingSettingsUpdate {
 	_u.mutation.AddExpiryMinutes(v)
+	return _u
+}
+
+// SetSettlementFrequency sets the "settlement_frequency" field.
+func (_u *MarketingSettingsUpdate) SetSettlementFrequency(v enum.SettlementFrequency) *MarketingSettingsUpdate {
+	_u.mutation.SetSettlementFrequency(v)
+	return _u
+}
+
+// SetNillableSettlementFrequency sets the "settlement_frequency" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillableSettlementFrequency(v *enum.SettlementFrequency) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetSettlementFrequency(*v)
+	}
+	return _u
+}
+
+// SetSettlementWeekday sets the "settlement_weekday" field.
+func (_u *MarketingSettingsUpdate) SetSettlementWeekday(v int) *MarketingSettingsUpdate {
+	_u.mutation.ResetSettlementWeekday()
+	_u.mutation.SetSettlementWeekday(v)
+	return _u
+}
+
+// SetNillableSettlementWeekday sets the "settlement_weekday" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillableSettlementWeekday(v *int) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetSettlementWeekday(*v)
+	}
+	return _u
+}
+
+// AddSettlementWeekday adds value to the "settlement_weekday" field.
+func (_u *MarketingSettingsUpdate) AddSettlementWeekday(v int) *MarketingSettingsUpdate {
+	_u.mutation.AddSettlementWeekday(v)
+	return _u
+}
+
+// SetSettlementMonthDay sets the "settlement_month_day" field.
+func (_u *MarketingSettingsUpdate) SetSettlementMonthDay(v int) *MarketingSettingsUpdate {
+	_u.mutation.ResetSettlementMonthDay()
+	_u.mutation.SetSettlementMonthDay(v)
+	return _u
+}
+
+// SetNillableSettlementMonthDay sets the "settlement_month_day" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillableSettlementMonthDay(v *int) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetSettlementMonthDay(*v)
+	}
+	return _u
+}
+
+// AddSettlementMonthDay adds value to the "settlement_month_day" field.
+func (_u *MarketingSettingsUpdate) AddSettlementMonthDay(v int) *MarketingSettingsUpdate {
+	_u.mutation.AddSettlementMonthDay(v)
+	return _u
+}
+
+// SetSettlementClock sets the "settlement_clock" field.
+func (_u *MarketingSettingsUpdate) SetSettlementClock(v string) *MarketingSettingsUpdate {
+	_u.mutation.SetSettlementClock(v)
+	return _u
+}
+
+// SetNillableSettlementClock sets the "settlement_clock" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillableSettlementClock(v *string) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetSettlementClock(*v)
+	}
+	return _u
+}
+
+// SetSettlementDelayMinutes sets the "settlement_delay_minutes" field.
+func (_u *MarketingSettingsUpdate) SetSettlementDelayMinutes(v int) *MarketingSettingsUpdate {
+	_u.mutation.ResetSettlementDelayMinutes()
+	_u.mutation.SetSettlementDelayMinutes(v)
+	return _u
+}
+
+// SetNillableSettlementDelayMinutes sets the "settlement_delay_minutes" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillableSettlementDelayMinutes(v *int) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetSettlementDelayMinutes(*v)
+	}
+	return _u
+}
+
+// AddSettlementDelayMinutes adds value to the "settlement_delay_minutes" field.
+func (_u *MarketingSettingsUpdate) AddSettlementDelayMinutes(v int) *MarketingSettingsUpdate {
+	_u.mutation.AddSettlementDelayMinutes(v)
+	return _u
+}
+
+// SetPlaybackCutoffClock sets the "playback_cutoff_clock" field.
+func (_u *MarketingSettingsUpdate) SetPlaybackCutoffClock(v string) *MarketingSettingsUpdate {
+	_u.mutation.SetPlaybackCutoffClock(v)
+	return _u
+}
+
+// SetNillablePlaybackCutoffClock sets the "playback_cutoff_clock" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillablePlaybackCutoffClock(v *string) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetPlaybackCutoffClock(*v)
+	}
+	return _u
+}
+
+// SetPlaybackCutoffMinutes sets the "playback_cutoff_minutes" field.
+func (_u *MarketingSettingsUpdate) SetPlaybackCutoffMinutes(v int) *MarketingSettingsUpdate {
+	_u.mutation.ResetPlaybackCutoffMinutes()
+	_u.mutation.SetPlaybackCutoffMinutes(v)
+	return _u
+}
+
+// SetNillablePlaybackCutoffMinutes sets the "playback_cutoff_minutes" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillablePlaybackCutoffMinutes(v *int) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetPlaybackCutoffMinutes(*v)
+	}
+	return _u
+}
+
+// AddPlaybackCutoffMinutes adds value to the "playback_cutoff_minutes" field.
+func (_u *MarketingSettingsUpdate) AddPlaybackCutoffMinutes(v int) *MarketingSettingsUpdate {
+	_u.mutation.AddPlaybackCutoffMinutes(v)
+	return _u
+}
+
+// SetPlaybackDeferralPeriods sets the "playback_deferral_periods" field.
+func (_u *MarketingSettingsUpdate) SetPlaybackDeferralPeriods(v int) *MarketingSettingsUpdate {
+	_u.mutation.ResetPlaybackDeferralPeriods()
+	_u.mutation.SetPlaybackDeferralPeriods(v)
+	return _u
+}
+
+// SetNillablePlaybackDeferralPeriods sets the "playback_deferral_periods" field if the given value is not nil.
+func (_u *MarketingSettingsUpdate) SetNillablePlaybackDeferralPeriods(v *int) *MarketingSettingsUpdate {
+	if v != nil {
+		_u.SetPlaybackDeferralPeriods(*v)
+	}
+	return _u
+}
+
+// AddPlaybackDeferralPeriods adds value to the "playback_deferral_periods" field.
+func (_u *MarketingSettingsUpdate) AddPlaybackDeferralPeriods(v int) *MarketingSettingsUpdate {
+	_u.mutation.AddPlaybackDeferralPeriods(v)
 	return _u
 }
 
@@ -156,9 +359,24 @@ func (_u *MarketingSettingsUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *MarketingSettingsUpdate) check() error {
+	if v, ok := _u.mutation.DailyLimit(); ok {
+		if err := marketingsettings.DailyLimitValidator(v); err != nil {
+			return &ValidationError{Name: "daily_limit", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.daily_limit": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CreativeLimit(); ok {
+		if err := marketingsettings.CreativeLimitValidator(v); err != nil {
+			return &ValidationError{Name: "creative_limit", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.creative_limit": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ExpiryMode(); ok {
 		if err := marketingsettings.ExpiryModeValidator(v); err != nil {
 			return &ValidationError{Name: "expiry_mode", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.expiry_mode": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SettlementFrequency(); ok {
+		if err := marketingsettings.SettlementFrequencyValidator(v); err != nil {
+			return &ValidationError{Name: "settlement_frequency", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.settlement_frequency": %w`, err)}
 		}
 	}
 	return nil
@@ -188,6 +406,21 @@ func (_u *MarketingSettingsUpdate) sqlSave(ctx context.Context) (_node int, err 
 	if value, ok := _u.mutation.Online(); ok {
 		_spec.SetField(marketingsettings.FieldOnline, field.TypeBool, value)
 	}
+	if value, ok := _u.mutation.DailyLimit(); ok {
+		_spec.SetField(marketingsettings.FieldDailyLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDailyLimit(); ok {
+		_spec.AddField(marketingsettings.FieldDailyLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CreativeLimit(); ok {
+		_spec.SetField(marketingsettings.FieldCreativeLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCreativeLimit(); ok {
+		_spec.AddField(marketingsettings.FieldCreativeLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CreativeOnline(); ok {
+		_spec.SetField(marketingsettings.FieldCreativeOnline, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.ExpiryMode(); ok {
 		_spec.SetField(marketingsettings.FieldExpiryMode, field.TypeEnum, value)
 	}
@@ -196,6 +429,45 @@ func (_u *MarketingSettingsUpdate) sqlSave(ctx context.Context) (_node int, err 
 	}
 	if value, ok := _u.mutation.AddedExpiryMinutes(); ok {
 		_spec.AddField(marketingsettings.FieldExpiryMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SettlementFrequency(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementFrequency, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.SettlementWeekday(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementWeekday, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSettlementWeekday(); ok {
+		_spec.AddField(marketingsettings.FieldSettlementWeekday, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SettlementMonthDay(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementMonthDay, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSettlementMonthDay(); ok {
+		_spec.AddField(marketingsettings.FieldSettlementMonthDay, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SettlementClock(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementClock, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SettlementDelayMinutes(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementDelayMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSettlementDelayMinutes(); ok {
+		_spec.AddField(marketingsettings.FieldSettlementDelayMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.PlaybackCutoffClock(); ok {
+		_spec.SetField(marketingsettings.FieldPlaybackCutoffClock, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PlaybackCutoffMinutes(); ok {
+		_spec.SetField(marketingsettings.FieldPlaybackCutoffMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPlaybackCutoffMinutes(); ok {
+		_spec.AddField(marketingsettings.FieldPlaybackCutoffMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.PlaybackDeferralPeriods(); ok {
+		_spec.SetField(marketingsettings.FieldPlaybackDeferralPeriods, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPlaybackDeferralPeriods(); ok {
+		_spec.AddField(marketingsettings.FieldPlaybackDeferralPeriods, field.TypeInt, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -265,6 +537,62 @@ func (_u *MarketingSettingsUpdateOne) SetNillableOnline(v *bool) *MarketingSetti
 	return _u
 }
 
+// SetDailyLimit sets the "daily_limit" field.
+func (_u *MarketingSettingsUpdateOne) SetDailyLimit(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.ResetDailyLimit()
+	_u.mutation.SetDailyLimit(v)
+	return _u
+}
+
+// SetNillableDailyLimit sets the "daily_limit" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillableDailyLimit(v *int) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetDailyLimit(*v)
+	}
+	return _u
+}
+
+// AddDailyLimit adds value to the "daily_limit" field.
+func (_u *MarketingSettingsUpdateOne) AddDailyLimit(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.AddDailyLimit(v)
+	return _u
+}
+
+// SetCreativeLimit sets the "creative_limit" field.
+func (_u *MarketingSettingsUpdateOne) SetCreativeLimit(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.ResetCreativeLimit()
+	_u.mutation.SetCreativeLimit(v)
+	return _u
+}
+
+// SetNillableCreativeLimit sets the "creative_limit" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillableCreativeLimit(v *int) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetCreativeLimit(*v)
+	}
+	return _u
+}
+
+// AddCreativeLimit adds value to the "creative_limit" field.
+func (_u *MarketingSettingsUpdateOne) AddCreativeLimit(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.AddCreativeLimit(v)
+	return _u
+}
+
+// SetCreativeOnline sets the "creative_online" field.
+func (_u *MarketingSettingsUpdateOne) SetCreativeOnline(v bool) *MarketingSettingsUpdateOne {
+	_u.mutation.SetCreativeOnline(v)
+	return _u
+}
+
+// SetNillableCreativeOnline sets the "creative_online" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillableCreativeOnline(v *bool) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetCreativeOnline(*v)
+	}
+	return _u
+}
+
 // SetExpiryMode sets the "expiry_mode" field.
 func (_u *MarketingSettingsUpdateOne) SetExpiryMode(v enum.MarketingExpiryMode) *MarketingSettingsUpdateOne {
 	_u.mutation.SetExpiryMode(v)
@@ -297,6 +625,153 @@ func (_u *MarketingSettingsUpdateOne) SetNillableExpiryMinutes(v *int) *Marketin
 // AddExpiryMinutes adds value to the "expiry_minutes" field.
 func (_u *MarketingSettingsUpdateOne) AddExpiryMinutes(v int) *MarketingSettingsUpdateOne {
 	_u.mutation.AddExpiryMinutes(v)
+	return _u
+}
+
+// SetSettlementFrequency sets the "settlement_frequency" field.
+func (_u *MarketingSettingsUpdateOne) SetSettlementFrequency(v enum.SettlementFrequency) *MarketingSettingsUpdateOne {
+	_u.mutation.SetSettlementFrequency(v)
+	return _u
+}
+
+// SetNillableSettlementFrequency sets the "settlement_frequency" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillableSettlementFrequency(v *enum.SettlementFrequency) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetSettlementFrequency(*v)
+	}
+	return _u
+}
+
+// SetSettlementWeekday sets the "settlement_weekday" field.
+func (_u *MarketingSettingsUpdateOne) SetSettlementWeekday(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.ResetSettlementWeekday()
+	_u.mutation.SetSettlementWeekday(v)
+	return _u
+}
+
+// SetNillableSettlementWeekday sets the "settlement_weekday" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillableSettlementWeekday(v *int) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetSettlementWeekday(*v)
+	}
+	return _u
+}
+
+// AddSettlementWeekday adds value to the "settlement_weekday" field.
+func (_u *MarketingSettingsUpdateOne) AddSettlementWeekday(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.AddSettlementWeekday(v)
+	return _u
+}
+
+// SetSettlementMonthDay sets the "settlement_month_day" field.
+func (_u *MarketingSettingsUpdateOne) SetSettlementMonthDay(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.ResetSettlementMonthDay()
+	_u.mutation.SetSettlementMonthDay(v)
+	return _u
+}
+
+// SetNillableSettlementMonthDay sets the "settlement_month_day" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillableSettlementMonthDay(v *int) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetSettlementMonthDay(*v)
+	}
+	return _u
+}
+
+// AddSettlementMonthDay adds value to the "settlement_month_day" field.
+func (_u *MarketingSettingsUpdateOne) AddSettlementMonthDay(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.AddSettlementMonthDay(v)
+	return _u
+}
+
+// SetSettlementClock sets the "settlement_clock" field.
+func (_u *MarketingSettingsUpdateOne) SetSettlementClock(v string) *MarketingSettingsUpdateOne {
+	_u.mutation.SetSettlementClock(v)
+	return _u
+}
+
+// SetNillableSettlementClock sets the "settlement_clock" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillableSettlementClock(v *string) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetSettlementClock(*v)
+	}
+	return _u
+}
+
+// SetSettlementDelayMinutes sets the "settlement_delay_minutes" field.
+func (_u *MarketingSettingsUpdateOne) SetSettlementDelayMinutes(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.ResetSettlementDelayMinutes()
+	_u.mutation.SetSettlementDelayMinutes(v)
+	return _u
+}
+
+// SetNillableSettlementDelayMinutes sets the "settlement_delay_minutes" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillableSettlementDelayMinutes(v *int) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetSettlementDelayMinutes(*v)
+	}
+	return _u
+}
+
+// AddSettlementDelayMinutes adds value to the "settlement_delay_minutes" field.
+func (_u *MarketingSettingsUpdateOne) AddSettlementDelayMinutes(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.AddSettlementDelayMinutes(v)
+	return _u
+}
+
+// SetPlaybackCutoffClock sets the "playback_cutoff_clock" field.
+func (_u *MarketingSettingsUpdateOne) SetPlaybackCutoffClock(v string) *MarketingSettingsUpdateOne {
+	_u.mutation.SetPlaybackCutoffClock(v)
+	return _u
+}
+
+// SetNillablePlaybackCutoffClock sets the "playback_cutoff_clock" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillablePlaybackCutoffClock(v *string) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetPlaybackCutoffClock(*v)
+	}
+	return _u
+}
+
+// SetPlaybackCutoffMinutes sets the "playback_cutoff_minutes" field.
+func (_u *MarketingSettingsUpdateOne) SetPlaybackCutoffMinutes(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.ResetPlaybackCutoffMinutes()
+	_u.mutation.SetPlaybackCutoffMinutes(v)
+	return _u
+}
+
+// SetNillablePlaybackCutoffMinutes sets the "playback_cutoff_minutes" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillablePlaybackCutoffMinutes(v *int) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetPlaybackCutoffMinutes(*v)
+	}
+	return _u
+}
+
+// AddPlaybackCutoffMinutes adds value to the "playback_cutoff_minutes" field.
+func (_u *MarketingSettingsUpdateOne) AddPlaybackCutoffMinutes(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.AddPlaybackCutoffMinutes(v)
+	return _u
+}
+
+// SetPlaybackDeferralPeriods sets the "playback_deferral_periods" field.
+func (_u *MarketingSettingsUpdateOne) SetPlaybackDeferralPeriods(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.ResetPlaybackDeferralPeriods()
+	_u.mutation.SetPlaybackDeferralPeriods(v)
+	return _u
+}
+
+// SetNillablePlaybackDeferralPeriods sets the "playback_deferral_periods" field if the given value is not nil.
+func (_u *MarketingSettingsUpdateOne) SetNillablePlaybackDeferralPeriods(v *int) *MarketingSettingsUpdateOne {
+	if v != nil {
+		_u.SetPlaybackDeferralPeriods(*v)
+	}
+	return _u
+}
+
+// AddPlaybackDeferralPeriods adds value to the "playback_deferral_periods" field.
+func (_u *MarketingSettingsUpdateOne) AddPlaybackDeferralPeriods(v int) *MarketingSettingsUpdateOne {
+	_u.mutation.AddPlaybackDeferralPeriods(v)
 	return _u
 }
 
@@ -356,9 +831,24 @@ func (_u *MarketingSettingsUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *MarketingSettingsUpdateOne) check() error {
+	if v, ok := _u.mutation.DailyLimit(); ok {
+		if err := marketingsettings.DailyLimitValidator(v); err != nil {
+			return &ValidationError{Name: "daily_limit", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.daily_limit": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CreativeLimit(); ok {
+		if err := marketingsettings.CreativeLimitValidator(v); err != nil {
+			return &ValidationError{Name: "creative_limit", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.creative_limit": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ExpiryMode(); ok {
 		if err := marketingsettings.ExpiryModeValidator(v); err != nil {
 			return &ValidationError{Name: "expiry_mode", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.expiry_mode": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SettlementFrequency(); ok {
+		if err := marketingsettings.SettlementFrequencyValidator(v); err != nil {
+			return &ValidationError{Name: "settlement_frequency", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.settlement_frequency": %w`, err)}
 		}
 	}
 	return nil
@@ -405,6 +895,21 @@ func (_u *MarketingSettingsUpdateOne) sqlSave(ctx context.Context) (_node *Marke
 	if value, ok := _u.mutation.Online(); ok {
 		_spec.SetField(marketingsettings.FieldOnline, field.TypeBool, value)
 	}
+	if value, ok := _u.mutation.DailyLimit(); ok {
+		_spec.SetField(marketingsettings.FieldDailyLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDailyLimit(); ok {
+		_spec.AddField(marketingsettings.FieldDailyLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CreativeLimit(); ok {
+		_spec.SetField(marketingsettings.FieldCreativeLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCreativeLimit(); ok {
+		_spec.AddField(marketingsettings.FieldCreativeLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CreativeOnline(); ok {
+		_spec.SetField(marketingsettings.FieldCreativeOnline, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.ExpiryMode(); ok {
 		_spec.SetField(marketingsettings.FieldExpiryMode, field.TypeEnum, value)
 	}
@@ -413,6 +918,45 @@ func (_u *MarketingSettingsUpdateOne) sqlSave(ctx context.Context) (_node *Marke
 	}
 	if value, ok := _u.mutation.AddedExpiryMinutes(); ok {
 		_spec.AddField(marketingsettings.FieldExpiryMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SettlementFrequency(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementFrequency, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.SettlementWeekday(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementWeekday, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSettlementWeekday(); ok {
+		_spec.AddField(marketingsettings.FieldSettlementWeekday, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SettlementMonthDay(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementMonthDay, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSettlementMonthDay(); ok {
+		_spec.AddField(marketingsettings.FieldSettlementMonthDay, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SettlementClock(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementClock, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SettlementDelayMinutes(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementDelayMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSettlementDelayMinutes(); ok {
+		_spec.AddField(marketingsettings.FieldSettlementDelayMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.PlaybackCutoffClock(); ok {
+		_spec.SetField(marketingsettings.FieldPlaybackCutoffClock, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PlaybackCutoffMinutes(); ok {
+		_spec.SetField(marketingsettings.FieldPlaybackCutoffMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPlaybackCutoffMinutes(); ok {
+		_spec.AddField(marketingsettings.FieldPlaybackCutoffMinutes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.PlaybackDeferralPeriods(); ok {
+		_spec.SetField(marketingsettings.FieldPlaybackDeferralPeriods, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPlaybackDeferralPeriods(); ok {
+		_spec.AddField(marketingsettings.FieldPlaybackDeferralPeriods, field.TypeInt, value)
 	}
 	_node = &MarketingSettings{config: _u.config}
 	_spec.Assign = _node.assignValues

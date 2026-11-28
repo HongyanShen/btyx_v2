@@ -2,6 +2,7 @@ package settlement
 
 import (
 	"context"
+	"time"
 
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 
@@ -19,15 +20,17 @@ type SettlementPreview struct {
 }
 
 type SettlementPreviewLine struct {
+	Creative     bool          `json:"creative,omitempty"`
 	SubmissionID string        `json:"submission_id"`
 	AssignmentID string        `json:"assignment_id"`
 	UserID       string        `json:"user_id"`
 	Platform     enum.Platform `json:"platform"`
 	AmountFen    string        `json:"amount_fen"`
 	EligibleDate string        `json:"eligible_date"`
+	revision     string
 }
 
-func settlementPreview(ctx context.Context, submissions *ent.SubmissionClient, assignments *ent.AssignmentClient, through string) (SettlementPreview, error) {
+func settlementPreview(ctx context.Context, client *ent.Client, through string, now time.Time, exactPeriod bool) (SettlementPreview, error) {
 	out := SettlementPreview{
 		Through:   through,
 		AmountFen: "0",
@@ -37,16 +40,22 @@ func settlementPreview(ctx context.Context, submissions *ent.SubmissionClient, a
 		return out, app.Invalid("结算日期无效")
 	}
 
-	rows, err := submissions.Query().
+	query := client.Submission.Query().
 		Where(
 			submission.StatusIn(enum.SubmissionApproved, enum.SubmissionWaived),
 			submission.SettlementIDEQ(""),
 			submission.ScreenshotNEQ(""),
+			submission.EligibleDateNEQ(""),
 			submission.EligibleDateLTE(through),
+			submission.EligibleDateLTE(app.BusinessDay(now)),
+			submission.Or(submission.SettlementEligibleAtIsNil(), submission.SettlementEligibleAtLTE(now)),
 			submission.VisibilityIn(enum.VisibilityManualVerified, enum.VisibilityVisible),
-		).
-		Limit(1001).
-		All(ctx)
+		)
+	if exactPeriod {
+		query.Where(submission.EligibleDateEQ(through))
+	}
+
+	rows, err := query.Limit(1001).All(ctx)
 	if err != nil {
 		return out, err
 	}
@@ -57,7 +66,7 @@ func settlementPreview(ctx context.Context, submissions *ent.SubmissionClient, a
 
 	total := decimal.Zero
 	for _, platformSubmission := range rows {
-		assignmentRecord, err := assignments.Get(ctx, platformSubmission.AssignmentID)
+		assignmentRecord, err := client.Assignment.Get(ctx, platformSubmission.AssignmentID)
 		if err != nil {
 			return out, err
 		}
@@ -70,7 +79,30 @@ func settlementPreview(ctx context.Context, submissions *ent.SubmissionClient, a
 			Platform:     platformSubmission.Platform,
 			AmountFen:    assignmentRecord.PriceFen.String(),
 			EligibleDate: platformSubmission.EligibleDate,
+			revision:     settlementRevision(platformSubmission, assignmentRecord),
 		})
+	}
+
+	extra, err := pendingCreative(ctx, client, through, now, exactPeriod)
+	if err != nil {
+		return out, err
+	}
+
+	for _, row := range extra {
+		total = total.Add(row.AmountFen)
+		out.Lines = append(out.Lines, SettlementPreviewLine{
+			Creative:     true,
+			SubmissionID: row.ID,
+			AssignmentID: row.WorkID,
+			UserID:       row.UserID,
+			AmountFen:    row.AmountFen.String(),
+			EligibleDate: app.BusinessDay(row.EligibleAt),
+			revision:     creativeRevision(row),
+		})
+	}
+
+	if len(out.Lines) > 1000 {
+		return out, app.Conflict("本批超过1000条，请缩小结算范围")
 	}
 
 	out.Count = int64(len(out.Lines))
@@ -79,5 +111,5 @@ func settlementPreview(ctx context.Context, submissions *ent.SubmissionClient, a
 }
 
 func (s *Service) PreviewSettlement(ctx context.Context, through string) (SettlementPreview, error) {
-	return settlementPreview(ctx, s.Client.Submission, s.Client.Assignment, through)
+	return settlementPreview(ctx, s.Client, through, s.Now(), false)
 }

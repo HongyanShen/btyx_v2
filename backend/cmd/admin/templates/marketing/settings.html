@@ -1,0 +1,38 @@
+{{define "marketing-settings"}}
+<section class="marketing-settings" aria-labelledby="marketing-settings-heading">
+  <div class="marketing-section-heading"><h4 id="marketing-settings-heading" class="ant-typography">营销设置</h4><span class="ant-typography-secondary">运营按实际节奏设置</span></div>
+  {{$visibility := marketingLink .Filter "" "visibility"}}
+  {{$price := marketingLink .Filter "" "price"}}
+  {{$save := printf "/tasks/settings?page=%d%s" .Pager.Current .Pager.Search}}
+  {{$csrf := .CSRF}}
+  <form class="marketing-settings-panel" action="{{$save}}" method="post" hx-post="{{$save}}" hx-target="#admin-workspace" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop">
+    <input type="hidden" name="mode" value="expiry"><input name="csrf" type="hidden" value="{{$csrf}}">
+    <span class="marketing-setting-label">派单开关</span>
+    <div class="marketing-setting-inline">
+      {{with .Settings}}<span class="server-tag ant-tag{{if .Online}} task-online-tag{{end}}">{{if .Online}}上架{{else}}下架{{end}}</span>
+        {{if .CanEdit}}<a class="server-button" role="button" href="{{$visibility}}" hx-get="{{$visibility}}" hx-target="#marketing-dialog-slot" data-open-server-dialog><span>{{if .Online}}下架{{else}}上架{{end}}</span></a>{{end}}
+      {{end}}
+      <a href="https://yanxuan.baituber.cn/#/task/M1" target="_blank" rel="noreferrer">看用户端</a><span class="marketing-note">下架后停止新领取和指派</span>
+    </div>
+    <label class="marketing-setting-label" for="marketing-price">单价</label><div class="marketing-setting-inline">
+      <span>每个平台 ¥</span>
+      <input id="marketing-price" name="price" aria-label="每平台单价（元）" class="marketing-setting-input" inputmode="decimal"{{if .Settings}} value="{{.Settings.Price}}"{{end}} {{if and .Settings .Settings.CanEdit}}hx-get="{{$price}}" hx-trigger="change" hx-target="#marketing-dialog-slot" data-marketing-price{{else}}disabled{{end}}>
+      {{with .Settings}}<span class="marketing-note">两个平台都发 ¥<span>{{.DoublePrice}}</span>，已领取的按领取时的单价结算</span>{{end}}
+    </div>
+    <span class="marketing-setting-label">领取规则</span><span>每人每天 {{if .Settings}}{{.Settings.DailyLimit}}{{else}}1{{end}} 条，每条只给一个人，领取时优先匹配标签。</span>
+    <label class="marketing-setting-label" for="marketing-expiry-mode">失效规则</label>
+    <div class="marketing-setting-inline" data-expiry-controls>
+      <span>领取、指派或重派后</span>
+      <select id="marketing-expiry-mode" name="expiry_mode" class="marketing-expiry-mode"{{if not (and .Settings .Settings.CanEdit)}} disabled{{end}}>
+        <option value="end_of_day"{{if and .Settings .Settings.EndOfDay}} selected{{end}}>当天</option><option value="fixed_duration"{{if or (not .Settings) (not .Settings.EndOfDay)}} selected{{end}}>指定时间内</option>
+      </select>
+      <input name="hours" aria-label="失效时长" class="marketing-setting-input" type="number" min="0.5" max="24" step="0.5"{{if .Settings}} value="{{.Settings.Expiry}}"{{end}}{{if not (and .Settings .Settings.CanEdit)}} disabled{{end}} data-expiry-fixed{{if and .Settings .Settings.EndOfDay}} hidden{{end}}>
+      <span data-expiry-fixed{{if and .Settings .Settings.EndOfDay}} hidden{{end}}>小时内未交发布链接，自动失效</span>
+      <span data-expiry-day{{if or (not .Settings) (not .Settings.EndOfDay)}} hidden{{end}}>北京时间 24:00 前未交发布链接，自动失效</span>
+    </div>
+    <span class="marketing-setting-label">失效以后</span><span>回到排队中，可以给其他分发员领取或指派。失效的任务仍算原分发员当天的 1 条。</span>
+    {{if and .Settings .Settings.CanEdit}}<div class="marketing-setting-actions marketing-setting-inline"><button type="submit" class="server-button server-primary"><span>保存失效规则</span></button><span class="marketing-note">现在生效：{{if .Settings.EndOfDay}}当天（北京时间 24:00 截止）{{else}}指定时间内（{{.Settings.Expiry}} 小时）{{end}}</span></div>{{end}}
+    <span class="marketing-setting-label">单价修改记录</span><div class="marketing-price-history">{{with .Settings}}{{range .History}}<span>{{.}}</span>{{else}}还没改过，现在是每个平台 ¥{{.Price}}{{end}}{{else}}—{{end}}</div>
+  </form>
+</section>
+{{end}}

@@ -3,7 +3,9 @@ package handler
 import (
 	"net/http"
 
+	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/httpx"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,6 +34,7 @@ func (handler *Handler) transferCallback(ctx *gin.Context) (httpx.EmptyResponse,
 		return httpx.EmptyResponse{}, &httpx.StatusError{Status: http.StatusBadRequest}
 	}
 
+	telemetry.SetUser(ctx.Request.Context(), record.UserID, enum.RoleUser)
 	if err := handler.services.ApplyTransferResult(ctx.Request.Context(), record.ID, result.Status, result.ProviderID); err != nil {
 		return httpx.EmptyResponse{}, &httpx.StatusError{Status: http.StatusInternalServerError}
 	}

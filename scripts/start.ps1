@@ -8,16 +8,17 @@ param(
 . (Join-Path $PSScriptRoot 'environment.ps1')
 
 $backendPath = Join-Path $workspacePath 'backend'
-$adminPath = Join-Path $workspacePath 'apps/admin'
 $binaryPath = Join-Path $workspacePath 'artifacts/bin'
 $logPath = Join-Path $workspacePath 'artifacts/logs'
 $manifestPath = Join-Path $workspacePath 'artifacts/processes.json'
 $env:BTYX_CONFIG = Join-Path $workspacePath '.env'
+$entries = @('miniapi', 'admin', 'worker')
 
 if (!(Test-Path -LiteralPath $env:BTYX_CONFIG)) { throw '请先根据 .env.example 创建本地 .env' }
 if (Test-Path -LiteralPath $manifestPath) { throw '已有启动记录；请先运行 scripts/stop.ps1，避免重复启动' }
 
 New-Item -ItemType Directory -Force -Path $binaryPath, $logPath | Out-Null
+
 Push-Location $backendPath
 
 try {
@@ -36,7 +37,7 @@ try {
         if ($LASTEXITCODE -ne 0) { throw '示例数据初始化失败' }
     }
 
-    foreach ($entry in @('miniapi', 'adminapi', 'worker')) {
+    foreach ($entry in $entries) {
         $executable = Join-Path $binaryPath "$entry.exe"
         if ($SkipBuild) {
             if (!(Test-Path -LiteralPath $executable)) { throw "缺少 $entry 二进制，请去掉 -SkipBuild" }
@@ -54,21 +55,14 @@ finally {
 $started = @()
 
 try {
-    foreach ($entry in @('miniapi', 'adminapi', 'worker')) {
+    foreach ($entry in $entries) {
         $executable = Join-Path $binaryPath "$entry.exe"
         $process = Start-Process -FilePath $executable -WorkingDirectory $backendPath -WindowStyle Hidden -PassThru `
             -RedirectStandardOutput (Join-Path $logPath "$entry.out.log") -RedirectStandardError (Join-Path $logPath "$entry.err.log")
         $started += @{ name = $entry; pid = $process.Id; executable = $executable; startedAt = $process.StartTime.ToUniversalTime().Ticks.ToString() }
     }
 
-    $nodeExecutable = (Get-Command node).Source
-    $viteEntry = Join-Path $adminPath 'node_modules/vite/bin/vite.js'
-    $process = Start-Process -FilePath $nodeExecutable -ArgumentList @("`"$viteEntry`"", '--host', '127.0.0.1', '--strictPort') `
-        -WorkingDirectory $adminPath -WindowStyle Hidden -PassThru `
-        -RedirectStandardOutput (Join-Path $logPath 'admin-web.out.log') -RedirectStandardError (Join-Path $logPath 'admin-web.err.log')
-    $started += @{ name = 'admin-web'; pid = $process.Id; executable = $nodeExecutable; command = $viteEntry; startedAt = $process.StartTime.ToUniversalTime().Ticks.ToString() }
-
-    foreach ($address in @('http://127.0.0.1:8081/healthz', 'http://127.0.0.1:8082/healthz', 'http://127.0.0.1:5173')) {
+    foreach ($address in @('http://127.0.0.1:8081/healthz', 'http://127.0.0.1:8083/healthz')) {
         $ready = $false
         for ($attempt = 0; $attempt -lt 20; $attempt++) {
             try {
@@ -84,8 +78,8 @@ try {
     }
 
     $started | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $manifestPath -Encoding utf8
-    Write-Host '管理后台：http://127.0.0.1:5173'
-    Write-Host '小程序 API：127.0.0.1:8081；后台 API：127.0.0.1:8082；worker 已启动。'
+    Write-Host '管理后台：http://127.0.0.1:8083'
+    Write-Host '小程序 API：127.0.0.1:8081；worker 已启动。'
     Write-Host '后台使用运营账号用户名和密码登录。日志位于 artifacts/logs。'
 }
 catch {

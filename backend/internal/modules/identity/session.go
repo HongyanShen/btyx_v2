@@ -13,6 +13,7 @@ import (
 	"baituber.cn/yanxuan/v2/ent/user"
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 )
 
 func (s *Service) createSession(ctx context.Context, sessions *ent.SessionClient, id string, role enum.Role) (LoginResult, error) {
@@ -77,6 +78,8 @@ func (s *Service) Authenticate(ctx context.Context, token string) (Principal, er
 				operator.FieldID,
 				operator.FieldUsername,
 				operator.FieldSuperAdmin,
+				operator.FieldAllPages,
+				operator.FieldAllEndpoints,
 				operator.FieldPages,
 				operator.FieldEndpoints,
 			).
@@ -92,6 +95,7 @@ func (s *Service) Authenticate(ctx context.Context, token string) (Principal, er
 		principal.Operator = operatorDTO(record)
 	}
 
+	telemetry.SetUser(ctx, principal.ID, principal.Role)
 	return principal, nil
 }
 
@@ -104,8 +108,16 @@ func invalidSession() error {
 }
 
 func (s *Service) LogoutUser(ctx context.Context, token string) error {
+	return s.logout(ctx, token, enum.RoleUser)
+}
+
+func (s *Service) LogoutAdmin(ctx context.Context, token string) error {
+	return s.logout(ctx, token, enum.RoleAdmin)
+}
+
+func (s *Service) logout(ctx context.Context, token string, role enum.Role) error {
 	_, err := s.Client.Session.Delete().
-		Where(session.TokenHashEQ(app.Hash(token)), session.RoleEQ(enum.RoleUser)).
+		Where(session.TokenHashEQ(app.Hash(token)), session.RoleEQ(role)).
 		Exec(ctx)
 
 	return err

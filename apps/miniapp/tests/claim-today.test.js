@@ -38,7 +38,10 @@ test("首页第二步打开领取前详情，只在详情确认后提交并以�
 
       if (requestedPath === "/api/v1/assignments/allocated") {
         assignmentReads.push(requestedPath);
-        options.success({ statusCode: 200, data: { code: 0, data: assignments[0] } });
+        options.success({
+          statusCode: 200,
+          data: { code: 0, data: assignments[0] },
+        });
         return;
       }
       const data = {
@@ -78,7 +81,9 @@ test("首页第二步打开领取前详情，只在详情确认后提交并以�
     assert.equal(requests.length, 0);
 
     const app = require("../src/app.json");
-    const taskPackage = app.subpackages.find(({ root }) => root === "subpackages/task");
+    const taskPackage = app.subpackages.find(
+      ({ root }) => root === "subpackages/task",
+    );
     assert.ok(taskPackage.pages.includes("today/index"));
     require("../src/subpackages/task/today/index");
     const detail = page;
@@ -86,7 +91,10 @@ test("首页第二步打开领取前详情，只在详情确认后提交并以�
       path.join(__dirname, "../src/subpackages/task/today/index.wxml"),
       "utf8",
     );
-    assert.equal((detailTemplate.match(/bindtap="followAction"/g) ?? []).length, 1);
+    assert.equal(
+      (detailTemplate.match(/bindtap="followAction"/g) ?? []).length,
+      1,
+    );
 
     hasContent = false;
     await detail.onShow();
@@ -120,7 +128,10 @@ test("首页第二步打开领取前详情，只在详情确认后提交并以�
     assert.match(repeated.url, /\/tasks\/claim$/);
     assert.deepEqual(repeated.data, {});
     assert.ok(original.header["Idempotency-Key"]);
-    assert.equal(original.header["Idempotency-Key"], repeated.header["Idempotency-Key"]);
+    assert.equal(
+      original.header["Idempotency-Key"],
+      repeated.header["Idempotency-Key"],
+    );
     const assignment = {
       id: "allocated",
       steps: [],
@@ -140,7 +151,9 @@ test("首页第二步打开领取前详情，只在详情确认后提交并以�
     });
     await retry;
 
-    assert.deepEqual(redirects, ["/subpackages/task/detail/index?id=allocated"]);
+    assert.deepEqual(redirects, [
+      "/subpackages/task/detail/index?id=allocated",
+    ]);
     require("../src/subpackages/task/detail/index");
     const execution = page;
     execution.onLoad({ id: "allocated" });
@@ -161,6 +174,22 @@ test("首页第二步打开领取前详情，只在详情确认后提交并以�
       "/subpackages/task/detail/index?id=allocated",
       "/subpackages/task/detail/index?id=allocated",
     ]);
+    for (const [used, label, action] of [
+      [1, "再领一条", "claim"],
+      [2, "今天 2 条已领满", ""],
+    ]) {
+      detail.initialOverview = {
+        user: { status: "approved", consented: true },
+        today: assignments[0],
+        hasContent: true,
+        dailyLimit: 2,
+        used,
+        priceFen: "825",
+      };
+      await detail.load();
+      assert.equal(detail.data.actionLabel, label);
+      assert.equal(detail.data.action, action);
+    }
   } finally {
     global.wx = prior.wx;
     global.Page = prior.Page;

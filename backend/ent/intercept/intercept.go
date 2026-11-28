@@ -10,8 +10,14 @@ import (
 	"baituber.cn/yanxuan/v2/ent/agreement"
 	"baituber.cn/yanxuan/v2/ent/assignment"
 	"baituber.cn/yanxuan/v2/ent/auditevent"
+	"baituber.cn/yanxuan/v2/ent/audithttpresponse"
 	"baituber.cn/yanxuan/v2/ent/consent"
 	"baituber.cn/yanxuan/v2/ent/content"
+	"baituber.cn/yanxuan/v2/ent/creativeearning"
+	"baituber.cn/yanxuan/v2/ent/creativelink"
+	"baituber.cn/yanxuan/v2/ent/creativetask"
+	"baituber.cn/yanxuan/v2/ent/creativetier"
+	"baituber.cn/yanxuan/v2/ent/creativework"
 	"baituber.cn/yanxuan/v2/ent/feedback"
 	"baituber.cn/yanxuan/v2/ent/fileobject"
 	"baituber.cn/yanxuan/v2/ent/job"
@@ -26,7 +32,9 @@ import (
 	"baituber.cn/yanxuan/v2/ent/settlementbatch"
 	"baituber.cn/yanxuan/v2/ent/settlementline"
 	"baituber.cn/yanxuan/v2/ent/submission"
+	"baituber.cn/yanxuan/v2/ent/subscriptionchoice"
 	"baituber.cn/yanxuan/v2/ent/task"
+	"baituber.cn/yanxuan/v2/ent/tasknumbercounter"
 	"baituber.cn/yanxuan/v2/ent/taskversion"
 	"baituber.cn/yanxuan/v2/ent/user"
 	"baituber.cn/yanxuan/v2/ent/userenrollment"
@@ -175,6 +183,33 @@ func (f TraverseAuditEvent) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.AuditEventQuery", q)
 }
 
+// The AuditHTTPResponseFunc type is an adapter to allow the use of ordinary function as a Querier.
+type AuditHTTPResponseFunc func(context.Context, *ent.AuditHTTPResponseQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f AuditHTTPResponseFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.AuditHTTPResponseQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.AuditHTTPResponseQuery", q)
+}
+
+// The TraverseAuditHTTPResponse type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseAuditHTTPResponse func(context.Context, *ent.AuditHTTPResponseQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseAuditHTTPResponse) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseAuditHTTPResponse) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.AuditHTTPResponseQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.AuditHTTPResponseQuery", q)
+}
+
 // The ConsentFunc type is an adapter to allow the use of ordinary function as a Querier.
 type ConsentFunc func(context.Context, *ent.ConsentQuery) (ent.Value, error)
 
@@ -227,6 +262,141 @@ func (f TraverseContent) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.ContentQuery", q)
+}
+
+// The CreativeEarningFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CreativeEarningFunc func(context.Context, *ent.CreativeEarningQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f CreativeEarningFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.CreativeEarningQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.CreativeEarningQuery", q)
+}
+
+// The TraverseCreativeEarning type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCreativeEarning func(context.Context, *ent.CreativeEarningQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCreativeEarning) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCreativeEarning) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.CreativeEarningQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.CreativeEarningQuery", q)
+}
+
+// The CreativeLinkFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CreativeLinkFunc func(context.Context, *ent.CreativeLinkQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f CreativeLinkFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.CreativeLinkQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.CreativeLinkQuery", q)
+}
+
+// The TraverseCreativeLink type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCreativeLink func(context.Context, *ent.CreativeLinkQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCreativeLink) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCreativeLink) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.CreativeLinkQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.CreativeLinkQuery", q)
+}
+
+// The CreativeTaskFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CreativeTaskFunc func(context.Context, *ent.CreativeTaskQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f CreativeTaskFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.CreativeTaskQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.CreativeTaskQuery", q)
+}
+
+// The TraverseCreativeTask type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCreativeTask func(context.Context, *ent.CreativeTaskQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCreativeTask) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCreativeTask) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.CreativeTaskQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.CreativeTaskQuery", q)
+}
+
+// The CreativeTierFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CreativeTierFunc func(context.Context, *ent.CreativeTierQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f CreativeTierFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.CreativeTierQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.CreativeTierQuery", q)
+}
+
+// The TraverseCreativeTier type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCreativeTier func(context.Context, *ent.CreativeTierQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCreativeTier) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCreativeTier) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.CreativeTierQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.CreativeTierQuery", q)
+}
+
+// The CreativeWorkFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CreativeWorkFunc func(context.Context, *ent.CreativeWorkQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f CreativeWorkFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.CreativeWorkQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.CreativeWorkQuery", q)
+}
+
+// The TraverseCreativeWork type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCreativeWork func(context.Context, *ent.CreativeWorkQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCreativeWork) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCreativeWork) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.CreativeWorkQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.CreativeWorkQuery", q)
 }
 
 // The FeedbackFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -580,6 +750,33 @@ func (f TraverseSubmission) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.SubmissionQuery", q)
 }
 
+// The SubscriptionChoiceFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SubscriptionChoiceFunc func(context.Context, *ent.SubscriptionChoiceQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f SubscriptionChoiceFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.SubscriptionChoiceQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.SubscriptionChoiceQuery", q)
+}
+
+// The TraverseSubscriptionChoice type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSubscriptionChoice func(context.Context, *ent.SubscriptionChoiceQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSubscriptionChoice) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSubscriptionChoice) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SubscriptionChoiceQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.SubscriptionChoiceQuery", q)
+}
+
 // The TaskFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TaskFunc func(context.Context, *ent.TaskQuery) (ent.Value, error)
 
@@ -605,6 +802,33 @@ func (f TraverseTask) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.TaskQuery", q)
+}
+
+// The TaskNumberCounterFunc type is an adapter to allow the use of ordinary function as a Querier.
+type TaskNumberCounterFunc func(context.Context, *ent.TaskNumberCounterQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f TaskNumberCounterFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.TaskNumberCounterQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.TaskNumberCounterQuery", q)
+}
+
+// The TraverseTaskNumberCounter type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseTaskNumberCounter func(context.Context, *ent.TaskNumberCounterQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseTaskNumberCounter) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseTaskNumberCounter) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.TaskNumberCounterQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.TaskNumberCounterQuery", q)
 }
 
 // The TaskVersionFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -832,10 +1056,22 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.AssignmentQuery, predicate.Assignment, assignment.OrderOption]{typ: ent.TypeAssignment, tq: q}, nil
 	case *ent.AuditEventQuery:
 		return &query[*ent.AuditEventQuery, predicate.AuditEvent, auditevent.OrderOption]{typ: ent.TypeAuditEvent, tq: q}, nil
+	case *ent.AuditHTTPResponseQuery:
+		return &query[*ent.AuditHTTPResponseQuery, predicate.AuditHTTPResponse, audithttpresponse.OrderOption]{typ: ent.TypeAuditHTTPResponse, tq: q}, nil
 	case *ent.ConsentQuery:
 		return &query[*ent.ConsentQuery, predicate.Consent, consent.OrderOption]{typ: ent.TypeConsent, tq: q}, nil
 	case *ent.ContentQuery:
 		return &query[*ent.ContentQuery, predicate.Content, content.OrderOption]{typ: ent.TypeContent, tq: q}, nil
+	case *ent.CreativeEarningQuery:
+		return &query[*ent.CreativeEarningQuery, predicate.CreativeEarning, creativeearning.OrderOption]{typ: ent.TypeCreativeEarning, tq: q}, nil
+	case *ent.CreativeLinkQuery:
+		return &query[*ent.CreativeLinkQuery, predicate.CreativeLink, creativelink.OrderOption]{typ: ent.TypeCreativeLink, tq: q}, nil
+	case *ent.CreativeTaskQuery:
+		return &query[*ent.CreativeTaskQuery, predicate.CreativeTask, creativetask.OrderOption]{typ: ent.TypeCreativeTask, tq: q}, nil
+	case *ent.CreativeTierQuery:
+		return &query[*ent.CreativeTierQuery, predicate.CreativeTier, creativetier.OrderOption]{typ: ent.TypeCreativeTier, tq: q}, nil
+	case *ent.CreativeWorkQuery:
+		return &query[*ent.CreativeWorkQuery, predicate.CreativeWork, creativework.OrderOption]{typ: ent.TypeCreativeWork, tq: q}, nil
 	case *ent.FeedbackQuery:
 		return &query[*ent.FeedbackQuery, predicate.Feedback, feedback.OrderOption]{typ: ent.TypeFeedback, tq: q}, nil
 	case *ent.FileObjectQuery:
@@ -862,8 +1098,12 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.SettlementLineQuery, predicate.SettlementLine, settlementline.OrderOption]{typ: ent.TypeSettlementLine, tq: q}, nil
 	case *ent.SubmissionQuery:
 		return &query[*ent.SubmissionQuery, predicate.Submission, submission.OrderOption]{typ: ent.TypeSubmission, tq: q}, nil
+	case *ent.SubscriptionChoiceQuery:
+		return &query[*ent.SubscriptionChoiceQuery, predicate.SubscriptionChoice, subscriptionchoice.OrderOption]{typ: ent.TypeSubscriptionChoice, tq: q}, nil
 	case *ent.TaskQuery:
 		return &query[*ent.TaskQuery, predicate.Task, task.OrderOption]{typ: ent.TypeTask, tq: q}, nil
+	case *ent.TaskNumberCounterQuery:
+		return &query[*ent.TaskNumberCounterQuery, predicate.TaskNumberCounter, tasknumbercounter.OrderOption]{typ: ent.TypeTaskNumberCounter, tq: q}, nil
 	case *ent.TaskVersionQuery:
 		return &query[*ent.TaskVersionQuery, predicate.TaskVersion, taskversion.OrderOption]{typ: ent.TypeTaskVersion, tq: q}, nil
 	case *ent.UserQuery:

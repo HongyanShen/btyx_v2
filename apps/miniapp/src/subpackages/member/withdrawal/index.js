@@ -1,7 +1,26 @@
-const { request, post, newKey } = require("../../../services/request");
+const { request } = require("../../../services/request");
+const {
+  isCurrentSession,
+  pendingSession,
+  tokenKey,
+} = require("../../../services/session");
 const { formatFen, yuanToFen } = require("../../../services/money");
-const { withdrawalLabels } = require("../../../services/labels");
 const { WithdrawalStatus } = require("../../../services/generated/enums");
+const {
+  presentWallet,
+  withdrawalAmountError,
+} = require("../../../services/wallet-view");
+const {
+  getWithdrawalAttempt,
+  presentWithdrawal,
+  requestWithdrawalReceipt,
+  submitWithdrawal,
+} = require("../../../services/withdrawals");
+
+const waiting = WithdrawalStatus.WithdrawalWaitingConfirmation;
+const success = WithdrawalStatus.WithdrawalSuccess;
+
+const { subscribe } = require("../../../services/subscriptions");
 
 Page({
   data: {
@@ -9,137 +28,216 @@ Page({
     error: "",
     wallet: null,
     withdrawals: [],
+    hasWithdrawals: false,
+    waitingRecords: [],
     amount: "",
+    amountError: "",
     submitting: false,
+    retrying: false,
+    confirming: false,
+    completed: null,
   },
 
   onShow() {
-    this.load();
+    this.visible = true;
     clearInterval(this.refreshTimer);
     this.refreshTimer = setInterval(() => this.load(false), 15000);
+    return this.load(!this.data.wallet);
   },
 
   onHide() {
+    this.visible = false;
     clearInterval(this.refreshTimer);
   },
 
   onUnload() {
-    clearInterval(this.refreshTimer);
+    this.onHide();
   },
 
-  async load(showLoading = true) {
-    if (this.refreshing) {
-      return;
-    }
+  onPullDownRefresh() {
+    return this.load(false).finally(() => wx.stopPullDownRefresh());
+  },
 
-    this.refreshing = true;
-    if (showLoading) {
-      this.setData({ loading: true, error: "" });
-    }
+  retryLoad() {
+    return this.load(!this.data.wallet);
+  },
 
+  load(showLoading) {
+    if (this.refreshing) return this.refreshing;
+    this.refreshing = this.loadRecords(showLoading).finally(() => {
+      this.refreshing = null;
+    });
+    return this.refreshing;
+  },
+
+  async loadRecords(showLoading) {
+    if (showLoading) this.setData({ loading: true, error: "" });
     try {
-      const [wallet, withdrawals] = await Promise.all([
+      await pendingSession();
+      const token = wx.getStorageSync(tokenKey);
+      const [balance, records, member] = await Promise.all([
         request("/wallet"),
         request("/withdrawals"),
+        this.memberToken === token && this.memberID
+          ? { id: this.memberID }
+          : request("/me"),
       ]);
+      if (!member?.id || !isCurrentSession(token))
+        throw new Error("登录状态已变化，请重新加载");
+      this.memberToken = wx.getStorageSync(tokenKey);
+      if (member.id !== this.memberID) {
+        this.selectedID = "";
+        this.autoReceiptID = "";
+        this.amountEdited = false;
+      }
+      this.memberID = member.id;
+      const attempt = getWithdrawalAttempt(member.id);
+      const wallet = presentWallet(balance);
+      const withdrawals = records.map(presentWithdrawal);
+      const selected = withdrawals.find(({ id }) => id === this.selectedID);
+      const completed = selected?.status === success ? selected : null;
+      const waitingRecords = withdrawals.filter(
+        ({ status }) => status === waiting,
+      );
       this.setData({
+        wallet,
+        withdrawals,
+        hasWithdrawals: withdrawals.length > 0,
+        waitingRecords,
+        completed,
         error: "",
-        wallet: {
-          available: formatFen(wallet.available_fen),
-          canWithdraw: !/^0+$/.test(wallet.available_fen),
-        },
-        withdrawals: withdrawals.map((record) => ({
-          ...record,
-          amount: formatFen(record.amount_fen),
-          label: withdrawalLabels[record.status],
-          time: new Date(record.created_at).toLocaleString("zh-CN", {
-            timeZone: "Asia/Shanghai",
-          }),
-          canConfirm:
-            record.status === WithdrawalStatus.WithdrawalWaitingConfirmation &&
-            !!record.package_info,
-        })),
+        retrying: Boolean(attempt) && !this.data.submitting,
+        amount: attempt
+          ? formatFen(attempt.amountFen)
+          : this.amountEdited || this.data.submitting
+            ? this.data.amount
+            : wallet.defaultAmount,
       });
+      if (
+        this.visible &&
+        selected?.id === this.autoReceiptID &&
+        selected?.canConfirm
+      ) {
+        this.autoReceiptID = "";
+        this.requestReceipt(selected);
+      }
     } catch (error) {
       this.setData({ error: error.message });
     } finally {
-      this.refreshing = false;
       this.setData({ loading: false });
     }
   },
 
   changeAmount(event) {
-    this.setData({ amount: event.detail.value });
-    this.withdrawalKey = undefined;
+    this.setAmount(event.detail.value);
+  },
+
+  finishAmountEdit() {
+    const { amount, wallet, submitting, retrying } = this.data;
+    if (!wallet?.canWithdraw || submitting || retrying || !amount) return;
+    const amountError = withdrawalAmountError(amount, wallet);
+    this.setData({
+      amount: amountError ? amount : formatFen(yuanToFen(amount)),
+      amountError,
+    });
+  },
+
+  useAll() {
+    if (this.data.wallet?.canWithdraw)
+      this.setAmount(this.data.wallet.defaultAmount);
+  },
+
+  setAmount(amount) {
+    const { retrying, submitting, wallet } = this.data;
+    if (retrying || submitting || !wallet?.canWithdraw) return;
+    this.amountEdited = true;
+    this.setData({
+      amount,
+      amountError: amount ? withdrawalAmountError(amount, wallet) : "",
+    });
   },
 
   async withdraw() {
-    if (this.data.submitting || !this.data.wallet?.canWithdraw) {
+    const { amount, submitting, wallet, retrying, error } = this.data;
+    if (submitting || (!retrying && (!wallet?.canWithdraw || error))) return;
+    if (!this.memberID || !isCurrentSession(this.memberToken)) {
+      this.setData({ amountError: "登录状态已变化，请重新加载" });
+      await this.load(false);
+      return;
+    }
+    const amountError = retrying ? "" : withdrawalAmountError(amount, wallet);
+    if (amountError) {
+      this.setData({ amountError });
       return;
     }
 
-    this.setData({ submitting: true });
-
+    this.setData({ submitting: true, amountError: "" });
     try {
-      const amount = yuanToFen(this.data.amount);
-      if (amount === "0") {
-        throw new Error("请输入大于零的提现金额");
-      }
-      // Reuse the key after a timeout; a retry must not freeze money twice.
-      this.withdrawalKey = this.withdrawalKey || newKey();
-      const record = await post(
-        "/withdrawals",
-        { amount_fen: amount },
-        this.withdrawalKey,
-      );
-      this.withdrawalKey = undefined;
-      this.setData({ amount: "" });
-      if (
-        record.status === WithdrawalStatus.WithdrawalWaitingConfirmation &&
-        record.package_info
-      ) {
-        this.requestReceipt(record);
-      } else {
+      if (wx.requestSubscribeMessage) await subscribe("withdrawal");
+      const record = await submitWithdrawal(this.memberID, yuanToFen(amount));
+      this.selectedID = record.id;
+      this.autoReceiptID = record.id;
+      this.amountEdited = false;
+      this.setData({ retrying: false });
+      if (record.status !== waiting) {
         wx.showToast({ title: "申请已提交", icon: "success" });
       }
+      if (this.refreshing) await this.refreshing;
       await this.load(false);
+      this.setData({ amount: this.data.wallet?.defaultAmount || "" });
     } catch (error) {
-      wx.showToast({ title: error.message, icon: "none" });
+      const attempt = getWithdrawalAttempt(this.memberID);
+      this.amountEdited = true;
+      this.setData({ retrying: Boolean(attempt), amountError: error.message });
     } finally {
       this.setData({ submitting: false });
     }
   },
 
   confirmReceipt(event) {
-    const record = this.data.withdrawals.find(
-      (item) => item.id === event.currentTarget.dataset.id,
+    if (this.data.confirming) return;
+    const record = this.data.waitingRecords.find(
+      ({ id }) => id === event.currentTarget.dataset.id,
     );
-    if (record?.canConfirm) {
+    if (record) {
+      this.selectedID = record.id;
+      this.autoReceiptID = "";
       this.requestReceipt(record);
     }
   },
 
-  requestReceipt(record) {
-    if (this.confirming) {
-      return;
+  async requestReceipt(record) {
+    if (this.data.confirming) return;
+    this.setData({ confirming: true });
+    try {
+      await requestWithdrawalReceipt(record);
+    } catch {
+      wx.showToast({ title: "微信收款页面打开失败，请重试", icon: "none" });
+    } finally {
+      this.setData({ confirming: false });
+      if (this.refreshing) await this.refreshing;
+      if (this.visible) await this.load(false);
     }
+  },
 
-    if (!wx.canIUse("requestMerchantTransfer")) {
-      wx.showToast({ title: "请升级微信后重试", icon: "none" });
-
-      return;
-    }
-
-    this.confirming = true;
-    wx.requestMerchantTransfer({
-      mchId: record.merchant_id,
-      appId: wx.getAccountInfoSync().miniProgram.appId,
-      package: record.package_info,
-      // Both outcomes only refresh; the server confirms payment by signed notification/query.
+  openRecords() {
+    if (this.navigating) return;
+    this.navigating = true;
+    wx.navigateTo({
+      url: "/subpackages/member/withdrawal-records/index",
+      fail: () =>
+        wx.showToast({ title: "提现记录打开失败，请重试", icon: "none" }),
       complete: () => {
-        this.confirming = false;
-        this.load(false);
+        this.navigating = false;
       },
     });
+  },
+
+  goWork() {
+    wx.switchTab({ url: "/pages/work/index" });
+  },
+
+  goWallet() {
+    wx.switchTab({ url: "/pages/wallet/index" });
   },
 });

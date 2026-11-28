@@ -4,6 +4,16 @@ package enum
 type AuditAction string
 
 const (
+	AuditRequestFailed      AuditAction = "request.failed"
+	AuditCreativeCreate     AuditAction = "creative.create"
+	AuditCreativeVisibility AuditAction = "creative.visibility"
+	AuditCreativeClaim      AuditAction = "creative.claim"
+	AuditCreativeSubmit     AuditAction = "creative.submit"
+	AuditCreativeReview     AuditAction = "creative.review"
+	AuditCreativeLink       AuditAction = "creative.link"
+	AuditCreativeEvidence   AuditAction = "creative.evidence"
+	AuditCreativeReward     AuditAction = "creative.reward"
+
 	AuditEnrollmentApply          AuditAction = "enrollment.apply"
 	AuditEnrollmentApproved       AuditAction = "enrollment.approved"
 	AuditEnrollmentRejected       AuditAction = "enrollment.rejected"
@@ -45,6 +55,16 @@ const (
 
 func (AuditAction) Values() []string {
 	return []string{
+		string(AuditRequestFailed),
+		string(AuditCreativeCreate),
+		string(AuditCreativeVisibility),
+		string(AuditCreativeClaim),
+		string(AuditCreativeSubmit),
+		string(AuditCreativeReview),
+		string(AuditCreativeLink),
+		string(AuditCreativeEvidence),
+		string(AuditCreativeReward),
+
 		string(AuditEnrollmentApply),
 		string(AuditEnrollmentApproved),
 		string(AuditEnrollmentRejected),

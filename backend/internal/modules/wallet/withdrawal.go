@@ -3,15 +3,20 @@ package wallet
 import (
 	"context"
 
-	"baituber.cn/yanxuan/v2/internal/domain/enum"
-
 	"baituber.cn/yanxuan/v2/ent"
 	"baituber.cn/yanxuan/v2/ent/wallet"
 	"baituber.cn/yanxuan/v2/ent/withdrawal"
+	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
 	"baituber.cn/yanxuan/v2/internal/platform/logging"
 	"baituber.cn/yanxuan/v2/internal/platform/money"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 	"github.com/shopspring/decimal"
+)
+
+const (
+	minWithdrawalFen = "10"
+	maxWithdrawalFen = "20000"
 )
 
 func (s *Service) Withdraw(ctx context.Context, userID, amountText, key string) (WithdrawalDTO, error) {
@@ -20,7 +25,7 @@ func (s *Service) Withdraw(ctx context.Context, userID, amountText, key string) 
 	}
 
 	amount, err := money.ParseFen(amountText)
-	if err != nil || amount.LessThan(decimal.NewFromInt(10)) || amount.GreaterThan(decimal.NewFromInt(20000)) {
+	if err != nil || amount.LessThan(decimal.RequireFromString(minWithdrawalFen)) || amount.GreaterThan(decimal.RequireFromString(maxWithdrawalFen)) {
 		return WithdrawalDTO{}, app.Invalid("本地业务配置：单笔提现0.10至200.00元")
 	}
 
@@ -84,10 +89,12 @@ func (s *Service) Withdraw(ctx context.Context, userID, amountText, key string) 
 			SetNextAt(s.Now()).
 			SetReferenceID(withdrawalRecord.ID).
 			SetRequestID(logging.RequestID(ctx)).
+			SetTraceParent(telemetry.Parent(ctx)).
 			Save(ctx); err != nil {
 			return WithdrawalDTO{}, err
 		}
 
-		return s.withdrawalDTO(withdrawalRecord), app.Audit(ctx, tx, userID, enum.AuditWithdrawalRequest, withdrawalRecord.ID, "")
+		return s.withdrawalDTO(withdrawalRecord), app.Audit(ctx, tx, userID, enum.AuditWithdrawalRequest, withdrawalRecord.ID, "",
+			"申请金额："+amount.String()+" 分")
 	})
 }

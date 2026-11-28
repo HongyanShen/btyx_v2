@@ -188,6 +188,20 @@ func (_c *SubmissionCreate) SetNillableEligibleDate(v *string) *SubmissionCreate
 	return _c
 }
 
+// SetSettlementEligibleAt sets the "settlement_eligible_at" field.
+func (_c *SubmissionCreate) SetSettlementEligibleAt(v time.Time) *SubmissionCreate {
+	_c.mutation.SetSettlementEligibleAt(v)
+	return _c
+}
+
+// SetNillableSettlementEligibleAt sets the "settlement_eligible_at" field if the given value is not nil.
+func (_c *SubmissionCreate) SetNillableSettlementEligibleAt(v *time.Time) *SubmissionCreate {
+	if v != nil {
+		_c.SetSettlementEligibleAt(*v)
+	}
+	return _c
+}
+
 // SetVisibility sets the "visibility" field.
 func (_c *SubmissionCreate) SetVisibility(v enum.Visibility) *SubmissionCreate {
 	_c.mutation.SetVisibility(v)
@@ -453,6 +467,10 @@ func (_c *SubmissionCreate) createSpec() (*Submission, *sqlgraph.CreateSpec) {
 		_spec.SetField(submission.FieldEligibleDate, field.TypeString, value)
 		_node.EligibleDate = value
 	}
+	if value, ok := _c.mutation.SettlementEligibleAt(); ok {
+		_spec.SetField(submission.FieldSettlementEligibleAt, field.TypeTime, value)
+		_node.SettlementEligibleAt = &value
+	}
 	if value, ok := _c.mutation.Visibility(); ok {
 		_spec.SetField(submission.FieldVisibility, field.TypeEnum, value)
 		_node.Visibility = value
@@ -674,6 +692,24 @@ func (u *SubmissionUpsert) SetEligibleDate(v string) *SubmissionUpsert {
 // UpdateEligibleDate sets the "eligible_date" field to the value that was provided on create.
 func (u *SubmissionUpsert) UpdateEligibleDate() *SubmissionUpsert {
 	u.SetExcluded(submission.FieldEligibleDate)
+	return u
+}
+
+// SetSettlementEligibleAt sets the "settlement_eligible_at" field.
+func (u *SubmissionUpsert) SetSettlementEligibleAt(v time.Time) *SubmissionUpsert {
+	u.Set(submission.FieldSettlementEligibleAt, v)
+	return u
+}
+
+// UpdateSettlementEligibleAt sets the "settlement_eligible_at" field to the value that was provided on create.
+func (u *SubmissionUpsert) UpdateSettlementEligibleAt() *SubmissionUpsert {
+	u.SetExcluded(submission.FieldSettlementEligibleAt)
+	return u
+}
+
+// ClearSettlementEligibleAt clears the value of the "settlement_eligible_at" field.
+func (u *SubmissionUpsert) ClearSettlementEligibleAt() *SubmissionUpsert {
+	u.SetNull(submission.FieldSettlementEligibleAt)
 	return u
 }
 
@@ -933,6 +969,27 @@ func (u *SubmissionUpsertOne) SetEligibleDate(v string) *SubmissionUpsertOne {
 func (u *SubmissionUpsertOne) UpdateEligibleDate() *SubmissionUpsertOne {
 	return u.Update(func(s *SubmissionUpsert) {
 		s.UpdateEligibleDate()
+	})
+}
+
+// SetSettlementEligibleAt sets the "settlement_eligible_at" field.
+func (u *SubmissionUpsertOne) SetSettlementEligibleAt(v time.Time) *SubmissionUpsertOne {
+	return u.Update(func(s *SubmissionUpsert) {
+		s.SetSettlementEligibleAt(v)
+	})
+}
+
+// UpdateSettlementEligibleAt sets the "settlement_eligible_at" field to the value that was provided on create.
+func (u *SubmissionUpsertOne) UpdateSettlementEligibleAt() *SubmissionUpsertOne {
+	return u.Update(func(s *SubmissionUpsert) {
+		s.UpdateSettlementEligibleAt()
+	})
+}
+
+// ClearSettlementEligibleAt clears the value of the "settlement_eligible_at" field.
+func (u *SubmissionUpsertOne) ClearSettlementEligibleAt() *SubmissionUpsertOne {
+	return u.Update(func(s *SubmissionUpsert) {
+		s.ClearSettlementEligibleAt()
 	})
 }
 
@@ -1361,6 +1418,27 @@ func (u *SubmissionUpsertBulk) SetEligibleDate(v string) *SubmissionUpsertBulk {
 func (u *SubmissionUpsertBulk) UpdateEligibleDate() *SubmissionUpsertBulk {
 	return u.Update(func(s *SubmissionUpsert) {
 		s.UpdateEligibleDate()
+	})
+}
+
+// SetSettlementEligibleAt sets the "settlement_eligible_at" field.
+func (u *SubmissionUpsertBulk) SetSettlementEligibleAt(v time.Time) *SubmissionUpsertBulk {
+	return u.Update(func(s *SubmissionUpsert) {
+		s.SetSettlementEligibleAt(v)
+	})
+}
+
+// UpdateSettlementEligibleAt sets the "settlement_eligible_at" field to the value that was provided on create.
+func (u *SubmissionUpsertBulk) UpdateSettlementEligibleAt() *SubmissionUpsertBulk {
+	return u.Update(func(s *SubmissionUpsert) {
+		s.UpdateSettlementEligibleAt()
+	})
+}
+
+// ClearSettlementEligibleAt clears the value of the "settlement_eligible_at" field.
+func (u *SubmissionUpsertBulk) ClearSettlementEligibleAt() *SubmissionUpsertBulk {
+	return u.Update(func(s *SubmissionUpsert) {
+		s.ClearSettlementEligibleAt()
 	})
 }
 

@@ -39,6 +39,7 @@ func RecordIdentityCheck(ctx context.Context, runtime *app.Runtime, tx *ent.Tx, 
 		SetAction(action).
 		SetReferenceID(userID).
 		SetReason(reason).
+		SetParameters(app.AuditFlag("提交联系电话", submission.Phone != "") + "；" + app.AuditFlag("提交微信号", submission.Wechat != "")).
 		SetSubmittedPhone(MaskPhone(submission.Phone)).
 		SetSubmittedWechatCipher(wechatCipher).
 		SetSubmittedMaskedName(maskedName).

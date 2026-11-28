@@ -91,6 +91,34 @@ func (_c *OperatorCreate) SetNillableDisabled(v *bool) *OperatorCreate {
 	return _c
 }
 
+// SetAllPages sets the "all_pages" field.
+func (_c *OperatorCreate) SetAllPages(v bool) *OperatorCreate {
+	_c.mutation.SetAllPages(v)
+	return _c
+}
+
+// SetNillableAllPages sets the "all_pages" field if the given value is not nil.
+func (_c *OperatorCreate) SetNillableAllPages(v *bool) *OperatorCreate {
+	if v != nil {
+		_c.SetAllPages(*v)
+	}
+	return _c
+}
+
+// SetAllEndpoints sets the "all_endpoints" field.
+func (_c *OperatorCreate) SetAllEndpoints(v bool) *OperatorCreate {
+	_c.mutation.SetAllEndpoints(v)
+	return _c
+}
+
+// SetNillableAllEndpoints sets the "all_endpoints" field if the given value is not nil.
+func (_c *OperatorCreate) SetNillableAllEndpoints(v *bool) *OperatorCreate {
+	if v != nil {
+		_c.SetAllEndpoints(*v)
+	}
+	return _c
+}
+
 // SetPages sets the "pages" field.
 func (_c *OperatorCreate) SetPages(v []string) *OperatorCreate {
 	_c.mutation.SetPages(v)
@@ -168,6 +196,14 @@ func (_c *OperatorCreate) defaults() {
 		v := operator.DefaultDisabled
 		_c.mutation.SetDisabled(v)
 	}
+	if _, ok := _c.mutation.AllPages(); !ok {
+		v := operator.DefaultAllPages
+		_c.mutation.SetAllPages(v)
+	}
+	if _, ok := _c.mutation.AllEndpoints(); !ok {
+		v := operator.DefaultAllEndpoints
+		_c.mutation.SetAllEndpoints(v)
+	}
 	if _, ok := _c.mutation.Pages(); !ok {
 		v := operator.DefaultPages
 		_c.mutation.SetPages(v)
@@ -211,6 +247,12 @@ func (_c *OperatorCreate) check() error {
 	}
 	if _, ok := _c.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "Operator.disabled"`)}
+	}
+	if _, ok := _c.mutation.AllPages(); !ok {
+		return &ValidationError{Name: "all_pages", err: errors.New(`ent: missing required field "Operator.all_pages"`)}
+	}
+	if _, ok := _c.mutation.AllEndpoints(); !ok {
+		return &ValidationError{Name: "all_endpoints", err: errors.New(`ent: missing required field "Operator.all_endpoints"`)}
 	}
 	if _, ok := _c.mutation.Pages(); !ok {
 		return &ValidationError{Name: "pages", err: errors.New(`ent: missing required field "Operator.pages"`)}
@@ -282,6 +324,14 @@ func (_c *OperatorCreate) createSpec() (*Operator, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Disabled(); ok {
 		_spec.SetField(operator.FieldDisabled, field.TypeBool, value)
 		_node.Disabled = value
+	}
+	if value, ok := _c.mutation.AllPages(); ok {
+		_spec.SetField(operator.FieldAllPages, field.TypeBool, value)
+		_node.AllPages = value
+	}
+	if value, ok := _c.mutation.AllEndpoints(); ok {
+		_spec.SetField(operator.FieldAllEndpoints, field.TypeBool, value)
+		_node.AllEndpoints = value
 	}
 	if value, ok := _c.mutation.Pages(); ok {
 		_spec.SetField(operator.FieldPages, field.TypeJSON, value)
@@ -376,6 +426,30 @@ func (u *OperatorUpsert) SetDisabled(v bool) *OperatorUpsert {
 // UpdateDisabled sets the "disabled" field to the value that was provided on create.
 func (u *OperatorUpsert) UpdateDisabled() *OperatorUpsert {
 	u.SetExcluded(operator.FieldDisabled)
+	return u
+}
+
+// SetAllPages sets the "all_pages" field.
+func (u *OperatorUpsert) SetAllPages(v bool) *OperatorUpsert {
+	u.Set(operator.FieldAllPages, v)
+	return u
+}
+
+// UpdateAllPages sets the "all_pages" field to the value that was provided on create.
+func (u *OperatorUpsert) UpdateAllPages() *OperatorUpsert {
+	u.SetExcluded(operator.FieldAllPages)
+	return u
+}
+
+// SetAllEndpoints sets the "all_endpoints" field.
+func (u *OperatorUpsert) SetAllEndpoints(v bool) *OperatorUpsert {
+	u.Set(operator.FieldAllEndpoints, v)
+	return u
+}
+
+// UpdateAllEndpoints sets the "all_endpoints" field to the value that was provided on create.
+func (u *OperatorUpsert) UpdateAllEndpoints() *OperatorUpsert {
+	u.SetExcluded(operator.FieldAllEndpoints)
 	return u
 }
 
@@ -499,6 +573,34 @@ func (u *OperatorUpsertOne) SetDisabled(v bool) *OperatorUpsertOne {
 func (u *OperatorUpsertOne) UpdateDisabled() *OperatorUpsertOne {
 	return u.Update(func(s *OperatorUpsert) {
 		s.UpdateDisabled()
+	})
+}
+
+// SetAllPages sets the "all_pages" field.
+func (u *OperatorUpsertOne) SetAllPages(v bool) *OperatorUpsertOne {
+	return u.Update(func(s *OperatorUpsert) {
+		s.SetAllPages(v)
+	})
+}
+
+// UpdateAllPages sets the "all_pages" field to the value that was provided on create.
+func (u *OperatorUpsertOne) UpdateAllPages() *OperatorUpsertOne {
+	return u.Update(func(s *OperatorUpsert) {
+		s.UpdateAllPages()
+	})
+}
+
+// SetAllEndpoints sets the "all_endpoints" field.
+func (u *OperatorUpsertOne) SetAllEndpoints(v bool) *OperatorUpsertOne {
+	return u.Update(func(s *OperatorUpsert) {
+		s.SetAllEndpoints(v)
+	})
+}
+
+// UpdateAllEndpoints sets the "all_endpoints" field to the value that was provided on create.
+func (u *OperatorUpsertOne) UpdateAllEndpoints() *OperatorUpsertOne {
+	return u.Update(func(s *OperatorUpsert) {
+		s.UpdateAllEndpoints()
 	})
 }
 
@@ -793,6 +895,34 @@ func (u *OperatorUpsertBulk) SetDisabled(v bool) *OperatorUpsertBulk {
 func (u *OperatorUpsertBulk) UpdateDisabled() *OperatorUpsertBulk {
 	return u.Update(func(s *OperatorUpsert) {
 		s.UpdateDisabled()
+	})
+}
+
+// SetAllPages sets the "all_pages" field.
+func (u *OperatorUpsertBulk) SetAllPages(v bool) *OperatorUpsertBulk {
+	return u.Update(func(s *OperatorUpsert) {
+		s.SetAllPages(v)
+	})
+}
+
+// UpdateAllPages sets the "all_pages" field to the value that was provided on create.
+func (u *OperatorUpsertBulk) UpdateAllPages() *OperatorUpsertBulk {
+	return u.Update(func(s *OperatorUpsert) {
+		s.UpdateAllPages()
+	})
+}
+
+// SetAllEndpoints sets the "all_endpoints" field.
+func (u *OperatorUpsertBulk) SetAllEndpoints(v bool) *OperatorUpsertBulk {
+	return u.Update(func(s *OperatorUpsert) {
+		s.SetAllEndpoints(v)
+	})
+}
+
+// UpdateAllEndpoints sets the "all_endpoints" field to the value that was provided on create.
+func (u *OperatorUpsertBulk) UpdateAllEndpoints() *OperatorUpsertBulk {
+	return u.Update(func(s *OperatorUpsert) {
+		s.UpdateAllEndpoints()
 	})
 }
 

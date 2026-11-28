@@ -1,0 +1,32 @@
+{{define "withdrawals"}}
+<section class="page server-page">
+  <div class="page-heading">
+    <div><h2>提现记录</h2><p class="server-secondary">分发员按余额申请提现，转账结果异步更新。{{if .Month}} 当前月份 {{.Month}}。{{end}}</p></div>
+    <a class="server-button" href="{{.URL}}" hx-get="{{.URL}}" hx-target="#withdrawal-results" hx-swap="outerHTML" hx-indicator="#admin-loading" hx-sync="#withdrawal-results:replace">刷新结果</a>
+  </div>
+  {{template "withdrawal-results" .}}
+</section>
+{{end}}
+{{define "withdrawal-results"}}
+<div id="withdrawal-results" hx-get="{{.URL}}" hx-trigger="every 15s" hx-target="this" hx-swap="outerHTML" hx-sync="this:drop">
+  {{if .Blocked}}<div class="server-alert server-alert-warning" role="status">微信转账通道尚未完成配置。相关申请处于等待处理状态，金额仍保留在冻结余额中。</div>{{end}}
+  <div class="ant-card server-card"><div class="ant-card-body">
+    <div class="ant-table-wrapper server-table-scroll" tabindex="0" role="region" aria-label="提现记录表格">
+      <table class="ant-table server-table">
+        <thead class="ant-table-thead"><tr><th scope="col">申请编号</th><th scope="col">分发员编号</th><th scope="col">申请金额</th><th scope="col">收款方式</th><th scope="col">处理状态</th><th scope="col">说明</th><th scope="col">申请时间</th></tr></thead>
+        <tbody class="ant-table-tbody">
+          {{range .Rows}}
+            <tr>
+              <td class="server-ellipsis" title="{{.ID}}">{{.ID}}</td><td class="server-ellipsis" title="{{.UserID}}">{{.UserID}}</td>
+              <td><strong class="money">¥{{.Amount}}</strong></td><td>微信零钱</td>
+              <td><span class="server-tag {{if .Paid}}server-tag-green{{else}}server-tag-gold{{end}}">{{.Label}}</span></td>
+              <td>{{if .Reason}}{{.Reason}}{{else}}—{{end}}</td><td>{{.Date}}</td>
+            </tr>
+          {{else}}<tr><td colspan="7" class="server-empty">暂无数据</td></tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+    {{template "pagination" .Pager}}
+  </div></div>
+</div>
+{{end}}

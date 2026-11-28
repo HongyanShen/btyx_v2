@@ -267,3 +267,5 @@ button.offer-button[disabled] {
 button.offer-button-pressed {
   background: linear-gradient(135deg, #7b72aa, #3b3568);
 }
+
+.creative-tabs{display:flex;gap:12rpx;margin:20rpx 0;background:#fff;padding:8rpx;border-radius:22rpx}.creative-tabs text,.creative-tabs navigator{flex:1;text-align:center;padding:12rpx}.creative-tabs .active{background:#40345f;border-radius:16rpx;color:white}

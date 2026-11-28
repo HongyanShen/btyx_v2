@@ -63,6 +63,34 @@ func (_u *OperatorUpdate) SetNillableDisabled(v *bool) *OperatorUpdate {
 	return _u
 }
 
+// SetAllPages sets the "all_pages" field.
+func (_u *OperatorUpdate) SetAllPages(v bool) *OperatorUpdate {
+	_u.mutation.SetAllPages(v)
+	return _u
+}
+
+// SetNillableAllPages sets the "all_pages" field if the given value is not nil.
+func (_u *OperatorUpdate) SetNillableAllPages(v *bool) *OperatorUpdate {
+	if v != nil {
+		_u.SetAllPages(*v)
+	}
+	return _u
+}
+
+// SetAllEndpoints sets the "all_endpoints" field.
+func (_u *OperatorUpdate) SetAllEndpoints(v bool) *OperatorUpdate {
+	_u.mutation.SetAllEndpoints(v)
+	return _u
+}
+
+// SetNillableAllEndpoints sets the "all_endpoints" field if the given value is not nil.
+func (_u *OperatorUpdate) SetNillableAllEndpoints(v *bool) *OperatorUpdate {
+	if v != nil {
+		_u.SetAllEndpoints(*v)
+	}
+	return _u
+}
+
 // SetPages sets the "pages" field.
 func (_u *OperatorUpdate) SetPages(v []string) *OperatorUpdate {
 	_u.mutation.SetPages(v)
@@ -159,6 +187,12 @@ func (_u *OperatorUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Disabled(); ok {
 		_spec.SetField(operator.FieldDisabled, field.TypeBool, value)
 	}
+	if value, ok := _u.mutation.AllPages(); ok {
+		_spec.SetField(operator.FieldAllPages, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AllEndpoints(); ok {
+		_spec.SetField(operator.FieldAllEndpoints, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.Pages(); ok {
 		_spec.SetField(operator.FieldPages, field.TypeJSON, value)
 	}
@@ -225,6 +259,34 @@ func (_u *OperatorUpdateOne) SetDisabled(v bool) *OperatorUpdateOne {
 func (_u *OperatorUpdateOne) SetNillableDisabled(v *bool) *OperatorUpdateOne {
 	if v != nil {
 		_u.SetDisabled(*v)
+	}
+	return _u
+}
+
+// SetAllPages sets the "all_pages" field.
+func (_u *OperatorUpdateOne) SetAllPages(v bool) *OperatorUpdateOne {
+	_u.mutation.SetAllPages(v)
+	return _u
+}
+
+// SetNillableAllPages sets the "all_pages" field if the given value is not nil.
+func (_u *OperatorUpdateOne) SetNillableAllPages(v *bool) *OperatorUpdateOne {
+	if v != nil {
+		_u.SetAllPages(*v)
+	}
+	return _u
+}
+
+// SetAllEndpoints sets the "all_endpoints" field.
+func (_u *OperatorUpdateOne) SetAllEndpoints(v bool) *OperatorUpdateOne {
+	_u.mutation.SetAllEndpoints(v)
+	return _u
+}
+
+// SetNillableAllEndpoints sets the "all_endpoints" field if the given value is not nil.
+func (_u *OperatorUpdateOne) SetNillableAllEndpoints(v *bool) *OperatorUpdateOne {
+	if v != nil {
+		_u.SetAllEndpoints(*v)
 	}
 	return _u
 }
@@ -354,6 +416,12 @@ func (_u *OperatorUpdateOne) sqlSave(ctx context.Context) (_node *Operator, err 
 	}
 	if value, ok := _u.mutation.Disabled(); ok {
 		_spec.SetField(operator.FieldDisabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AllPages(); ok {
+		_spec.SetField(operator.FieldAllPages, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AllEndpoints(); ok {
+		_spec.SetField(operator.FieldAllEndpoints, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Pages(); ok {
 		_spec.SetField(operator.FieldPages, field.TypeJSON, value)

@@ -2,8 +2,10 @@ package agreement
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"baituber.cn/yanxuan/v2/ent"
 	"baituber.cn/yanxuan/v2/ent/agreement"
@@ -12,13 +14,14 @@ import (
 )
 
 type DTO struct {
-	ID        string    `json:"id"`
-	Title     string    `json:"title"`
-	Body      string    `json:"body"`
-	BodyHTML  string    `json:"body_html,omitempty"`
-	CreatorID string    `json:"creator_id"`
-	Active    bool      `json:"active"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	Body        string    `json:"body"`
+	BodyHTML    string    `json:"body_html,omitempty"`
+	CreatorName string    `json:"creator_name"`
+	CreatorID   string    `json:"creator_id"`
+	Active      bool      `json:"active"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 func (s *Service) Agreements(ctx context.Context) ([]DTO, error) {
@@ -30,18 +33,27 @@ func (s *Service) Agreements(ctx context.Context) ([]DTO, error) {
 		return nil, err
 	}
 
+	ids := make([]string, 0, len(records))
+	for _, record := range records {
+		ids = append(ids, record.CreatorID)
+	}
+
+	names, err := app.LookupOperatorNames(ctx, s.Client, ids)
+	if err != nil {
+		return nil, err
+	}
+
 	result := make([]DTO, 0, len(records))
 	for _, record := range records {
 		result = append(result, DTO{
-
-			ID:       record.ID,
-			Title:    record.Title,
-			Body:     record.Body,
-			BodyHTML: record.BodyHTML,
-
-			CreatorID: record.CreatorID,
-			Active:    record.Active,
-			CreatedAt: record.CreatedAt,
+			ID:          record.ID,
+			Title:       record.Title,
+			Body:        record.Body,
+			BodyHTML:    record.BodyHTML,
+			CreatorID:   record.CreatorID,
+			CreatorName: names.Label(record.CreatorID),
+			Active:      record.Active,
+			CreatedAt:   record.CreatedAt,
 		})
 	}
 
@@ -90,7 +102,7 @@ func (s *Service) publish(ctx context.Context, actorID, title, body, rich string
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditAgreementPublish, record.ID, "")
+		return true, app.Audit(ctx, tx, actorID, enum.AuditAgreementPublish, record.ID, "", fmt.Sprintf("协议正文字数：%d", utf8.RuneCountInString(body)))
 	})
 
 	return err

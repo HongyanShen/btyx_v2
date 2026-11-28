@@ -20,6 +20,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeleted holds the string denoting the deleted field in the database.
 	FieldDeleted = "deleted"
+	// FieldDisplayNumber holds the string denoting the display_number field in the database.
+	FieldDisplayNumber = "display_number"
 	// FieldCurrentVersionID holds the string denoting the current_version_id field in the database.
 	FieldCurrentVersionID = "current_version_id"
 	// FieldCreatorID holds the string denoting the creator_id field in the database.
@@ -36,6 +38,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeleted,
+	FieldDisplayNumber,
 	FieldCurrentVersionID,
 	FieldCreatorID,
 	FieldOnline,
@@ -67,6 +70,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultDeleted holds the default value on creation for the "deleted" field.
 	DefaultDeleted bool
+	// DisplayNumberValidator is a validator for the "display_number" field. It is called by the builders before save.
+	DisplayNumberValidator func(int64) error
 	// DefaultCurrentVersionID holds the default value on creation for the "current_version_id" field.
 	DefaultCurrentVersionID string
 	// DefaultOnline holds the default value on creation for the "online" field.
@@ -98,6 +103,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeleted orders the results by the deleted field.
 func ByDeleted(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeleted, opts...).ToFunc()
+}
+
+// ByDisplayNumber orders the results by the display_number field.
+func ByDisplayNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayNumber, opts...).ToFunc()
 }
 
 // ByCurrentVersionID orders the results by the current_version_id field.

@@ -18,6 +18,15 @@ const AssignmentStatus = Object.freeze({
 });
 
 const AuditAction = Object.freeze({
+  AuditRequestFailed: "request.failed",
+  AuditCreativeCreate: "creative.create",
+  AuditCreativeVisibility: "creative.visibility",
+  AuditCreativeClaim: "creative.claim",
+  AuditCreativeSubmit: "creative.submit",
+  AuditCreativeReview: "creative.review",
+  AuditCreativeLink: "creative.link",
+  AuditCreativeEvidence: "creative.evidence",
+  AuditCreativeReward: "creative.reward",
   AuditEnrollmentApply: "enrollment.apply",
   AuditEnrollmentApproved: "enrollment.approved",
   AuditEnrollmentRejected: "enrollment.rejected",
@@ -55,6 +64,30 @@ const AuditAction = Object.freeze({
   AuditFeedbackReply: "feedback.reply",
   AuditOperatorCreate: "operator.create",
   AuditOperatorUpdate: "operator.update",
+});
+
+const AuditPlatform = Object.freeze({
+  AuditPlatformAdmin: "admin",
+  AuditPlatformMiniapp: "miniapp",
+});
+
+const CreativeWorkStatus = Object.freeze({
+  CreativeDraft: "draft",
+  CreativePending: "pending",
+  CreativeRejected: "rejected",
+  CreativeApproved: "approved",
+  CreativeLinked: "linked",
+  CreativeRewarded: "rewarded",
+});
+
+const DeliveryState = Object.freeze({
+  DeliveryStation: "station_only",
+  DeliveryPending: "pending",
+  DeliverySending: "sending",
+  DeliverySent: "sent",
+  DeliverySkipped: "skipped",
+  DeliveryFailed: "failed",
+  DeliveryUnknown: "unknown",
 });
 
 const EnrollmentAge = Object.freeze({
@@ -145,12 +178,28 @@ const Role = Object.freeze({
   RoleUser: "user",
 });
 
+const SettlementFrequency = Object.freeze({
+  SettlementWeekly: "weekly",
+  SettlementDaily: "daily",
+  SettlementMonthly: "monthly",
+  SettlementAfterDelay: "after_delay",
+});
+
 const SubmissionStatus = Object.freeze({
   SubmissionPending: "pending",
   SubmissionApproved: "approved",
   SubmissionRejected: "rejected",
   SubmissionInvalid: "invalid",
   SubmissionWaived: "waived",
+});
+
+const SubscriptionResult = Object.freeze({
+  SubscriptionAccept: "accept",
+  SubscriptionReject: "reject",
+  SubscriptionBan: "ban",
+  SubscriptionFilter: "filter",
+  SubscriptionError: "error",
+  SubscriptionUnknown: "unknown",
 });
 
 const TaskStep = Object.freeze({
@@ -195,6 +244,9 @@ module.exports = Object.freeze({
   AssignmentSource,
   AssignmentStatus,
   AuditAction,
+  AuditPlatform,
+  CreativeWorkStatus,
+  DeliveryState,
   EnrollmentAge,
   EnrollmentStatus,
   ErrorCode,
@@ -208,7 +260,9 @@ module.exports = Object.freeze({
   MarketingExpiryMode,
   Platform,
   Role,
+  SettlementFrequency,
   SubmissionStatus,
+  SubscriptionResult,
   TaskStep,
   Visibility,
   WechatTransferState,

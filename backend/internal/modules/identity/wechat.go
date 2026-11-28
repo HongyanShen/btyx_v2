@@ -11,6 +11,7 @@ import (
 
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 )
 
 func (s *Service) LoginWechat(ctx context.Context, code string) (LoginResult, error) {
@@ -38,7 +39,10 @@ func (s *Service) LoginWechat(ctx context.Context, code string) (LoginResult, er
 		return LoginResult{}, app.Invalid("无法发起微信登录")
 	}
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: telemetry.Transport("wechat"),
+	}
 	response, err := client.Do(request)
 	if err != nil {
 		return LoginResult{}, app.Conflict("微信服务暂时不可用，请稍后重试")

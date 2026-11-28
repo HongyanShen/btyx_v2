@@ -1,13 +1,50 @@
 package business
 
 import (
+	"context"
+	"regexp"
 	"slices"
 	"sync"
 	"testing"
+	"time"
 
 	"baituber.cn/yanxuan/v2/ent/userenrollment"
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
+	"baituber.cn/yanxuan/v2/internal/platform/shortcode"
 )
+
+func TestFailedTaskCreationConsumesOnlyItsNumber(t *testing.T) {
+	service := testService(t)
+	service.DB.SetMaxOpenConns(1)
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+	defer cancel()
+	input := TaskInput{
+		Title:     "取号后创建失败",
+		Body:      "分发要求",
+		PriceFen:  "750",
+		Platforms: []enum.Platform{enum.PlatformDouyin},
+		ContentID: "missing",
+	}
+	if _, err := service.CreateTask(ctx, "operator", input); err == nil {
+		t.Fatal("expected creation to fail for a missing content record")
+	}
+
+	input.ContentID = ""
+	created, err := service.CreateTask(ctx, "operator", input)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	suffix, err := shortcode.Encode(2)
+	if err != nil || created.TaskCode != "RW-"+suffix {
+		t.Fatalf("unexpected task number after rollback: %s, %v", created.TaskCode, err)
+	}
+
+	count, err := service.Client.Task.Query().Count(ctx)
+	if err != nil || count != 1 {
+		t.Fatalf("got %d task records after one successful creation: %v", count, err)
+	}
+}
 
 func TestPoolShowsActualMediaAndOriginalUploadTime(t *testing.T) {
 	service := testService(t)
@@ -42,6 +79,22 @@ func TestPoolShowsActualMediaAndOriginalUploadTime(t *testing.T) {
 	pool, err := service.Tasks(ctx)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if !regexp.MustCompile(`^RW-[A-Za-z0-9]{4}$`).MatchString(first.TaskCode) || updated.TaskCode != first.TaskCode || len(pool) != 1 || pool[0].TaskCode != first.TaskCode {
+		t.Fatalf("task code must start at four characters and survive version changes")
+	}
+
+	second, err := service.CreateTask(ctx, "operator", input)
+	if err != nil || second.TaskCode == first.TaskCode {
+		t.Fatalf("second task needs a distinct code: %q, %v", second.TaskCode, err)
+	}
+
+	for _, query := range []string{first.TaskCode, first.TaskCode[3:]} {
+		found, err := service.TasksByCode(ctx, query)
+		if err != nil || len(found) != 1 || found[0].TaskID != first.TaskID {
+			t.Fatalf("task number lookup %q: %v, %v", query, found, err)
+		}
 	}
 
 	if len(pool) != 1 || pool[0].ID != updated.ID || !slices.Equal(pool[0].MediaTypes, []enum.FileMediaType{enum.FileMP4}) || pool[0].UploadedAt == nil || pool[0].UploadedAt.After(first.CreatedAt) {
@@ -122,6 +175,11 @@ func TestClaimTodaySelectsAvailableContentAndSharesManualQuota(t *testing.T) {
 	first, err := service.ClaimToday(ctx, userIDs[0], "today-first-key")
 	if err != nil || first.TaskID != manual.TaskID || first.VersionID != manual.ID || first.PriceFen != "750" {
 		t.Fatalf("expected latest matching task and its snapshot, got %+v, %v", first, err)
+	}
+
+	reviews, _, err := service.ReviewPage(ctx, 1, "", "")
+	if err != nil || len(reviews) != 1 || reviews[0].TaskCode != manual.TaskCode || first.TaskCode != manual.TaskCode {
+		t.Fatalf("expected the same task number in the pool, assignment and review: %q, %q, %+v, %v", manual.TaskCode, first.TaskCode, reviews, err)
 	}
 
 	repeated, err := service.ClaimToday(ctx, userIDs[0], "today-first-key")

@@ -15,11 +15,29 @@ type Assignment func(*sql.Selector)
 // AuditEvent is the predicate function for auditevent builders.
 type AuditEvent func(*sql.Selector)
 
+// AuditHTTPResponse is the predicate function for audithttpresponse builders.
+type AuditHTTPResponse func(*sql.Selector)
+
 // Consent is the predicate function for consent builders.
 type Consent func(*sql.Selector)
 
 // Content is the predicate function for content builders.
 type Content func(*sql.Selector)
+
+// CreativeEarning is the predicate function for creativeearning builders.
+type CreativeEarning func(*sql.Selector)
+
+// CreativeLink is the predicate function for creativelink builders.
+type CreativeLink func(*sql.Selector)
+
+// CreativeTask is the predicate function for creativetask builders.
+type CreativeTask func(*sql.Selector)
+
+// CreativeTier is the predicate function for creativetier builders.
+type CreativeTier func(*sql.Selector)
+
+// CreativeWork is the predicate function for creativework builders.
+type CreativeWork func(*sql.Selector)
 
 // Feedback is the predicate function for feedback builders.
 type Feedback func(*sql.Selector)
@@ -60,8 +78,14 @@ type SettlementLine func(*sql.Selector)
 // Submission is the predicate function for submission builders.
 type Submission func(*sql.Selector)
 
+// SubscriptionChoice is the predicate function for subscriptionchoice builders.
+type SubscriptionChoice func(*sql.Selector)
+
 // Task is the predicate function for task builders.
 type Task func(*sql.Selector)
+
+// TaskNumberCounter is the predicate function for tasknumbercounter builders.
+type TaskNumberCounter func(*sql.Selector)
 
 // TaskVersion is the predicate function for taskversion builders.
 type TaskVersion func(*sql.Selector)

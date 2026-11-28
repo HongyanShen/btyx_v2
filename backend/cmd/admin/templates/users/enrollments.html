@@ -1,0 +1,87 @@
+{{define "enrollments"}}
+<section class="page server-page workspace-page">
+  <div class="page-heading"><div><h2>营销分发 · 分发员报名审核</h2><span class="ant-typography-secondary">粉丝数不限，抖音和小红书账号均须填写。请查看两端主页，记录近 30 天发布情况、新号情况和账号画像。报名时确认《营销分发任务协议》，审核通过且已同意当前版本后可领取任务。</span></div></div>
+  {{if .HasLibrary}}{{template "enrollment-tag-library" .}}{{end}}
+  <form class="enrollment-filters table-toolbar" method="get" action="/users" hx-get="/users" hx-target="#admin-workspace" hx-push-url="true" hx-indicator="#admin-loading" hx-sync="#admin-workspace:replace">
+    <div class="enrollment-filter-select"><select class="server-field" name="status" aria-label="按状态筛选" data-enrollment-filter-status><option value="">全部状态</option>{{range .Statuses}}<option value="{{.Key}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select>{{template "down-chevron" .}}</div>
+    {{$active := ""}}{{range .TagFilter}}{{if .Selected}}{{$active = .Label}}{{end}}{{end}}
+    <input class="server-field" type="hidden" name="tag" value="{{.Tag}}">
+    <div class="enrollment-filter-select"><input class="server-field" type="search" list="enrollment-filter-tags" aria-label="按标签筛选" placeholder="全部标签" value="{{$active}}" data-enrollment-filter-tag>{{template "down-chevron" .}}</div>
+    <datalist id="enrollment-filter-tags">{{range .TagFilter}}<option value="{{.Label}}" data-tag-key="{{.Key}}"></option>{{end}}</datalist>
+    <button class="server-button" type="submit"><span>刷新</span></button>
+  </form>
+  <div class="server-table-frame">
+  <div class="server-table-scroll" role="region" tabindex="0" aria-label="报名审核表格">
+    <table class="server-table enrollment-table">
+      <colgroup><col style="width:154px"><col style="width:138px"><col style="width:160px"><col style="width:152px"><col style="width:94px"><col style="width:114px"><col style="width:128px"><col style="width:126px"><col style="width:126px"></colgroup>
+      <thead><tr><th scope="col">报名人</th><th scope="col">抖音号</th><th scope="col">小红书号</th><th scope="col">身份证照片</th><th scope="col">提交</th><th scope="col">状态</th><th scope="col">人工复核</th><th scope="col">标签</th><th scope="col">操作</th></tr></thead>
+      <tbody>
+        {{$page := .}}
+        {{range .Rows}}{{$row := .}}
+        <tr>
+          <td>{{$url := enrollmentLink $page.Pager.Current $page.Filter $page.Tag .ID .EnrollmentID "details"}}<a class="server-link enrollment-person" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#enrollment-dialog-slot" data-open-server-dialog><span>{{.DisplayName}}</span></a>{{if and .Name .Nickname (ne .Name .Nickname)}}<div class="enrollment-muted">{{.Nickname}}</div>{{end}}</td>
+          <td>{{template "platform-account" .DouyinLink}}</td><td>{{template "platform-account" .XHSLink}}</td>
+          <td>{{if .Photos}}<div class="identity-photo-thumbnails">{{range .Photos}}
+            {{if .URL}}{{$mode := "back"}}{{if eq .Side "正面"}}{{$mode = "front"}}{{end}}{{$url := enrollmentLink $page.Pager.Current $page.Filter $page.Tag $row.ID $row.EnrollmentID $mode}}
+            <a class="identity-photo-thumbnail" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#enrollment-dialog-slot" data-open-server-dialog aria-label="查看身份证{{.Side}}大图"><img src="{{.URL}}" alt="" loading="lazy" referrerpolicy="no-referrer">{{.Side}}</a>
+            {{else}}<span class="identity-photo-missing">{{.Side}} —</span>{{end}}
+          {{end}}</div>{{else if .PhotosUnavailable}}预览暂不可用{{else if .EnrollmentHasPhotos}}已上传{{else}}—{{end}}</td>
+          <td>{{.Date}}</td><td>{{template "enrollment-status" .}}</td>
+          <td>{{range .ReviewInfo}}<div>{{.}}</div>{{else}}—{{end}}</td>
+          <td>{{range .TagLabels}}<span class="server-tag platform-tag">#{{.}}</span> {{else}}—{{end}}</td>
+          <td>{{if .ReviewText}}{{$url := enrollmentLink $page.Pager.Current $page.Filter $page.Tag .ID .EnrollmentID "review"}}<a class="server-button ant-btn enrollment-action" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#enrollment-dialog-slot" data-open-server-dialog><span>{{.ReviewText}}</span></a>
+          {{if .TagsOnly}}{{$tags := enrollmentLink $page.Pager.Current $page.Filter $page.Tag .ID .EnrollmentID "tags"}}<div><a class="server-link" role="button" href="{{$tags}}" hx-get="{{$tags}}" hx-target="#enrollment-dialog-slot" data-open-server-dialog>只改标签</a></div>{{end}}{{else}}—{{end}}</td>
+        </tr>
+        {{else}}<tr><td colspan="9" class="server-empty">{{if or .Filter .Tag}}没有符合筛选条件的报名{{else}}暂无分发员报名{{end}}</td></tr>{{end}}
+      </tbody>
+    </table>
+  </div></div>
+  {{template "pagination" .Pager}}
+  <div id="enrollment-dialog-slot">{{with .Dialog}}{{template "enrollment-dialog" .}}{{end}}</div>
+</section>
+{{end}}
+{{define "enrollment-status"}}
+<span class="server-tag {{if eq .Status "pending"}}enrollment-status-pending{{else if eq .Status "approved"}}enrollment-status-approved{{else}}enrollment-status-rejected{{end}}">{{.StatusText}}</span>
+{{if and (eq .Status "rejected") .Reason}}<div class="enrollment-reason">{{.Reason}}</div>{{end}}
+{{end}}
+{{define "enrollment-dialog"}}
+  {{if eq .Mode "details"}}{{template "enrollment-profile-dialog" .}}
+  {{else if or (eq .Mode "front") (eq .Mode "back")}}{{template "enrollment-photo-dialog" .}}
+  {{else if or (eq .Mode "rename") (eq .Mode "delete")}}{{template "enrollment-tag-dialog" .}}
+  {{else}}{{template "enrollment-review-dialog" .}}{{end}}
+{{end}}
+{{define "enrollment-profile-dialog"}}
+{{$row := .Row}}{{$details := .Document.Details}}
+<dialog class="server-dialog" data-server-dialog aria-labelledby="enrollment-dialog-title">
+  <header><h3 id="enrollment-dialog-title">报名人资料</h3><button type="button" aria-label="关闭" data-close-dialog>×</button></header>
+  <div class="server-dialog-body">
+    <dl class="distributor-description">
+      <dt>姓名</dt><dd>{{if $row.Name}}{{$row.Name}}{{else if and $details $details.Name}}{{$details.Name}}{{else}}—{{end}}</dd>
+      <dt>微信昵称</dt><dd>{{if $row.Nickname}}{{$row.Nickname}}{{else}}—{{end}}</dd>
+      {{if .CanDocuments}}
+        <dt>微信号</dt><dd>{{if and $details $details.Wechat}}{{$details.Wechat}}{{else}}—{{end}}</dd>
+        <dt>身份证号</dt><dd>{{if and $details $details.Identity}}{{$details.Identity}}{{else}}—{{end}}</dd>
+      {{end}}
+      <dt>手机号</dt><dd>{{if and $details $details.Phone}}{{$details.Phone}}{{else if $row.Phone}}{{$row.Phone}}{{else}}—{{end}}</dd>
+      <dt>抖音号</dt><dd>{{template "platform-account" $row.DouyinLink}}</dd><dt>小红书号</dt><dd>{{template "platform-account" $row.XHSLink}}</dd>
+    </dl>
+    {{if .CanDocuments}}
+      {{if .Document.PhotosUnavailable}}<p class="server-alert server-alert-warning">暂时无法生成证件照片预览 <a class="server-link" href="{{.Retry}}" hx-get="{{.Retry}}" hx-target="#enrollment-dialog-slot">重试</a></p>{{end}}
+      <div class="enrollment-document-images">
+        <div class="enrollment-document-image">{{if and $details $details.FrontURL}}<a href="{{.FrontPreview}}" hx-get="{{.FrontPreview}}" hx-target="#enrollment-photo-slot" data-open-server-dialog aria-label="查看身份证正面大图"><img src="{{$details.FrontURL}}" alt="身份证人像面" width="148" referrerpolicy="no-referrer"></a>{{else}}<span class="enrollment-muted">暂无照片</span>{{end}}<div>人像面</div></div>
+        <div class="enrollment-document-image">{{if and $details $details.BackURL}}<a href="{{.BackPreview}}" hx-get="{{.BackPreview}}" hx-target="#enrollment-photo-slot" data-open-server-dialog aria-label="查看身份证反面大图"><img src="{{$details.BackURL}}" alt="身份证国徽面" width="148" referrerpolicy="no-referrer"></a>{{else}}<span class="enrollment-muted">暂无照片</span>{{end}}<div>国徽面</div></div>
+      </div>
+    {{end}}
+  </div>
+  <div id="enrollment-photo-slot"></div>
+</dialog>
+{{end}}
+{{define "enrollment-photo-dialog"}}
+<dialog class="server-dialog identity-preview-dialog" data-server-dialog aria-labelledby="enrollment-photo-title">
+  <header><h3 id="enrollment-photo-title">身份证{{.Photo.Side}}</h3><button type="button" aria-label="关闭照片预览" data-close-dialog>×</button></header>
+  <div class="server-dialog-body">
+    {{if .Photo.URL}}<img class="identity-photo-preview" data-photo-error src="{{.Photo.URL}}" alt="身份证{{.Photo.Side}}大图" referrerpolicy="no-referrer">{{end}}
+    <div class="server-alert server-alert-warning identity-preview-error" role="alert" data-photo-fallback{{if .Photo.URL}} hidden{{end}}>该面照片暂时无法预览 <a class="server-link" href="{{.Retry}}" hx-get="{{.Retry}}" hx-target="#enrollment-dialog-slot">重新获取</a></div>
+  </div>
+</dialog>
+{{end}}

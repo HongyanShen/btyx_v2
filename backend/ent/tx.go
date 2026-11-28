@@ -20,10 +20,22 @@ type Tx struct {
 	Assignment *AssignmentClient
 	// AuditEvent is the client for interacting with the AuditEvent builders.
 	AuditEvent *AuditEventClient
+	// AuditHTTPResponse is the client for interacting with the AuditHTTPResponse builders.
+	AuditHTTPResponse *AuditHTTPResponseClient
 	// Consent is the client for interacting with the Consent builders.
 	Consent *ConsentClient
 	// Content is the client for interacting with the Content builders.
 	Content *ContentClient
+	// CreativeEarning is the client for interacting with the CreativeEarning builders.
+	CreativeEarning *CreativeEarningClient
+	// CreativeLink is the client for interacting with the CreativeLink builders.
+	CreativeLink *CreativeLinkClient
+	// CreativeTask is the client for interacting with the CreativeTask builders.
+	CreativeTask *CreativeTaskClient
+	// CreativeTier is the client for interacting with the CreativeTier builders.
+	CreativeTier *CreativeTierClient
+	// CreativeWork is the client for interacting with the CreativeWork builders.
+	CreativeWork *CreativeWorkClient
 	// Feedback is the client for interacting with the Feedback builders.
 	Feedback *FeedbackClient
 	// FileObject is the client for interacting with the FileObject builders.
@@ -50,8 +62,12 @@ type Tx struct {
 	SettlementLine *SettlementLineClient
 	// Submission is the client for interacting with the Submission builders.
 	Submission *SubmissionClient
+	// SubscriptionChoice is the client for interacting with the SubscriptionChoice builders.
+	SubscriptionChoice *SubscriptionChoiceClient
 	// Task is the client for interacting with the Task builders.
 	Task *TaskClient
+	// TaskNumberCounter is the client for interacting with the TaskNumberCounter builders.
+	TaskNumberCounter *TaskNumberCounterClient
 	// TaskVersion is the client for interacting with the TaskVersion builders.
 	TaskVersion *TaskVersionClient
 	// User is the client for interacting with the User builders.
@@ -202,8 +218,14 @@ func (tx *Tx) init() {
 	tx.Agreement = NewAgreementClient(tx.config)
 	tx.Assignment = NewAssignmentClient(tx.config)
 	tx.AuditEvent = NewAuditEventClient(tx.config)
+	tx.AuditHTTPResponse = NewAuditHTTPResponseClient(tx.config)
 	tx.Consent = NewConsentClient(tx.config)
 	tx.Content = NewContentClient(tx.config)
+	tx.CreativeEarning = NewCreativeEarningClient(tx.config)
+	tx.CreativeLink = NewCreativeLinkClient(tx.config)
+	tx.CreativeTask = NewCreativeTaskClient(tx.config)
+	tx.CreativeTier = NewCreativeTierClient(tx.config)
+	tx.CreativeWork = NewCreativeWorkClient(tx.config)
 	tx.Feedback = NewFeedbackClient(tx.config)
 	tx.FileObject = NewFileObjectClient(tx.config)
 	tx.Job = NewJobClient(tx.config)
@@ -217,7 +239,9 @@ func (tx *Tx) init() {
 	tx.SettlementBatch = NewSettlementBatchClient(tx.config)
 	tx.SettlementLine = NewSettlementLineClient(tx.config)
 	tx.Submission = NewSubmissionClient(tx.config)
+	tx.SubscriptionChoice = NewSubscriptionChoiceClient(tx.config)
 	tx.Task = NewTaskClient(tx.config)
+	tx.TaskNumberCounter = NewTaskNumberCounterClient(tx.config)
 	tx.TaskVersion = NewTaskVersionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserEnrollment = NewUserEnrollmentClient(tx.config)

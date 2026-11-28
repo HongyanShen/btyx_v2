@@ -1,3 +1,4 @@
+const { getCurrentAgreement } = require("../../../services/agreement");
 const { request, post } = require("../../../services/request");
 
 Page({
@@ -11,22 +12,23 @@ Page({
   },
 
   async onShow() {
-    const previous = this.data.agreement;
+    const { agreement: previous, checked: wasChecked } = this.data;
     this.setData({
       loading: true,
       error: "",
       agreement: null,
       consented: false,
+      checked: false,
     });
     try {
-      const [agreement, user] = await Promise.all([
-        request("/agreement"),
-        request("/me"),
-      ]);
+      const agreement = await getCurrentAgreement();
+      if (!agreement) return;
+
+      const user = await request("/me");
       this.setData({
         agreement,
         consented: user.consented,
-        checked: previous?.id === agreement.id && this.data.checked,
+        checked: previous?.id === agreement.id && wasChecked,
       });
     } catch (error) {
       this.setData({ error: error.message });
@@ -40,7 +42,8 @@ Page({
   },
 
   async confirm() {
-    if (!this.data.agreement || !this.data.checked || this.data.submitting) {
+    const { agreement, checked, submitting } = this.data;
+    if (!agreement?.id || !checked || submitting) {
       return;
     }
 
@@ -48,7 +51,7 @@ Page({
 
     try {
       await post("/agreement/consent", {
-        agreement_id: this.data.agreement.id,
+        agreement_id: agreement.id,
       });
       this.setData({ consented: true });
       wx.showToast({ title: "协议已确认", icon: "success" });

@@ -23,6 +23,8 @@ type Task struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Deleted holds the value of the "deleted" field.
 	Deleted bool `json:"deleted,omitempty"`
+	// DisplayNumber holds the value of the "display_number" field.
+	DisplayNumber int64 `json:"display_number,omitempty"`
 	// CurrentVersionID holds the value of the "current_version_id" field.
 	CurrentVersionID string `json:"current_version_id,omitempty"`
 	// CreatorID holds the value of the "creator_id" field.
@@ -39,6 +41,8 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case task.FieldDeleted, task.FieldOnline:
 			values[i] = new(sql.NullBool)
+		case task.FieldDisplayNumber:
+			values[i] = new(sql.NullInt64)
 		case task.FieldID, task.FieldCurrentVersionID, task.FieldCreatorID:
 			values[i] = new(sql.NullString)
 		case task.FieldCreatedAt, task.FieldUpdatedAt:
@@ -81,6 +85,12 @@ func (_m *Task) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field deleted", values[i])
 			} else if value.Valid {
 				_m.Deleted = value.Bool
+			}
+		case task.FieldDisplayNumber:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field display_number", values[i])
+			} else if value.Valid {
+				_m.DisplayNumber = value.Int64
 			}
 		case task.FieldCurrentVersionID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -144,6 +154,9 @@ func (_m *Task) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("deleted=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Deleted))
+	builder.WriteString(", ")
+	builder.WriteString("display_number=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DisplayNumber))
 	builder.WriteString(", ")
 	builder.WriteString("current_version_id=")
 	builder.WriteString(_m.CurrentVersionID)

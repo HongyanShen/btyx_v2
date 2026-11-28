@@ -56,8 +56,13 @@ async function loadMarketingTasks() {
   return {
     user,
     today: today ? presentAssignment(today) : null,
+    dailyLimit: availability.daily_limit || 1,
+    used: availability.used ?? (today ? 1 : 0),
+    creativeOnline: !!availability.creative_online,
+    creativeLimit: availability.creative_limit || 1,
     hasContent: availability.has_content,
     priceFen: availability.price_fen,
+    settlementLabel: availability.settlement_label,
   };
 }
 

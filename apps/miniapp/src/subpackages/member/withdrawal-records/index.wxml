@@ -1,0 +1,14 @@
+<import src="/templates/loading.wxml" />
+<import src="/templates/withdrawal-record.wxml" />
+<view class="wallet-page">
+  <template wx:if="{{state === 'loading'}}" is="loading-card" />
+  <view wx:if="{{state === 'guest'}}" class="wallet-card withdrawal-records-empty">
+    <view>登录后查看提现记录</view>
+    <button class="wallet-action withdrawal-records-login" bindtap="openLogin">登录</button>
+  </view>
+  <button wx:if="{{error}}" class="error wallet-retry" bindtap="load">{{error}} · 点击重试</button>
+  <view wx:if="{{state === 'empty'}}" class="wallet-card wallet-caption withdrawal-records-empty">还没有提现过</view>
+  <view wx:if="{{state === 'ready'}}" class="withdrawal-records-list">
+    <template wx:for="{{records}}" wx:key="id" is="withdrawal-record" data="{{item, showConfirm: true, confirming: confirming || !!error}}" />
+  </view>
+</view>

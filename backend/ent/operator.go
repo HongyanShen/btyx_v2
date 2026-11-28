@@ -30,6 +30,10 @@ type Operator struct {
 	SuperAdmin bool `json:"super_admin,omitempty"`
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
+	// AllPages holds the value of the "all_pages" field.
+	AllPages bool `json:"all_pages,omitempty"`
+	// AllEndpoints holds the value of the "all_endpoints" field.
+	AllEndpoints bool `json:"all_endpoints,omitempty"`
 	// Pages holds the value of the "pages" field.
 	Pages []string `json:"pages,omitempty"`
 	// Endpoints holds the value of the "endpoints" field.
@@ -44,7 +48,7 @@ func (*Operator) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case operator.FieldPages, operator.FieldEndpoints:
 			values[i] = new([]byte)
-		case operator.FieldSuperAdmin, operator.FieldDisabled:
+		case operator.FieldSuperAdmin, operator.FieldDisabled, operator.FieldAllPages, operator.FieldAllEndpoints:
 			values[i] = new(sql.NullBool)
 		case operator.FieldID, operator.FieldUsername, operator.FieldPasswordHash:
 			values[i] = new(sql.NullString)
@@ -106,6 +110,18 @@ func (_m *Operator) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field disabled", values[i])
 			} else if value.Valid {
 				_m.Disabled = value.Bool
+			}
+		case operator.FieldAllPages:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field all_pages", values[i])
+			} else if value.Valid {
+				_m.AllPages = value.Bool
+			}
+		case operator.FieldAllEndpoints:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field all_endpoints", values[i])
+			} else if value.Valid {
+				_m.AllEndpoints = value.Bool
 			}
 		case operator.FieldPages:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -175,6 +191,12 @@ func (_m *Operator) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("disabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Disabled))
+	builder.WriteString(", ")
+	builder.WriteString("all_pages=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AllPages))
+	builder.WriteString(", ")
+	builder.WriteString("all_endpoints=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AllEndpoints))
 	builder.WriteString(", ")
 	builder.WriteString("pages=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Pages))

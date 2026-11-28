@@ -1,0 +1,118 @@
+{{define "assets"}}
+<meta name="admin-workspace" content="htmx">
+<meta name="htmx-config" content='{"allowEval":false,"allowScriptTags":false,"selfRequestsOnly":true,"historyCacheSize":0,"historyRestoreAsHxRequest":false,"includeIndicatorStyles":false,"timeout":20000}'>
+<link rel="stylesheet" href="/assets/styles/global.css">
+<link rel="stylesheet" href="/assets/modules/support/agreements.css">
+<link rel="stylesheet" href="/assets/modules/users/distributors.css">
+<link rel="stylesheet" href="/assets/modules/users/account-search-link.css">
+<link rel="stylesheet" href="/assets/modules/users/enrollment-reviews.css">
+<link rel="stylesheet" href="/assets/modules/reviews/reviews.css">
+<link rel="stylesheet" href="/assets/components/playback-screenshot.css">
+<link rel="stylesheet" href="/assets/components/operator-watermark.css">
+<link rel="stylesheet" href="/assets/modules/settlement/settlement.css">
+<link rel="stylesheet" href="/assets/components/month-picker.css">
+<link rel="stylesheet" href="/assets/app/workspace.css">
+<link rel="stylesheet" href="/assets/components/date-time-picker.css">
+<link rel="stylesheet" href="/assets/vendor/quill.snow.css">
+<script type="module" src="/assets/app/workspace.js"></script>
+{{end}}
+{{define "workspace-document"}}<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} · 白兔严选</title>
+  {{template "assets"}}
+</head>
+<body>{{template "workspace" .}}</body>
+</html>
+{{end}}
+{{define "workspace"}}
+<div id="admin-workspace" class="workspace server-workspace" data-csrf="{{.CSRF}}" data-page-title="{{.Title}} · 白兔严选" hx-history="false">
+  <aside class="sidebar">{{template "navigation" .}}</aside>
+  <div class="workspace-main">
+    <header class="mobile-topbar">
+      <button class="ant-btn" type="button" id="open-mobile-menu" aria-label="打开导航菜单" aria-controls="mobile-menu" aria-expanded="false"><span aria-hidden="true">☰</span></button>
+      <strong>白兔严选 · 运营后台</strong>
+    </header>
+    <main class="workspace-content" id="workspace-content" tabindex="-1">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      <div id="admin-loading" class="htmx-indicator" role="status">正在加载</div>
+      {{if .Success}}<div class="server-toast" role="status">{{.Success}}</div>{{end}}
+      {{if .Error}}
+        <section class="page server-error">
+          <h2>{{.Error}}</h2>
+          {{if .Path}}<a class="server-button" href="{{.Path}}" hx-get="{{.Path}}" hx-target="#admin-workspace" hx-swap="outerHTML">重试</a>{{end}}
+        </section>
+      {{else if .Profile}}{{template "operator-profile" .}}
+      {{else if .Audits}}{{template "audits" .Audits}}
+      {{else if .Withdrawals}}{{template "withdrawals" .Withdrawals}}
+      {{else if .Feedback}}{{template "feedback" .Feedback}}
+      {{else if .Identity}}{{template "identity-records" .Identity}}
+      {{else if .Ledger}}{{template "ledger" .Ledger}}
+      {{else if .Agreements}}{{template "agreements" .Agreements}}
+      {{else if .Operators}}{{template "operators" .Operators}}
+      {{else if .Content}}{{template "content-library" .Content}}
+      {{else if .Distributors}}{{template "distributors" .Distributors}}
+      {{else if .Enrollments}}{{template "enrollments" .Enrollments}}
+      {{else if .Reviews}}{{template "reviews" .Reviews}}
+      {{else if .Settlement}}{{template "settlements" .Settlement}}
+        {{else if .Distribution}}{{template "distribution-settings" .Distribution}}
+      {{else if .Creative}}{{template "creative" .Creative}}
+      {{else if .Tasks}}{{template "marketing-tasks" .Tasks}}
+      {{end}}
+    </main>
+  </div>
+  <dialog class="server-mobile-menu" id="mobile-menu" aria-label="导航菜单">
+    <div class="server-mobile-menu-header">
+      <strong>导航菜单</strong>
+      <form method="dialog"><button type="submit" aria-label="关闭导航菜单">×</button></form>
+    </div>
+    <div class="server-alert" data-request-error role="alert" hidden></div>
+    {{template "navigation" .}}
+  </dialog>
+</div>
+{{end}}
+{{define "navigation"}}
+<nav class="workspace-nav" aria-label="管理后台导航">
+  <div class="sidebar-brand">
+    <strong>白兔严选 · 运营后台</strong>
+    <span>营销分发 · 第一阶段</span>
+  </div>
+  <div class="ant-menu server-menu" hx-target="#admin-workspace" hx-swap="outerHTML" hx-push-url="true" hx-indicator="#admin-loading" hx-sync="#admin-workspace:replace">
+    {{range .Nav}}
+      <details class="nav-section" {{if .Open}}open{{end}}><summary class="ant-menu-item-group-title" {{if .Pending}}aria-description="待办 {{.Pending}}"{{end}}>
+        {{.Label}}{{with .Pending}}{{template "nav-pending" .}}{{end}}
+      </summary>
+      <ul class="server-nav-group" aria-label="{{.Label}}">
+        {{range .Entries}}
+          <li>
+            <a class="ant-menu-item{{if .Selected}} ant-menu-item-selected{{end}}" href="{{.Path}}" hx-get="{{.Path}}" {{if .Selected}}aria-current="page"{{end}} {{if .Pending}}aria-label="{{.Label}}" aria-description="待办 {{.Pending}}"{{end}}><span class="nav-label">{{.Label}}</span>{{with .Pending}}{{template "nav-pending" .}}{{end}}</a>
+          </li>
+        {{end}}
+      </ul></details>
+    {{end}}
+  </div>
+  <div class="sidebar-foot">
+    <a class="profile-link" href="/profile" hx-get="/profile" hx-target="#admin-workspace" hx-swap="outerHTML" hx-push-url="true" title="个人信息" {{if eq .Path "/profile"}}aria-current="page"{{end}}>{{.User}}</a>
+    <form action="/logout" method="post" hx-post="/logout" hx-disabled-elt="find button">
+      <input name="csrf" type="hidden" value="{{.CSRF}}">
+      <button type="submit" class="ant-btn">退出</button>
+    </form>
+  </div>
+</nav>
+{{end}}
+{{define "nav-pending"}}<span class="nav-pending" aria-hidden="true">{{.}}</span>{{end}}
+{{define "error-message"}}
+<div class="server-alert server-alert-error" role="alert">{{.Message}}</div>
+{{end}}
+{{define "error-document"}}<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{.Status}} · 白兔严选</title>{{template "assets"}}</head>
+<body>
+  <main class="server-error page">
+    <h1>{{.Status}}</h1><p>{{.Message}}</p><a class="server-button" href="/">返回后台</a>
+  </main>
+</body>
+</html>
+{{end}}

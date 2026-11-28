@@ -25,6 +25,11 @@ func (Job) Fields() []ent.Field {
 
 		field.String("reference_id"),
 
+		field.String("trace_parent").
+			Default("").
+			MaxLen(55).
+			Immutable(),
+
 		field.String("request_id").
 			Default("").
 			MaxLen(27).

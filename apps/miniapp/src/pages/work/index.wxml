@@ -1,51 +1,57 @@
+<navigator wx:if="{{signedIn}}" class="creative-work-entry" url="/subpackages/task/creative/index?mine=1">我的创作任务 ›</navigator>
 <import src="/templates/loading.wxml" />
-<view class="page work-page">
-  <view wx:if="{{!signedIn && !loading}}" class="card">
-    <view class="muted">登录后查看任务进度</view>
-    <button class="primary spaced" bindtap="openLogin">登录</button>
+<view class="work-page">
+  <view wx:if="{{!signedIn && !loading}}" class="work-empty">
+    <image src="/assets/ai.png" mode="aspectFit" />
+    <view>登录后查看任务进度</view>
+    <view class="work-pill work-empty-button" aria-role="button" bindtap="openLogin">登录</view>
   </view>
   <block wx:else>
-    <button wx:if="{{!loading && !error}}" class="notice data-entry" bindtap="showScreenshots">
-      <view class="grow">
-        <view class="data-entry-title">交播放数据</view>
-        <view>{{screenshotCount ? screenshotCount + ' 条任务待补截图' : '每周一 12:00 前提交上周播放截图'}}</view>
-      </view>
-      <text>{{needsScreenshots ? '查看全部' : '去查看'}} ›</text>
-    </button>
+    <view wx:if="{{signedIn && showSubscription}}" class="work-notice work-subscribe" aria-role="button" bindtap="subscribe">
+      <text class="grow">🔔 开启通知，审核结果第一时间告诉你</text><text>›</text>
+    </view>
+    <view wx:if="{{!loading && !error && showPlayback}}" class="work-notice {{pendingTasks ? 'work-notice-pending' : ''}}" aria-role="button" bindtap="openPlayback">
+      <text class="grow">📊 {{playbackMessage}}</text><text class="work-notice-action">交播放数据 ›</text>
+    </view>
 
-    <scroll-view scroll-x class="work-tabs">
-      <button wx:for="{{tabs}}" wx:key="value" class="work-tab {{!needsScreenshots && selected === item.value ? 'work-tab-active' : ''}}" data-value="{{item.value}}" bindtap="select">
-        {{item.label}}
-      </button>
+    <scroll-view scroll-x class="work-tabs" aria-label="任务状态筛选">
+      <view class="work-tabs-inner">
+        <view wx:for="{{tabs}}" wx:key="value" class="work-tab {{selected === item.value ? 'work-tab-active' : ''}}" data-value="{{item.value}}" aria-role="button" bindtap="select">
+          {{item.value ? item.label + ' ' + item.count : item.label}}
+        </view>
+      </view>
     </scroll-view>
 
     <view wx:if="{{error}}" class="error">
       <view>{{error}}</view>
-      <button class="secondary-button small-button spaced" bindtap="load">重试</button>
+      <view class="work-pill work-empty-button" aria-role="button" bindtap="load">重试</view>
     </view>
     <template wx:elif="{{loading}}" is="loading-card" />
-    <view wx:elif="{{!tasks.length}}" class="empty">{{needsScreenshots ? '暂无待补截图的任务' : '暂无此类任务'}}</view>
+    <view wx:if="{{!loading && !error && !tasks.length}}" class="work-empty">
+      <image src="/assets/ai.png" mode="aspectFit" />
+      <view>还没有任务</view>
+      <view class="work-pill work-empty-button" aria-role="button" bindtap="goHome">去首页领一个</view>
+    </view>
 
-    <block wx:if="{{!error && !loading}}">
-      <view wx:for="{{tasks}}" wx:key="id" class="card work-card" data-id="{{item.id}}" bindtap="open">
+    <block wx:if="{{!loading && !error}}">
+      <view wx:for="{{tasks}}" wx:key="id" class="work-card" data-id="{{item.id}}" bindtap="open">
         <view class="work-card-header">
-          <view class="work-icon">
-            <image src="/assets/marketing-white.png" mode="aspectFit" />
-          </view>
+          <view class="work-icon"><image src="/assets/marketing-white.png" mode="aspectFit" /></view>
           <view class="grow">
-            <view class="card-title">{{item.title}}</view>
-            <view class="muted">营销分发 · {{item.platformText}}</view>
+            <view class="work-card-title">
+              {{item.title}} <text wx:if="{{item.sourceLabel}}" class="work-badge {{item.reissued ? 'work-source-reissued' : 'work-source-assigned'}}">{{item.sourceLabel}}</text>
+            </view>
+            <view class="work-meta">
+              营销分发 · {{item.platformText}}
+              <text wx:if="{{item.deadline}}"> · 截止 {{item.deadline.time}} · 还剩 <text class="work-countdown">{{item.deadline.remaining}}</text></text>
+              <text wx:elif="{{item.dueDate}}"> · 截止 {{item.dueDate}}</text>
+            </view>
           </view>
-          <text class="badge">{{item.statusLabel}}</text>
+          <text class="work-badge work-badge-{{item.tone}}">{{item.statusLabel}}</text>
         </view>
-        <text wx:if="{{item.showSource}}" class="badge {{item.reissued ? 'badge-reissued' : ''}}">{{item.sourceLabel}}</text>
-        <view wx:if="{{item.notice}}" class="work-rejection">{{item.notice}}</view>
         <view class="work-card-footer">
-          <view class="grow muted">
-            <view wx:if="{{item.deadline}}">{{item.deadline.time}} 前交链接 · {{item.deadline.remaining}}</view>
-            <view wx:else>{{item.progressHint}}</view>
-          </view>
-          <text class="work-arrow">›</text>
+          <text class="grow">{{item.footer}}</text>
+          <view class="work-pill {{item.quietAction ? 'work-pill-quiet' : ''}}" aria-role="button" data-id="{{item.id}}" catchtap="open">{{item.action}}</view>
         </view>
       </view>
     </block>

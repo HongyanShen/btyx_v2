@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   gap: 20rpx;
-  padding: 22rpx 24rpx;
+  padding: 24rpx;
 }
 
 .execution-icon {
@@ -28,8 +28,8 @@
 }
 
 .execution-icon-image {
-  width: 44rpx;
-  height: 44rpx;
+  width: 40rpx;
+  height: 40rpx;
 }
 
 .execution-heading,
@@ -55,16 +55,53 @@
 
 .execution-meta {
   margin-top: 4rpx;
+  color: #9d97b8;
+  font-size: 23rpx;
+  line-height: 1.45;
 }
 
-.execution-status {
+.execution-status,
+.execution-source {
+  display: inline-block;
   flex: none;
-  padding: 3rpx 10rpx;
-  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 10rpx;
   background: #f0edf8;
-  color: #585080;
+  color: #3b3568;
   font-size: 22rpx;
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.execution-status-warning {
+  background: #fff6db;
+  color: #b07800;
+}
+
+.execution-status-success {
+  background: #e6f7ec;
+  color: #1e9e50;
+}
+
+.execution-status-neutral {
+  background: #f0f0f2;
+  color: #666;
+}
+
+.execution-status-danger {
+  background: #fdecec;
+  color: #d33;
+}
+
+.execution-source {
+  margin-left: 8rpx;
+  background: #fbf6f9;
+}
+
+.execution-source-reissued {
+  background: #fff1d6;
+  color: #b06200;
 }
 
 .execution-countdown {
@@ -175,8 +212,18 @@
   border-color: #efd0d2;
 }
 
-.execution-due {
-  margin: 0 8rpx 20rpx;
+.execution-alert-assigned {
+  border-color: #c9c4e0;
+  background: #fbf6f9;
+  color: #3b3568;
+}
+
+.execution-alert-source {
+  font-weight: 700;
+}
+
+.execution-reasons {
+  white-space: pre-line;
 }
 
 .execution-timeline {
@@ -386,6 +433,11 @@ button.material-save {
   margin-top: 6rpx;
 }
 
+.execution-video-file button.material-save {
+  margin-top: 0;
+  margin-left: 8rpx;
+}
+
 button.material-saved {
   border-color: #c0e2ce;
   background: #eef9f2;
@@ -407,6 +459,19 @@ button.execution-primary {
 button.execution-primary[disabled] {
   background: #ede9f5;
   color: #766c97;
+}
+
+button.execution-return {
+  width: 100%;
+  margin-top: 0;
+  border-radius: 28rpx;
+  font-size: 26rpx;
+  line-height: 86rpx;
+}
+
+.execution-result-actions {
+  display: flex;
+  gap: 16rpx;
 }
 
 .execution-links-tip {

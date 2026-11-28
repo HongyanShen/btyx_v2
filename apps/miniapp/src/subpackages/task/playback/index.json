@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "交播放数据",
+  "navigationBarBackgroundColor": "#ffffff",
+  "navigationBarTextStyle": "black",
+  "enablePullDownRefresh": true
+}

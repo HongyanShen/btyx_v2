@@ -43,6 +43,8 @@ const (
 	FieldSettlementID = "settlement_id"
 	// FieldEligibleDate holds the string denoting the eligible_date field in the database.
 	FieldEligibleDate = "eligible_date"
+	// FieldSettlementEligibleAt holds the string denoting the settlement_eligible_at field in the database.
+	FieldSettlementEligibleAt = "settlement_eligible_at"
 	// FieldVisibility holds the string denoting the visibility field in the database.
 	FieldVisibility = "visibility"
 	// Table holds the table name of the submission in the database.
@@ -66,6 +68,7 @@ var Columns = []string{
 	FieldApprovedAt,
 	FieldSettlementID,
 	FieldEligibleDate,
+	FieldSettlementEligibleAt,
 	FieldVisibility,
 }
 
@@ -214,6 +217,11 @@ func BySettlementID(opts ...sql.OrderTermOption) OrderOption {
 // ByEligibleDate orders the results by the eligible_date field.
 func ByEligibleDate(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEligibleDate, opts...).ToFunc()
+}
+
+// BySettlementEligibleAt orders the results by the settlement_eligible_at field.
+func BySettlementEligibleAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementEligibleAt, opts...).ToFunc()
 }
 
 // ByVisibility orders the results by the visibility field.

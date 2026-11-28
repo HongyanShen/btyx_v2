@@ -1,0 +1,20 @@
+<view class="creative">
+<view wx:if="{{loading}}">正在加载…</view><view wx:elif="{{error}}" class="card">{{error}}<button bindtap="load">重新加载</button></view>
+<block wx:elif="{{!task}}">
+<view wx:if="{{online && !mineOnly}}" class="tabs"><text bindtap="distribution">分发任务</text><text class="selected">创作任务</text></view>
+<view wx:if="{{mineOnly || mine.length}}" class="heading">我在做的</view>
+<view wx:for="{{mine}}" wx:key="id" class="card" bindtap="select" data-work="{{item.id}}"><text class="title">{{item.task.title}}</text>{{item.label}} ›</view>
+<view wx:if="{{mineOnly && !mine.length}}" class="card">还没有领取创作任务</view>
+<block wx:if="{{!mineOnly && online}}"><view class="hint">创作任务每天可领 {{limit}} 个，今天已领 {{used}} 个，和分发任务分开算。</view>
+<view wx:for="{{tasks}}" wx:key="id" class="card" bindtap="select" data-task="{{item.id}}"><text class="title">{{item.title}}</text><text>创作 ¥{{item.fee}} · 发布 ¥{{item.rate}} / 平台</text><text class="reward">点赞奖励最高 ¥{{item.tiers[item.tiers.length-1].amount}}</text><text>{{item.requirements}}</text><text>{{item.platformNames}} · 截止 {{item.end}}　查看任务 ›</text></view>
+<view wx:if="{{!tasks.length}}" class="card">暂无可领取的创作任务</view></block></block>
+<block wx:else><view class="hero"><text class="title">{{task.title}}</text><text>创作 ¥{{task.fee}}　发布 ¥{{task.rate}} / 平台</text><text>{{task.platformNames}}</text></view>
+<view wx:if="{{work}}" class="card"><text class="title">{{work.label}}</text><view class="steps"><text wx:for="{{steps}}" wx:key="*this" class="{{index===stage?'current':''}}">{{item}} </text></view></view>
+<view class="card"><text class="title">创作要求</text><text>{{task.requirements}}</text><text>{{task.copy_text}}</text><text>{{task.topics}}</text><button wx:for="{{task.files}}" wx:key="*this" data-id="{{item}}" bindtap="save">保存参考素材 {{index+1}}</button></view>
+<view class="card"><text class="title">点赞奖励</text><text wx:for="{{task.tiers}}" wx:key="likes">{{item.likes}} 赞起　¥{{item.amount}}</text><text>{{task.combined_likes?'各平台点赞合计对档':'各平台分别对档'}} · 发布满 {{task.publish_days}} 天</text><text>投稿 {{task.start}} 至 {{task.end}}　兑奖 {{task.award}}</text></view>
+<button wx:if="{{!work}}" disabled="{{busy || used >= limit}}" bindtap="claim">{{used >= limit?'今日创作名额已领满':'领取创作任务'}}</button>
+<view wx:elif="{{work.status==='draft' || work.status==='rejected'}}" class="card"><text wx:if="{{work.reason}}">驳回原因　{{work.reason}}</text><button disabled="{{busy}}" bindtap="selectFiles">{{files.length?'重新选择作品（已选 '+files.length+' 个）':'选择作品'}}</button><textarea placeholder="发布文案和必带话题" value="{{copy}}" bindinput="editCopy"/><button disabled="{{busy}}" bindtap="submit">提交作品审核</button></view>
+<view wx:elif="{{work.status==='approved'}}" class="card"><text class="title">提交发布链接</text><textarea wx:for="{{platformRows}}" wx:key="id" data-platform="{{item.id}}" value="{{urls[item.id]}}" placeholder="粘贴{{item.label}}分享文案" bindinput="editUrl"/><button disabled="{{busy}}" bindtap="submitLinks">提交链接</button></view>
+<view wx:if="{{work.links.length}}" class="card"><text class="title">点赞截图与兑奖</text><view wx:for="{{work.links}}" wx:key="platform"><text>{{item.label}}　{{item.likes === null?'待核实':item.likes+' 赞'}}　{{item.reward}}</text><text wx:if="{{item.reason}}">截图退回原因　{{item.reason}}</text><button wx:if="{{item.screenshot}}" data-id="{{item.screenshot}}" bindtap="preview">查看截图</button><button wx:if="{{work.status==='linked'}}" disabled="{{busy}}" data-platform="{{item.platform}}" bindtap="evidence">{{item.screenshot?'更换':'上传'}}点赞截图</button></view></view>
+<view wx:if="{{work.earnings.length}}" class="card"><text class="title">奖励明细</text><text wx:for="{{work.earnings}}" wx:key="likes_reward">{{item.likes_reward?'点赞奖励':'创作费 + 发布费'}}　¥{{item.amount}}　{{item.amount_fen==='0'?'未达奖励档':item.batch_id?'已入账':item.date+' 待结算'}}</text></view></block>
+<view wx:if="{{actionError}}" class="hint" role="alert">{{actionError}}</view></view>

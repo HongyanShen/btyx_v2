@@ -1,0 +1,121 @@
+.wallet-page {
+  padding: 28rpx 28rpx calc(36rpx + env(safe-area-inset-bottom));
+}
+.wallet-page button,
+.wallet-content button {
+  min-width: 0;
+  max-width: none;
+}
+.wallet-card {
+  margin-bottom: 24rpx;
+  padding: 28rpx;
+  border-radius: 32rpx;
+  background: #fff;
+  box-shadow:
+    0 2rpx 4rpx #2d26540d,
+    0 8rpx 28rpx #2d26540a;
+}
+.wallet-number {
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.wallet-caption {
+  color: #746b8e;
+  font-size: 24rpx;
+  line-height: 1.55;
+}
+.wallet-action {
+  display: flex;
+  width: 100%;
+  min-height: 70rpx;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8b82be, #756aa8);
+  color: #fff;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.wallet-action[disabled] {
+  background: #dedbe6;
+  color: #756f84;
+}
+.wallet-retry {
+  width: 100% !important;
+  margin-bottom: 24rpx;
+  text-align: left;
+}
+.wallet-page .wallet-action {
+  width: 100% !important;
+}
+.wallet-banner {
+  margin-bottom: 24rpx;
+  padding: 20rpx 24rpx;
+  border: 2rpx solid #e8dfee;
+  border-radius: 24rpx;
+  background: #f1edf8;
+  color: #554a7d;
+  font-size: 26rpx;
+  line-height: 1.55;
+}
+.wallet-banner-success {
+  border-color: #d2ebd9;
+  background: #eaf6ee;
+  color: #276541;
+}
+.wallet-record {
+  margin-bottom: 12rpx;
+  padding: 20rpx 24rpx;
+  border: 2rpx solid #ece8f3;
+  border-radius: 24rpx;
+  background: #fff;
+}
+.wallet-record-title {
+  font-weight: 700;
+}
+.wallet-record-meta {
+  margin-top: 8rpx;
+}
+
+.wallet-frozen,
+.withdrawal-record-note {
+  margin-top: 8rpx;
+}
+
+.wallet-frozen {
+  color: #865c1e;
+}
+
+.wallet-page .withdrawal-confirm {
+  width: auto !important;
+  min-height: 68rpx;
+  margin: 16rpx 0 0 !important;
+  padding: 0 32rpx;
+  font-size: 26rpx;
+}
+
+.withdrawal-status {
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  background: #efedf3;
+  color: #605977;
+  font-size: 23rpx;
+}
+
+.withdrawal-status-done {
+  background: #e6f7ec;
+  color: #27704c;
+}
+
+.withdrawal-status-waiting {
+  background: #fff6db;
+  color: #8b5c00;
+}
+
+.wallet-page .withdrawal-status-action {
+  width: auto !important;
+  margin: 0 !important;
+  min-height: 58rpx;
+  padding: 6rpx 14rpx;
+  line-height: 1.4;
+}

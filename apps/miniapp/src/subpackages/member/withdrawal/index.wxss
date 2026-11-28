@@ -1,0 +1,110 @@
+@import "../../../styles/wallet.wxss";
+
+.withdrawal-balance,
+.withdrawal-success {
+  padding: 40rpx 32rpx;
+  text-align: center;
+}
+.withdrawal-available {
+  margin-top: 6rpx;
+  font-size: 60rpx;
+}
+.withdrawal-form {
+  padding: 28rpx 32rpx;
+}
+.withdrawal-label {
+  margin-bottom: 12rpx;
+  color: #554a7d;
+  font-size: 26rpx;
+  font-weight: 650;
+}
+.withdrawal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.withdrawal-yuan {
+  font-size: 40rpx;
+  font-weight: 700;
+}
+.withdrawal-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 76rpx;
+  padding: 14rpx 20rpx;
+  font-size: 36rpx;
+  font-variant-numeric: tabular-nums;
+}
+.withdrawal-all {
+  flex: none;
+  width: auto !important;
+  padding: 8rpx;
+  background: transparent;
+  color: #655a98;
+  font-size: 28rpx;
+  line-height: 1.45;
+}
+.withdrawal-zero {
+  margin: 20rpx 0 0;
+  font-size: 25rpx;
+}
+.withdrawal-destination {
+  margin-top: 24rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 20rpx;
+  background: #f6f5fa;
+  font-size: 26rpx;
+}
+.withdrawal-help {
+  margin-top: 16rpx;
+}
+.withdrawal-error {
+  margin-top: 12rpx;
+  color: #a54545;
+  font-size: 26rpx;
+}
+.withdrawal-submit {
+  min-height: 88rpx;
+  margin-top: 20rpx;
+}
+.withdrawal-history-title {
+  margin-bottom: 16rpx;
+  font-weight: 700;
+}
+.withdrawal-open-records {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 8rpx 0 8rpx 16rpx;
+  background: transparent;
+  color: #655a98;
+  font-size: 25rpx;
+  line-height: 1.45;
+}
+.withdrawal-check {
+  width: 104rpx;
+  height: 104rpx;
+  margin: 0 auto 20rpx;
+  border-radius: 50%;
+  background: #07c160;
+  color: #fff;
+  font-size: 60rpx;
+  line-height: 104rpx;
+}
+.withdrawal-done-title {
+  margin-bottom: 8rpx;
+  font-size: 34rpx;
+  font-weight: 750;
+}
+.withdrawal-back-work {
+  min-height: 88rpx;
+  border: 2rpx solid #8b82be;
+  background: #fff;
+  color: #655a98;
+  line-height: 84rpx;
+}
+.withdrawal-back-wallet {
+  min-height: 88rpx;
+}
+.wallet-page .actions button {
+  width: 0 !important;
+}

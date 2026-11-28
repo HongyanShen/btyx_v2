@@ -216,6 +216,26 @@ func (_u *SubmissionUpdate) SetNillableEligibleDate(v *string) *SubmissionUpdate
 	return _u
 }
 
+// SetSettlementEligibleAt sets the "settlement_eligible_at" field.
+func (_u *SubmissionUpdate) SetSettlementEligibleAt(v time.Time) *SubmissionUpdate {
+	_u.mutation.SetSettlementEligibleAt(v)
+	return _u
+}
+
+// SetNillableSettlementEligibleAt sets the "settlement_eligible_at" field if the given value is not nil.
+func (_u *SubmissionUpdate) SetNillableSettlementEligibleAt(v *time.Time) *SubmissionUpdate {
+	if v != nil {
+		_u.SetSettlementEligibleAt(*v)
+	}
+	return _u
+}
+
+// ClearSettlementEligibleAt clears the value of the "settlement_eligible_at" field.
+func (_u *SubmissionUpdate) ClearSettlementEligibleAt() *SubmissionUpdate {
+	_u.mutation.ClearSettlementEligibleAt()
+	return _u
+}
+
 // SetVisibility sets the "visibility" field.
 func (_u *SubmissionUpdate) SetVisibility(v enum.Visibility) *SubmissionUpdate {
 	_u.mutation.SetVisibility(v)
@@ -347,6 +367,12 @@ func (_u *SubmissionUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.EligibleDate(); ok {
 		_spec.SetField(submission.FieldEligibleDate, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SettlementEligibleAt(); ok {
+		_spec.SetField(submission.FieldSettlementEligibleAt, field.TypeTime, value)
+	}
+	if _u.mutation.SettlementEligibleAtCleared() {
+		_spec.ClearField(submission.FieldSettlementEligibleAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Visibility(); ok {
 		_spec.SetField(submission.FieldVisibility, field.TypeEnum, value)
@@ -558,6 +584,26 @@ func (_u *SubmissionUpdateOne) SetNillableEligibleDate(v *string) *SubmissionUpd
 	return _u
 }
 
+// SetSettlementEligibleAt sets the "settlement_eligible_at" field.
+func (_u *SubmissionUpdateOne) SetSettlementEligibleAt(v time.Time) *SubmissionUpdateOne {
+	_u.mutation.SetSettlementEligibleAt(v)
+	return _u
+}
+
+// SetNillableSettlementEligibleAt sets the "settlement_eligible_at" field if the given value is not nil.
+func (_u *SubmissionUpdateOne) SetNillableSettlementEligibleAt(v *time.Time) *SubmissionUpdateOne {
+	if v != nil {
+		_u.SetSettlementEligibleAt(*v)
+	}
+	return _u
+}
+
+// ClearSettlementEligibleAt clears the value of the "settlement_eligible_at" field.
+func (_u *SubmissionUpdateOne) ClearSettlementEligibleAt() *SubmissionUpdateOne {
+	_u.mutation.ClearSettlementEligibleAt()
+	return _u
+}
+
 // SetVisibility sets the "visibility" field.
 func (_u *SubmissionUpdateOne) SetVisibility(v enum.Visibility) *SubmissionUpdateOne {
 	_u.mutation.SetVisibility(v)
@@ -719,6 +765,12 @@ func (_u *SubmissionUpdateOne) sqlSave(ctx context.Context) (_node *Submission, 
 	}
 	if value, ok := _u.mutation.EligibleDate(); ok {
 		_spec.SetField(submission.FieldEligibleDate, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SettlementEligibleAt(); ok {
+		_spec.SetField(submission.FieldSettlementEligibleAt, field.TypeTime, value)
+	}
+	if _u.mutation.SettlementEligibleAtCleared() {
+		_spec.ClearField(submission.FieldSettlementEligibleAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Visibility(); ok {
 		_spec.SetField(submission.FieldVisibility, field.TypeEnum, value)

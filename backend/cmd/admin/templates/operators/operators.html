@@ -1,0 +1,58 @@
+{{define "operators"}}
+<section class="page server-page workspace-page">
+  <div class="page-heading">
+    <div><h2>运营账号</h2><span class="ant-typography-secondary">为每个账号配置可访问的页面和可调用的接口。</span></div>
+    <a class="server-button server-primary" role="button" href="/operators?new=1" hx-get="/operators?new=1" hx-target="#operator-dialog-slot" data-open-server-dialog>新建运营账号</a>
+  </div>
+  <div class="server-table-frame">
+  <div class="server-table-scroll" role="region" tabindex="0" aria-label="运营账号表格">
+    <table class="server-table operator-table">
+      <thead><tr><th scope="col">用户名</th><th scope="col">状态</th><th scope="col">页面权限</th><th scope="col">接口权限</th><th scope="col">操作</th></tr></thead>
+      <tbody>
+        {{$page := .}}
+        {{range .Rows}}<tr>
+          <td>{{.Username}}</td><td>{{if .Disabled}}<span class="server-tag">已停用</span>{{else}}<span class="server-tag server-tag-green">已启用</span>{{end}}</td>
+          <td>{{if or .SuperAdmin .AllPages}}全部{{else}}{{len .Pages}} 项{{end}}</td><td>{{if or .SuperAdmin .AllEndpoints}}全部{{else}}{{len .Endpoints}} 项{{end}}</td>
+          <td>{{if .SuperAdmin}}<span class="server-tag server-tag-purple">超级管理员</span>{{else}}<a class="server-button" role="button" href="/operators?page={{$page.Pager.Current}}&amp;edit={{.ID}}" hx-get="/operators?page={{$page.Pager.Current}}&amp;edit={{.ID}}" hx-target="#operator-dialog-slot" data-open-server-dialog>编辑账号</a>{{end}}</td>
+        </tr>{{else}}<tr><td class="server-empty" colspan="5">暂无数据</td></tr>{{end}}
+      </tbody>
+    </table>
+  </div></div>
+  {{template "pagination" .Pager}}
+  <div id="operator-dialog-slot">{{with .Dialog}}{{template "operator-dialog" .}}{{end}}</div>
+</section>
+{{end}}
+{{define "operator-dialog"}}
+<dialog class="server-dialog server-dialog-wide" data-server-dialog aria-labelledby="operator-dialog-title">
+  <header><h3 id="operator-dialog-title">{{if .ID}}编辑运营账号 · {{.Username}}{{else}}新建运营账号{{end}}</h3><button type="button" aria-label="关闭" data-close-dialog>×</button></header>
+  {{$action := "/operators"}}{{if .ID}}{{$action = printf "/operators/%s" .ID}}{{end}}
+  <form class="server-dialog-form" method="post" action="{{$action}}?page={{.Page}}" hx-post="{{$action}}?page={{.Page}}" hx-target="#operator-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop">
+    <input name="csrf" type="hidden" value="{{.CSRF}}">
+    <div class="server-dialog-body">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{end}}
+      {{if .ID}}<input name="username" type="hidden" value="{{.Username}}">{{else}}<label for="operator-username">用户名</label><input id="operator-username" name="username" value="{{.Username}}" pattern="[a-zA-Z0-9][a-zA-Z0-9._\-]{2,63}" maxlength="64" autocomplete="off" required>{{end}}
+      <label for="operator-password">{{if .ID}}重置密码{{else}}初始密码{{end}}</label>
+      <input id="operator-password" type="password" name="password" autocomplete="new-password" {{if .ID}}aria-describedby="operator-password-help"{{else}}required minlength="12" aria-describedby="operator-password-help"{{end}}>
+      <p class="server-secondary" id="operator-password-help">{{if .ID}}留空保留原密码。重置密码会使该账号的现有会话失效。{{else}}至少 12 个字符，最多 72 字节。{{end}}</p>
+      {{if .ID}}<label><input name="disabled" type="checkbox" value="1" role="switch"{{if .Disabled}} checked{{end}}> 停用账号</label><p class="server-secondary">停用后，该账号无法登录，现有会话立即失效。</p>{{end}}
+      <fieldset class="operator-choices"><legend>页面权限</legend>
+        <label><input type="checkbox" name="all_pages" value="1" data-select-permissions aria-describedby="operator-all-pages-help"{{if .AllPages}} checked{{end}}> 全选</label>
+        <small class="server-secondary" id="operator-all-pages-help">包含以后新增的页面</small>
+        <div class="operator-permission-options">
+        {{range .Pages}}<label><input type="checkbox" name="pages" value="{{.Key}}"{{if .Checked}} checked{{end}}> {{.Label}}</label>{{end}}
+      </div></fieldset>
+      <fieldset class="operator-choices"><legend>接口权限</legend>
+        <label><input type="checkbox" name="all_endpoints" value="1" data-select-permissions aria-describedby="operator-all-endpoints-help"{{if .AllEndpoints}} checked{{end}}> 全选</label>
+        <small class="server-secondary" id="operator-all-endpoints-help">包含以后新增的接口</small>
+        <div class="operator-permission-options operator-endpoint-options">
+        {{range $index, $endpoint := .Endpoints}}<label class="operator-endpoint">
+          <input type="checkbox" name="endpoints" value="{{.Key}}" aria-labelledby="operator-endpoint-name-{{$index}}" aria-describedby="operator-endpoint-key-{{$index}}"{{if .Checked}} checked{{end}}>
+          <span><span id="operator-endpoint-name-{{$index}}">{{.Label}}</span><code class="operator-endpoint-key" id="operator-endpoint-key-{{$index}}">{{.Key}}</code></span>
+        </label>{{end}}
+      </div></fieldset>
+    </div>
+    <footer><button class="server-button" type="button" data-close-dialog>取消</button><button class="server-button server-primary" type="submit">保存</button></footer>
+  </form>
+</dialog>
+{{end}}

@@ -25,6 +25,10 @@ const (
 	FieldSuperAdmin = "super_admin"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
+	// FieldAllPages holds the string denoting the all_pages field in the database.
+	FieldAllPages = "all_pages"
+	// FieldAllEndpoints holds the string denoting the all_endpoints field in the database.
+	FieldAllEndpoints = "all_endpoints"
 	// FieldPages holds the string denoting the pages field in the database.
 	FieldPages = "pages"
 	// FieldEndpoints holds the string denoting the endpoints field in the database.
@@ -42,6 +46,8 @@ var Columns = []string{
 	FieldPasswordHash,
 	FieldSuperAdmin,
 	FieldDisabled,
+	FieldAllPages,
+	FieldAllEndpoints,
 	FieldPages,
 	FieldEndpoints,
 }
@@ -71,6 +77,10 @@ var (
 	DefaultSuperAdmin bool
 	// DefaultDisabled holds the default value on creation for the "disabled" field.
 	DefaultDisabled bool
+	// DefaultAllPages holds the default value on creation for the "all_pages" field.
+	DefaultAllPages bool
+	// DefaultAllEndpoints holds the default value on creation for the "all_endpoints" field.
+	DefaultAllEndpoints bool
 	// DefaultPages holds the default value on creation for the "pages" field.
 	DefaultPages []string
 	// DefaultEndpoints holds the default value on creation for the "endpoints" field.
@@ -117,4 +127,14 @@ func BySuperAdmin(opts ...sql.OrderTermOption) OrderOption {
 // ByDisabled orders the results by the disabled field.
 func ByDisabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisabled, opts...).ToFunc()
+}
+
+// ByAllPages orders the results by the all_pages field.
+func ByAllPages(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAllPages, opts...).ToFunc()
+}
+
+// ByAllEndpoints orders the results by the all_endpoints field.
+func ByAllEndpoints(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAllEndpoints, opts...).ToFunc()
 }

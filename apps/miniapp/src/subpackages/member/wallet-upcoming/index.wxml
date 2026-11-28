@@ -1,0 +1,6 @@
+<view class="wallet-page">
+  <view class="wallet-card upcoming-card">
+    <image class="upcoming-icon" src="{{page.icon}}" mode="aspectFit" />
+    <view>即将上线，敬请期待</view>
+  </view>
+</view>

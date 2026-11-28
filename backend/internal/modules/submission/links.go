@@ -10,6 +10,10 @@ import (
 )
 
 func workKey(platform enum.Platform, raw string) (string, error) {
+	return WorkKey(platform, raw)
+}
+
+func WorkKey(platform enum.Platform, raw string) (string, error) {
 	u, err := url.Parse(strings.TrimSpace(raw))
 	if err != nil || u.Scheme != "https" || u.User != nil || u.Port() != "" {
 		return "", app.Invalid("请提供 HTTPS 平台作品链接")

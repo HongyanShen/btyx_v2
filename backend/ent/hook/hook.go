@@ -45,6 +45,18 @@ func (f AuditEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuditEventMutation", m)
 }
 
+// The AuditHTTPResponseFunc type is an adapter to allow the use of ordinary
+// function as AuditHTTPResponse mutator.
+type AuditHTTPResponseFunc func(context.Context, *ent.AuditHTTPResponseMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AuditHTTPResponseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AuditHTTPResponseMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuditHTTPResponseMutation", m)
+}
+
 // The ConsentFunc type is an adapter to allow the use of ordinary
 // function as Consent mutator.
 type ConsentFunc func(context.Context, *ent.ConsentMutation) (ent.Value, error)
@@ -67,6 +79,66 @@ func (f ContentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContentMutation", m)
+}
+
+// The CreativeEarningFunc type is an adapter to allow the use of ordinary
+// function as CreativeEarning mutator.
+type CreativeEarningFunc func(context.Context, *ent.CreativeEarningMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreativeEarningFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreativeEarningMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreativeEarningMutation", m)
+}
+
+// The CreativeLinkFunc type is an adapter to allow the use of ordinary
+// function as CreativeLink mutator.
+type CreativeLinkFunc func(context.Context, *ent.CreativeLinkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreativeLinkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreativeLinkMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreativeLinkMutation", m)
+}
+
+// The CreativeTaskFunc type is an adapter to allow the use of ordinary
+// function as CreativeTask mutator.
+type CreativeTaskFunc func(context.Context, *ent.CreativeTaskMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreativeTaskFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreativeTaskMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreativeTaskMutation", m)
+}
+
+// The CreativeTierFunc type is an adapter to allow the use of ordinary
+// function as CreativeTier mutator.
+type CreativeTierFunc func(context.Context, *ent.CreativeTierMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreativeTierFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreativeTierMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreativeTierMutation", m)
+}
+
+// The CreativeWorkFunc type is an adapter to allow the use of ordinary
+// function as CreativeWork mutator.
+type CreativeWorkFunc func(context.Context, *ent.CreativeWorkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreativeWorkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreativeWorkMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreativeWorkMutation", m)
 }
 
 // The FeedbackFunc type is an adapter to allow the use of ordinary
@@ -225,6 +297,18 @@ func (f SubmissionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubmissionMutation", m)
 }
 
+// The SubscriptionChoiceFunc type is an adapter to allow the use of ordinary
+// function as SubscriptionChoice mutator.
+type SubscriptionChoiceFunc func(context.Context, *ent.SubscriptionChoiceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubscriptionChoiceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubscriptionChoiceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubscriptionChoiceMutation", m)
+}
+
 // The TaskFunc type is an adapter to allow the use of ordinary
 // function as Task mutator.
 type TaskFunc func(context.Context, *ent.TaskMutation) (ent.Value, error)
@@ -235,6 +319,18 @@ func (f TaskFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TaskMutation", m)
+}
+
+// The TaskNumberCounterFunc type is an adapter to allow the use of ordinary
+// function as TaskNumberCounter mutator.
+type TaskNumberCounterFunc func(context.Context, *ent.TaskNumberCounterMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TaskNumberCounterFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TaskNumberCounterMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TaskNumberCounterMutation", m)
 }
 
 // The TaskVersionFunc type is an adapter to allow the use of ordinary

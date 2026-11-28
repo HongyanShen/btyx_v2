@@ -3,5 +3,4 @@ module.exports = Object.freeze({
   apiBase: "https://dev-btyx-mini-api.baituber.cn/api/v1",
   allowLocalDemo: false,
   marketingReferencePriceFen: "750",
-  subscriptionTemplates: [],
 });

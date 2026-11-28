@@ -1,3 +1,4 @@
+const { getCurrentAgreement } = require("../../../services/agreement");
 const config = require("../../../services/config");
 const { EnrollmentStatus } = require("../../../services/generated/enums");
 const {
@@ -10,6 +11,8 @@ const { request, post } = require("../../../services/request");
 const { hasSession, openLogin } = require("../../../services/session");
 
 const xiaohongshuNumberPattern = /^[^\s:/\\<>?#：／\x00-\x1f\x7f-\x9f]+$/;
+
+const { subscribe } = require("../../../services/subscriptions");
 
 Page({
   data: {
@@ -43,6 +46,7 @@ Page({
       this.refreshing ||
       this.data.uploading ||
       this.data.submitting ||
+      this.data.agreementLoading ||
       this.data.agreementOpen
     )
       return;
@@ -110,18 +114,22 @@ Page({
     });
   },
 
-  openFeedback() {
-    wx.navigateTo({ url: "/subpackages/member/feedback/index" });
-  },
-
   async submit() {
-    const { editable, submitting, uploading, agreementOpen, user, document } =
-      this.data;
+    const {
+      editable,
+      submitting,
+      uploading,
+      agreementOpen,
+      agreementLoading,
+      user,
+      document,
+    } = this.data;
     if (
       !editable ||
       submitting ||
       uploading ||
       agreementOpen ||
+      agreementLoading ||
       this.refreshing
     )
       return;
@@ -170,7 +178,6 @@ Page({
       ...(user.identity_verified ? {} : document),
     };
     this.setData({
-      agreementOpen: true,
       agreement: null,
       agreementError: "",
       error: "",
@@ -180,23 +187,32 @@ Page({
   },
 
   async loadEnrollmentAgreement() {
-    const { agreementOpen, agreementLoading } = this.data;
-    if (!agreementOpen || agreementLoading) return;
-
     const enrollment = this.pendingEnrollment;
+    if (!enrollment || this.data.agreementLoading) return;
+
     this.setData({
       agreementLoading: true,
       agreement: null,
       agreementError: "",
     });
     try {
-      const agreement = await request("/agreement");
-      if (!agreement?.id) throw new Error("当前营销分发任务协议尚未发布");
+      const agreement = await getCurrentAgreement();
+      if (this.pendingEnrollment !== enrollment) return;
 
-      if (this.pendingEnrollment === enrollment) this.setData({ agreement });
+      if (!agreement) {
+        this.pendingEnrollment = null;
+        this.setData({
+          agreementOpen: false,
+          agreementLoading: false,
+          error: "暂无协议",
+        });
+        return;
+      }
+
+      this.setData({ agreement, agreementOpen: true });
     } catch (error) {
       if (this.pendingEnrollment === enrollment) {
-        this.setData({ agreementError: error.message });
+        this.setData({ agreementError: error.message, agreementOpen: true });
       }
     } finally {
       if (this.pendingEnrollment === enrollment) {
@@ -225,6 +241,7 @@ Page({
 
     this.setData({ submitting: true, agreementError: "" });
     try {
+      if (wx.requestSubscribeMessage) await subscribe("enrollment");
       await post("/enrollment", {
         ...this.pendingEnrollment,
         agreement_id: agreement.id,

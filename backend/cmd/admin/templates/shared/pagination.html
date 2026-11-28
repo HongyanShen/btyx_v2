@@ -1,0 +1,16 @@
+{{define "pagination"}}
+{{if .Pages}}
+<nav class="server-pager{{if .Legacy}} server-pager-legacy{{end}}{{if eq .Label "报名审核分页"}} enrollment-pagination{{end}}{{if eq .Label "实名认证记录分页"}} identity-records-pagination{{end}}" aria-label="{{if .Label}}{{.Label}}{{else}}分页{{end}}" hx-target="#admin-workspace" hx-swap="outerHTML" hx-push-url="true" hx-indicator="#admin-loading" hx-sync="#admin-workspace:replace">
+  {{if .TotalLabel}}<span class="server-pager-total">{{.TotalLabel}}</span>{{end}}
+  {{if .Prev}}<a href="{{.Path}}?page={{.Prev}}{{.Search}}" hx-get="{{.Path}}?page={{.Prev}}{{.Search}}" aria-label="上一页">{{if .Legacy}}‹{{else}}{{template "pagination-arrow" "previous"}}{{end}}</a>{{else if .Legacy}}<span aria-hidden="true">‹</span>{{else}}<button type="button" aria-label="上一页" disabled>{{template "pagination-arrow" "previous"}}</button>{{end}}
+  {{$pager := .}}
+  {{range .Pages}}
+    {{if eq . 0}}<span aria-hidden="true">…</span>
+    {{else if eq . $pager.Current}}{{if or $pager.Legacy (eq $pager.Label "实名认证记录分页")}}<span aria-current="page">{{.}}</span>{{else}}<button type="button" aria-current="page" aria-label="页 {{.}}">{{.}}</button>{{end}}
+    {{else}}<a href="{{$pager.Path}}?page={{.}}{{$pager.Search}}" hx-get="{{$pager.Path}}?page={{.}}{{$pager.Search}}" aria-label="第 {{.}} 页">{{.}}</a>{{end}}
+  {{end}}
+  {{if .Next}}<a href="{{.Path}}?page={{.Next}}{{.Search}}" hx-get="{{.Path}}?page={{.Next}}{{.Search}}" aria-label="下一页">{{if .Legacy}}›{{else}}{{template "pagination-arrow" "next"}}{{end}}</a>{{else if .Legacy}}<span aria-hidden="true">›</span>{{else}}<button type="button" aria-label="下一页" disabled>{{template "pagination-arrow" "next"}}</button>{{end}}
+</nav>
+{{end}}
+{{end}}
+{{define "pagination-arrow"}}<svg width="12" height="12" viewBox="64 64 896 896" fill="currentColor" aria-hidden="true" focusable="false">{{if eq . "previous"}}<path d="M724 218.3V141c0-6.7-7.7-10.4-12.9-6.3L260.3 486.8a31.86 31.86 0 000 50.3l450.8 352.1c5.3 4.1 12.9.4 12.9-6.3v-77.3c0-4.9-2.3-9.6-6.1-12.6l-360-281 360-281.1c3.8-3 6.1-7.7 6.1-12.6z"/>{{else}}<path d="M765.7 486.8L314.9 134.7A7.97 7.97 0 00302 141v77.3c0 4.9 2.3 9.6 6.1 12.6l360 281.1-360 281.1c-3.9 3-6.1 7.7-6.1 12.6V883c0 6.7 7.7 10.4 12.9 6.3l450.8-352.1a31.96 31.96 0 000-50.4z"/>{{end}}</svg>{{end}}

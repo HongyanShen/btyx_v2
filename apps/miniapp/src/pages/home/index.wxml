@@ -75,12 +75,12 @@
           </view>
           <view class="marketing-stat">
             <view>每天</view>
-            <text class="marketing-stat-value">1 条</text>
+            <text class="marketing-stat-value">{{dailyLimit || 1}} 条</text>
           </view>
         </view>
       </view>
       <view class="marketing-description">
-        审核通过并确认协议后，每天可领取一条。系统优先匹配符合标签的内容。按任务要求发布并提交链接，审核通过后按周结算。
+        审核通过并确认协议后，每天可领取 {{dailyLimit || 1}} 条。系统优先匹配符合标签的内容。按任务要求发布并提交链接，审核通过后按任务安排结算。
       </view>
 
       <view wx:if="{{error}}" class="home-feedback">
@@ -88,6 +88,7 @@
         <button wx:if="{{localDemo}}" class="secondary-button small-button spaced" bindtap="demoLogin">本地联调登录</button>
       </view>
       <view wx:elif="{{guide.action === 'blocked'}}" class="home-feedback">账号已暂停领取。已发布的任务仍可在工作台查看。</view>
+      <view wx:elif="{{today && used < dailyLimit && hasContent && !user.blocked && user.consented}}" class="marketing-footer"><view class="grow marketing-status">今天已领 {{used}} / {{dailyLimit}} 条</view><button class="marketing-pill" bindtap="openTodayTask">再领一条</button></view>
       <view wx:elif="{{today}}" class="marketing-footer">
         <view class="grow marketing-status">{{today.cardStatus.message}}</view>
         <view class="marketing-pill" aria-role="button" bindtap="openAssignment" hover-class="home-action-pressed">{{today.cardStatus.button}}</view>
@@ -99,7 +100,7 @@
         </view>
       </view>
       <view wx:elif="{{!loading}}" class="marketing-footer">
-        <view class="grow marketing-status">{{hasContent ? '今日可领 1 条' : '暂无可领取任务'}}</view>
+        <view class="grow marketing-status">{{hasContent ? '今日可领 ' + (dailyLimit || 1) + ' 条' : '暂无可领取任务'}}</view>
         <button class="marketing-pill" bindtap="openTodayTask" hover-class="home-action-pressed">{{hasContent ? '领取任务' : '查看详情'}}</button>
       </view>
       <button wx:if="{{localDemo && !error}}" class="secondary-button small-button spaced" bindtap="demoLogin">本地联调登录</button>

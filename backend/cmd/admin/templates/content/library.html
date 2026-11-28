@@ -1,0 +1,61 @@
+{{define "content-library"}}
+<section class="page server-page workspace-page">
+  <div class="page-heading">
+    <div><h2>素材库</h2><span class="ant-typography-secondary">查看和整理素材。要开放领取或手动指派，请在营销任务中创建内容。</span></div>
+    {{if .CanCreate}}<a class="server-button server-primary" role="button" href="/contents?new=1" hx-get="/contents?new=1" hx-target="#content-dialog-slot" data-open-server-dialog>新增内容</a>{{end}}
+  </div>
+  <div class="ant-card server-card"><div class="ant-card-body">
+    <div class="server-table-scroll" role="region" aria-label="素材库表格" tabindex="0">
+      <table class="server-table content-library-table">
+        <thead><tr><th scope="col">素材内容</th><th scope="col">项目</th><th scope="col">标签</th><th scope="col">附件</th><th scope="col">创建时间</th></tr></thead>
+        <tbody>
+          {{$page := .}}
+          {{range .Rows}}<tr>
+            <td><strong>{{.Title}}</strong><div class="content-excerpt">{{.Body}}</div></td><td>{{if .Project}}{{.Project}}{{else}}未分项目{{end}}</td>
+            <td><div class="content-cell-actions">{{range .TagLabels}}<span class="server-tag">{{.}}</span>{{end}}{{if $page.CanEditTags}}<a class="server-link" role="button" href="/contents?page={{$page.Pager.Current}}&amp;edit={{.ID}}" hx-get="/contents?page={{$page.Pager.Current}}&amp;edit={{.ID}}" hx-target="#content-dialog-slot" data-open-server-dialog>编辑标签</a>{{end}}</div></td>
+            <td>{{if $page.CanDownload}}{{range .Attachment}}<button class="server-plain-button" type="button" data-file-download="{{.ID}}">素材 {{.Number}}</button> {{end}}{{end}}</td>
+            <td>{{.Date}}</td>
+          </tr>{{else}}<tr><td colspan="5" class="server-empty">暂无数据</td></tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+    {{template "pagination" .Pager}}
+  </div></div>
+  <div id="content-dialog-slot">{{with .Dialog}}{{template "content-dialog" .}}{{end}}</div>
+</section>
+{{end}}
+{{define "content-dialog"}}
+<dialog class="server-dialog server-dialog-wide" data-server-dialog aria-labelledby="content-dialog-title">
+  <header><h3 id="content-dialog-title">{{if .ID}}编辑标签 · {{.Title}}{{else}}新增内容{{end}}</h3><button type="button" aria-label="关闭" data-close-dialog>×</button></header>
+  {{$action := "/contents"}}{{if .ID}}{{$action = printf "/contents/%s/tags" .ID}}{{end}}
+  <form class="server-dialog-form" method="post" action="{{$action}}?page={{.Page}}" hx-post="{{$action}}?page={{.Page}}" hx-target="#content-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop">
+    <input name="csrf" type="hidden" value="{{.CSRF}}">
+    <div class="server-dialog-body">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{end}}
+      {{if .ID}}
+        <input type="hidden" name="title" value="{{.Title}}">
+        {{range .PreviousTags}}<input type="hidden" name="previous_tags" value="{{.}}">{{end}}
+      {{else}}
+        <label for="content-title">标题</label><input id="content-title" name="title" value="{{.Title}}" required autofocus>
+        <label for="content-project">所属项目</label><input id="content-project" name="project" value="{{.Project}}">
+        <label for="content-body">文案和发布要求</label><textarea id="content-body" name="body" rows="5" required>{{.Body}}</textarea>
+      {{end}}
+      <label for="content-tags">匹配标签</label>
+      {{if .TagsEnabled}}<select class="server-field" id="content-tags" name="tags" multiple>{{range .Choices}}<option value="{{.Key}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select>
+      {{else}}<p class="server-secondary">当前账号无权查看标签库</p>{{range .Choices}}{{if .Selected}}<input type="hidden" name="tags" value="{{.Key}}">{{end}}{{end}}{{end}}
+      {{if not .ID}}
+        <div data-file-widget data-can-download="{{.CanDownload}}">
+          <label for="content-file">图片 / 视频</label>
+          {{if .CanUpload}}<label class="server-button" for="content-file">上传图片或视频</label><input type="file" id="content-file" data-file-picker class="visually-hidden" accept="image/*,video/mp4">{{end}}
+          <p class="server-secondary" data-file-status role="status" hidden></p>
+          <div data-file-list>{{range .Attachments}}
+            <div data-file-item><input type="hidden" name="files" value="{{.ID}}">{{if $.CanDownload}}<button class="server-plain-button" type="button" data-file-download="{{.ID}}">查看附件 {{.Number}}</button>{{else}}<span>附件 {{.Number}}</span>{{end}} <button class="server-plain-button" type="button" data-file-remove>移除</button></div>
+          {{end}}</div>
+        </div>
+      {{end}}
+    </div>
+    <footer><button type="button" class="server-button" data-close-dialog>取消</button><button type="submit" class="server-button server-primary">{{if .ID}}保存{{else}}确定{{end}}</button></footer>
+  </form>
+</dialog>
+{{end}}

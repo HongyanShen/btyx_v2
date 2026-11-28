@@ -81,7 +81,7 @@ func (s *Service) AdjustLedger(ctx context.Context, actorID, original, delta, re
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditLedgerAdjust, adjustmentEntry.ID, reason)
+		return true, app.Audit(ctx, tx, actorID, enum.AuditLedgerAdjust, adjustmentEntry.ID, reason, "原流水："+original, "调整金额："+amount.String()+" 分")
 	})
 	return err
 }

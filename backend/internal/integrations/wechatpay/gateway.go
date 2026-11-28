@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"baituber.cn/yanxuan/v2/internal/platform/config"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 	"github.com/wechatpay-apiv3/wechatpay-go/core"
 	"github.com/wechatpay-apiv3/wechatpay-go/core/auth/verifiers"
 	"github.com/wechatpay-apiv3/wechatpay-go/core/notify"
@@ -47,7 +48,10 @@ func New(ctx context.Context, cfg config.Config) (*Gateway, error) {
 			cfg.Payment.MerchantID, cfg.Payment.CertificateID,
 			privateKey, cfg.Payment.PublicKeyID, publicKey,
 		),
-		option.WithHTTPClient(&http.Client{Timeout: 15 * time.Second}),
+		option.WithHTTPClient(&http.Client{
+			Timeout:   15 * time.Second,
+			Transport: telemetry.Transport("wechat.pay"),
+		}),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("初始化微信支付官方 SDK 失败")

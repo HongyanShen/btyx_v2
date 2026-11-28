@@ -1,0 +1,204 @@
+admin-datetime {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+admin-datetime:has(.datetime-display) input[type="datetime-local"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 176px;
+  height: 34px;
+  padding: 5px 30px 5px 11px;
+  border: 1px solid #d6d2e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #342b50;
+  cursor: pointer;
+  font: inherit;
+}
+
+admin-datetime:has(.datetime-display) input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+admin-datetime input:hover,
+admin-datetime input[aria-expanded="true"] {
+  border-color: #8b7bb1;
+}
+admin-datetime input:focus-visible {
+  outline: 2px solid #8773ae;
+  outline-offset: 1px;
+}
+.datetime-display {
+  position: absolute;
+  inset: 2px 3px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  background: white;
+  color: #342b50;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.datetime-display[data-empty] {
+  color: #797383;
+}
+.datetime-display::before {
+  content: attr(data-text);
+}
+admin-datetime input:focus-visible + .datetime-display {
+  opacity: 0;
+}
+admin-datetime:has(.datetime-display)::after {
+  content: "";
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  width: 13px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 1.5px solid #837497;
+  border-radius: 3px;
+  background: linear-gradient(
+    to bottom,
+    transparent 2px,
+    #837497 2px 3px,
+    transparent 3px
+  );
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.datetime-panel {
+  position: fixed;
+  inset: auto;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 14px;
+  width: min(296px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #dfd9e9;
+  border-radius: 14px;
+  box-shadow:
+    0 12px 36px #35244724,
+    0 2px 6px #3524470a;
+  color: #352b4d;
+  background: #fff;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.datetime-panel button,
+.datetime-panel select {
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.datetime-panel button {
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+}
+.datetime-panel button:hover {
+  background: #f1edf7;
+}
+.datetime-panel :is(button, select):focus-visible {
+  outline: 2px solid #907bad;
+  outline-offset: -2px;
+}
+.datetime-heading,
+.datetime-time,
+.datetime-actions,
+.datetime-time > div {
+  display: flex;
+  align-items: center;
+}
+.datetime-heading {
+  gap: 4px;
+  padding-bottom: 9px;
+}
+.datetime-heading strong {
+  flex: 1;
+  padding-left: 4px;
+  font-size: 16px;
+}
+.datetime-heading button {
+  width: 30px;
+  height: 30px;
+  background: #f6f4f9;
+  font:
+    22px/1 system-ui,
+    sans-serif;
+}
+.datetime-week,
+.datetime-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+  text-align: center;
+}
+.datetime-week {
+  padding: 5px 0 7px;
+  color: #827a8c;
+  font-size: 12px;
+}
+.datetime-days button {
+  position: relative;
+  height: 31px;
+  padding: 0;
+}
+.datetime-days [data-adjacent] {
+  color: #938b9c;
+}
+.datetime-days [aria-current="date"]::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.datetime-days button[aria-pressed="true"],
+.datetime-actions button[data-action="confirm"] {
+  color: white;
+  background: #73609b;
+  font-weight: 600;
+}
+.datetime-time {
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 10px 3px;
+  border-block: 1px solid #eeeaf2;
+  font-weight: 600;
+}
+.datetime-time > div {
+  gap: 4px;
+}
+.datetime-time select {
+  height: 30px;
+  padding-inline: 6px;
+  border: 1px solid #e1dce8;
+  border-radius: 6px;
+  background: #faf9fc;
+  font-weight: 500;
+}
+.datetime-actions {
+  gap: 4px;
+  padding-top: 10px;
+}
+.datetime-actions button {
+  padding: 6px 10px;
+  color: #675682;
+}
+.datetime-actions [data-action="clear"] {
+  margin-right: auto;
+  color: #716a79;
+}
+.datetime-actions button[data-action="confirm"] {
+  padding-inline: 17px;
+}

@@ -1,0 +1,47 @@
+{{define "agreements"}}
+<section class="page server-page workspace-page">
+  <div class="page-heading">
+    <div><h2>分发协议</h2><span class="ant-typography-secondary">保存各版本协议与用户同意记录。当前协议用于新领取资格检查。</span></div>
+    {{if .CanPublish}}<a class="server-button server-primary" role="button" href="/agreements?publish=1" hx-get="/agreements?publish=1" hx-target="#agreement-dialog-slot" data-open-server-dialog>发布新协议</a>{{end}}
+  </div>
+  <div class="ant-card server-card"><div class="ant-card-body">
+    <div class="server-table-scroll" role="region" aria-label="分发协议表格" tabindex="0">
+      <table class="server-table agreements-table">
+        <thead><tr><th scope="col" aria-label="协议正文"></th><th scope="col">协议标题</th><th scope="col">状态</th><th scope="col">发布人</th><th scope="col">发布时间</th></tr></thead>
+        <tbody>
+          {{range .Rows}}
+          <tr>
+            <td class="server-table-expand"><button type="button" aria-label="展开行" aria-expanded="false" aria-controls="agreement-{{.ID}}" data-expand-row></button></td>
+            <td>{{.Title}}</td><td>{{if .Active}}<span class="server-tag server-tag-green">当前生效</span>{{else}}<span class="server-tag">历史版本</span>{{end}}</td>
+            <td class="agreement-creator">{{.CreatorName}}</td><td>{{.Date}}</td>
+          </tr>
+          <tr id="agreement-{{.ID}}" hidden><td colspan="5">{{if .HTML}}<div class="agreement-content">{{.HTML}}</div>{{else}}<div class="agreement-content agreement-plain">{{.Body}}</div>{{end}}</td></tr>
+          {{else}}<tr><td colspan="5" class="server-empty">暂无数据</td></tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+    {{template "pagination" .Pager}}
+  </div></div>
+  <div id="agreement-dialog-slot">{{with .Dialog}}{{template "agreement-dialog" .}}{{end}}</div>
+</section>
+{{end}}
+{{define "agreement-dialog"}}
+<dialog class="server-dialog server-dialog-wide" data-server-dialog aria-labelledby="agreement-dialog-title">
+  <header><h3 id="agreement-dialog-title">发布新协议</h3><button type="button" aria-label="关闭" data-close-dialog>×</button></header>
+  <form class="server-dialog-form" method="post" action="/agreements" hx-post="/agreements" hx-target="#agreement-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop" data-agreement-form>
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="server-dialog-body">
+      <div class="server-alert server-alert-warning">发布后，分发员需要同意新协议才能领取新任务。已领取任务继续保留原版本信息。</div>
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{end}}
+      <label for="agreement-title">协议标题</label>
+      <input id="agreement-title" name="title" value="{{.Title}}" required autofocus>
+      <label for="agreement-editor">协议正文</label>
+      <textarea name="body_html" aria-label="协议正文" class="agreement-source" required>{{.Body}}</textarea>
+      <div id="agreement-editor" class="agreement-editor" data-agreement-mount hidden></div>
+      <details class="agreement-preview"><summary>预览小程序排版</summary><article><h3></h3><div class="agreement-content"></div></article></details>
+    </div>
+    <footer><button class="server-button" data-close-dialog type="button">取消</button><button class="server-button server-primary" type="submit">确定</button></footer>
+  </form>
+</dialog>
+{{end}}

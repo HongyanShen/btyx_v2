@@ -21,16 +21,35 @@ test("a rejected application prefills its accounts and lets the owner reuse both
     },
   };
   const submissions = [];
+  const subscriptionReceipts = [];
+  let agreementUnavailable = false;
   let agreement = {
     id: "agreement-one",
     title: "营销分发任务协议",
     body: "协议正文",
   };
   global.wx = {
-    getStorageSync: () => "test-session",
+    getStorageSync: (key) => (key === "btyx-session" ? "test-session" : ""),
+    requestSubscribeMessage({ tmplIds, success }) {
+      success(Object.fromEntries(tmplIds.map((id) => [id, "reject"])));
+    },
     showToast() {},
     request({ method, url, data, success }) {
+      if (url.endsWith("/notifications/subscriptions")) {
+        subscriptionReceipts.push(data);
+        success({ statusCode: 200, data: { code: 0, data: null } });
+        return;
+      }
+
       if (url.endsWith("/agreement")) {
+        if (agreementUnavailable) {
+          success({
+            statusCode: 409,
+            data: { code: 409, msg: "当前营销分发任务协议尚未发布" },
+          });
+          return;
+        }
+
         success({ statusCode: 200, data: { code: 0, data: agreement } });
         return;
       }
@@ -101,6 +120,17 @@ test("a rejected application prefills its accounts and lets the owner reuse both
       front_file_id: "previous-front",
       back_file_id: "previous-back",
     };
+    agreementUnavailable = true;
+    const attempt = page.submit();
+    assert.equal(page.data.agreementOpen, false);
+    assert.equal(page.data.agreementLoading, true);
+    await attempt;
+    assert.equal(page.data.agreementOpen, false);
+    assert.equal(page.data.agreementLoading, false);
+    assert.equal(page.data.error, "暂无协议");
+    assert.equal(submissions.length, 0);
+
+    agreementUnavailable = false;
     await page.submit();
     assert.equal(page.data.agreementOpen, true);
     assert.equal(page.data.agreement.id, "agreement-one");
@@ -131,6 +161,12 @@ test("a rejected application prefills its accounts and lets the owner reuse both
     assert.equal(submissions.length, 2);
     assert.equal(page.data.agreementOpen, false);
     assert.equal(page.data.user.status, "pending");
+    assert.equal(subscriptionReceipts.length, 2);
+    for (const receipt of subscriptionReceipts) {
+      assert.equal(receipt.scene, "enrollment");
+      assert.equal(receipt.choices[0].template_id, "lRpXa_GcSSdTfsMcNX1vl4fC9jCsvAiQSr_fjp66nls");
+      assert.equal(receipt.choices[0].result, "reject");
+    }
   } finally {
     delete global.wx;
   }

@@ -7,12 +7,15 @@ import (
 	"errors"
 
 	"baituber.cn/yanxuan/v2/ent"
+	"baituber.cn/yanxuan/v2/ent/user"
 	"baituber.cn/yanxuan/v2/ent/wechatidentity"
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
+	"baituber.cn/yanxuan/v2/internal/platform/displaynumber"
+	"baituber.cn/yanxuan/v2/internal/platform/shortcode"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 	"github.com/segmentio/ksuid"
 	"github.com/shopspring/decimal"
-	"github.com/sqids/sqids-go"
 )
 
 var errOpenIDClaimed = errors.New("wechat identity registered concurrently")
@@ -30,22 +33,35 @@ func (s *Service) DemoLogin(ctx context.Context, device string) (LoginResult, er
 }
 
 func (s *Service) loginOpenID(ctx context.Context, openid string) (LoginResult, error) {
-	userID, err := app.Transaction(ctx, s.Runtime, func(tx *ent.Tx) (string, error) {
-		userID, err := userIDForOpenID(ctx, tx.Client(), openid)
-		if err == nil {
-			return userID, nil
-		}
+	userID, err := userIDForOpenID(ctx, s.Client, openid)
+	if ent.IsNotFound(err) {
+		userID, err = s.registerOpenID(ctx, openid)
+	}
 
-		if !ent.IsNotFound(err) {
-			return "", err
-		}
+	if errors.Is(err, errOpenIDClaimed) {
+		userID, err = userIDForOpenID(ctx, s.Client, openid)
+	}
 
-		userID = app.NewID()
-		nickname, err := defaultNickname(userID)
-		if err != nil {
-			return "", err
-		}
+	if err != nil {
+		return LoginResult{}, err
+	}
 
+	login, err := s.createSession(ctx, s.Client.Session, userID, enum.RoleUser)
+	if err == nil {
+		telemetry.SetUser(ctx, login.UserID, login.Role)
+	}
+
+	return login, err
+}
+
+func (s *Service) registerOpenID(ctx context.Context, openid string) (string, error) {
+	nickname, err := s.newDefaultNickname(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return app.Transaction(ctx, s.Runtime, func(tx *ent.Tx) (string, error) {
+		userID := app.NewID()
 		if err := tx.User.Create().
 			SetID(userID).
 			SetNickname(nickname).
@@ -53,7 +69,7 @@ func (s *Service) loginOpenID(ctx context.Context, openid string) (LoginResult, 
 			return "", err
 		}
 
-		err = tx.WechatIdentity.Create().
+		err := tx.WechatIdentity.Create().
 			SetUserID(userID).
 			SetOpenid(openid).
 			OnConflictColumns(wechatidentity.FieldOpenid).
@@ -76,16 +92,6 @@ func (s *Service) loginOpenID(ctx context.Context, openid string) (LoginResult, 
 
 		return userID, err
 	})
-	if errors.Is(err, errOpenIDClaimed) {
-		// Roll back the candidate user and use the winning registration.
-		userID, err = userIDForOpenID(ctx, s.Client, openid)
-	}
-
-	if err != nil {
-		return LoginResult{}, err
-	}
-
-	return s.createSession(ctx, s.Client.Session, userID, enum.RoleUser)
 }
 
 func userIDForOpenID(ctx context.Context, client *ent.Client, openid string) (string, error) {
@@ -116,20 +122,40 @@ func (s *Service) WechatOpenID(ctx context.Context, userID string) (string, erro
 	return identity.Openid, nil
 }
 
-func defaultNickname(userID string) (string, error) {
-	id, err := ksuid.Parse(userID)
-	if err != nil {
-		return "", err
-	}
+func (s *Service) newDefaultNickname(ctx context.Context) (string, error) {
+	for {
+		number, err := displaynumber.Nickname.Next(ctx, s.Client)
+		if err != nil {
+			return "", err
+		}
 
-	encoder, err := sqids.New(sqids.Options{MinLength: 4})
+		suffix, err := shortcode.Encode(uint64(number))
+		if err != nil {
+			return "", err
+		}
+
+		nickname := "微信用户" + suffix
+		taken, err := s.Client.User.Query().Where(user.NicknameEQ(nickname)).Exist(ctx)
+		if err != nil {
+			return "", err
+		}
+
+		if !taken {
+			return nickname, nil
+		}
+	}
+}
+
+// Older profiles without a stored nickname keep their original display name.
+func legacyDefaultNickname(userID string) (string, error) {
+	id, err := ksuid.Parse(userID)
 	if err != nil {
 		return "", err
 	}
 
 	// The random payload gives each account a short, stable display suffix.
 	random := binary.BigEndian.Uint32(id.Payload())
-	suffix, err := encoder.Encode([]uint64{uint64(random)})
+	suffix, err := shortcode.Encode(uint64(random))
 	if err != nil {
 		return "", err
 	}

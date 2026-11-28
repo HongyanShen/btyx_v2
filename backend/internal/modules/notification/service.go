@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"context"
 	"time"
 
@@ -14,12 +15,14 @@ type Service struct {
 }
 
 type DTO struct {
-	ID          string    `json:"id"`
-	Title       string    `json:"title"`
-	Body        string    `json:"body"`
-	ReferenceID string    `json:"reference_id"`
-	Read        bool      `json:"read"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID             string             `json:"id"`
+	Title          string             `json:"title"`
+	Body           string             `json:"body"`
+	ReferenceID    string             `json:"reference_id"`
+	DeliveryState  enum.DeliveryState `json:"delivery_state"`
+	DeliveryReason string             `json:"delivery_reason"`
+	Read           bool               `json:"read"`
+	CreatedAt      time.Time          `json:"created_at"`
 }
 
 func (s *Service) Notifications(ctx context.Context, userID string) ([]DTO, error) {
@@ -35,12 +38,14 @@ func (s *Service) Notifications(ctx context.Context, userID string) ([]DTO, erro
 	result := make([]DTO, 0, len(records))
 	for _, record := range records {
 		result = append(result, DTO{
-			ID:          record.ID,
-			Title:       record.Title,
-			Body:        record.Body,
-			ReferenceID: record.ReferenceID,
-			Read:        record.Read,
-			CreatedAt:   record.CreatedAt,
+			ID:             record.ID,
+			Title:          record.Title,
+			Body:           record.Body,
+			ReferenceID:    record.ReferenceID,
+			DeliveryState:  record.DeliveryState,
+			DeliveryReason: record.DeliveryReason,
+			Read:           record.Read,
+			CreatedAt:      record.CreatedAt,
 		})
 	}
 

@@ -1,53 +1,69 @@
 <import src="/templates/loading.wxml" />
-<view class="page">
-  <view class="card">
-    <view class="card-title">提现到微信零钱</view>
-    <view class="muted">可提现余额 ¥{{wallet ? wallet.available : '—'}}</view>
-    <view class="field spaced">
-      <text class="field-label">提现金额（元）</text>
-      <input
-        class="input"
-        type="digit"
-        placeholder="请输入提现金额"
-        value="{{amount}}"
-        bindinput="changeAmount"
-        disabled="{{submitting}}"
-      />
-    </view>
-    <button
-      class="primary"
-      loading="{{submitting}}"
-      disabled="{{submitting || !wallet.canWithdraw}}"
-      bindtap="withdraw"
-    >
-      申请提现
-    </button>
-    <view class="muted spaced">
-      申请后金额会暂时冻结。显示「待确认收款」时，点「去收款」进入微信确认。
-    </view>
-  </view>
-  <view wx:if="{{error}}" class="error" bindtap="load">
-    {{error}} · 点击刷新
-  </view>
-  <view class="section-title">提现记录</view>
+<import src="/templates/withdrawal-record.wxml" />
+<view class="wallet-page">
   <template wx:if="{{loading}}" is="loading-card" />
-  <view wx:elif="{{!error && !withdrawals.length}}" class="empty">
-    暂无提现记录
-  </view>
-  <view wx:for="{{withdrawals}}" wx:key="id" class="card">
-    <view class="row">
-      <text class="card-title">¥{{item.amount}}</text>
-      <text class="badge">{{item.label}}</text>
+  <button wx:if="{{error}}" class="error wallet-retry" bindtap="retryLoad">{{error}} · 点击重试</button>
+  <block wx:if="{{wallet}}">
+    <view wx:for="{{waitingRecords}}" wx:key="id" class="wallet-banner withdrawal-pending">
+      <view class="row">
+        <text class="wallet-record-title">¥{{item.amount}}</text>
+        <button class="withdrawal-status withdrawal-status-waiting withdrawal-status-action" data-id="{{item.id}}" bindtap="confirmReceipt" disabled="{{confirming}}">待确认收款 ›</button>
+      </view>
+      <view class="wallet-caption">{{item.time}} 发起，提现金额已冻结。请在微信规定的时间内确认收款，超时关闭后金额退回余额。</view>
+      <button wx:if="{{item.canConfirm}}" class="wallet-action withdrawal-confirm" data-id="{{item.id}}" bindtap="confirmReceipt" disabled="{{confirming}}">去收款</button>
+      <view wx:elif="{{item.reason}}" class="wallet-caption withdrawal-record-note">{{item.reason}}</view>
     </view>
-    <view class="muted">{{item.time}}</view>
-    <view wx:if="{{item.reason}}" class="muted">{{item.reason}}</view>
-    <button
-      wx:if="{{item.canConfirm}}"
-      class="primary spaced"
-      data-id="{{item.id}}"
-      bindtap="confirmReceipt"
-    >
-      去收款
-    </button>
-  </view>
+    <view wx:if="{{completed}}" class="wallet-card withdrawal-success">
+      <view class="withdrawal-check">✓</view>
+      <view class="withdrawal-done-title">¥{{completed.amount}} 已到账微信零钱</view>
+      <view class="wallet-caption">可提现余额还剩 ¥{{wallet.available}}</view>
+      <view class="actions">
+        <button class="withdrawal-back-work" bindtap="goWork">回工作台</button>
+        <button class="wallet-action withdrawal-back-wallet" bindtap="goWallet">回收益</button>
+      </view>
+    </view>
+    <block wx:else>
+      <view class="wallet-card withdrawal-balance">
+        <view class="wallet-caption">可提现余额</view>
+        <view class="wallet-number withdrawal-available">¥{{wallet.available}}</view>
+        <view wx:if="{{wallet.hasFrozen}}" class="wallet-caption wallet-frozen">提现冻结中 ¥{{wallet.frozen}}</view>
+      </view>
+      <view class="wallet-card withdrawal-form">
+        <view class="withdrawal-label">提现金额</view>
+        <view class="withdrawal-input-row">
+          <text class="withdrawal-yuan">¥</text>
+          <input
+            class="input withdrawal-input"
+            type="digit"
+            value="{{amount}}"
+            placeholder="{{wallet.canWithdraw ? '请输入提现金额' : '当前余额暂不可提现'}}"
+            confirm-type="done"
+            bindinput="changeAmount"
+            bindblur="finishAmountEdit"
+            bindconfirm="finishAmountEdit"
+            disabled="{{submitting || retrying || !wallet.canWithdraw}}"
+            aria-label="提现金额"
+          />
+          <button wx:if="{{wallet.canWithdraw && !retrying}}" class="withdrawal-all" bindtap="useAll" disabled="{{submitting}}">全部</button>
+        </view>
+        <view wx:if="{{!wallet.canWithdraw && !retrying}}" class="wallet-banner withdrawal-zero">当前可提现余额不足。营销奖励入账后，可在这里提现。</view>
+        <view class="withdrawal-destination row"><text>提现到</text><text class="wallet-record-title">微信零钱</text></view>
+        <view class="wallet-caption withdrawal-help">申请后金额会冻结。待确认收款时，进入微信确认后到账。单笔最多 ¥{{wallet.max}}。</view>
+        <view wx:if="{{retrying}}" class="wallet-banner withdrawal-zero">上次申请结果待确认，请重试本次提现，系统会核对原申请。</view>
+        <view wx:if="{{amountError}}" class="withdrawal-error">{{amountError}}</view>
+        <button class="wallet-action withdrawal-submit" bindtap="withdraw" loading="{{submitting}}" disabled="{{submitting || (!retrying && (!wallet.canWithdraw || error))}}">
+          {{retrying ? '重试本次提现' : wallet.canWithdraw ? '提现到微信零钱' : '没有可提现的余额'}}
+        </button>
+      </view>
+    </block>
+    <view class="wallet-card withdrawal-history">
+      <view class="row withdrawal-history-title">
+        <text>提现记录</text><button class="withdrawal-open-records" bindtap="openRecords">查看全部 ›</button>
+      </view>
+      <view wx:if="{{!hasWithdrawals}}" class="wallet-caption withdrawal-history-empty">还没有提现过</view>
+      <block wx:else>
+        <template wx:for="{{withdrawals}}" wx:key="id" is="withdrawal-record" data="{{item, confirming}}" />
+      </block>
+    </view>
+  </block>
 </view>

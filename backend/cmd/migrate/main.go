@@ -32,5 +32,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	logging.From(ctx).Info().Str("schema", cfg.Schema).Msg("Ent migration completed")
+	logging.Info(ctx).Str("schema", cfg.Schema).Msg("Ent migration completed")
 }

@@ -28,6 +28,13 @@ func (AuditEvent) Fields() []ent.Field {
 		field.String("reason").
 			Default(""),
 
+		field.String("endpoint").Default("").Immutable(),
+		field.String("request_id").MaxLen(27).Optional().Immutable(),
+
+		field.Enum("platform").GoType(enum.AuditPlatform("")).Optional().Immutable(),
+
+		field.String("parameters").Default("").Immutable(),
+
 		field.String("submitted_phone").Default("").Immutable(),
 
 		field.String("submitted_wechat_cipher").Default("").Sensitive().Immutable(),
@@ -44,6 +51,9 @@ func (AuditEvent) Fields() []ent.Field {
 
 func (AuditEvent) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("created_at", "id"),
+		index.Fields("request_id").Annotations(entsql.IndexWhere("request_id IS NOT NULL")),
+		index.Fields("endpoint", "created_at", "id"),
 		index.Fields("submitted_front_file_id").
 			Annotations(entsql.IndexWhere("submitted_front_file_id <> ''")),
 		index.Fields("submitted_back_file_id").
@@ -53,8 +63,8 @@ func (AuditEvent) Indexes() []ent.Index {
 
 func (AuditEvent) Annotations() []schema.Annotation {
 	checks := mixin.EnumChecks((AuditEvent{}).Fields())
-	// Replace the v5 check on databases that predate marketing settings and expiry audits.
-	checks.Checks["audit_action_enum_v6"] = checks.Checks["action_enum"]
+	// Replace the previous action check so existing databases accept failed requests.
+	checks.Checks["audit_action_enum_v7"] = checks.Checks["action_enum"]
 	delete(checks.Checks, "action_enum")
 
 	return []schema.Annotation{

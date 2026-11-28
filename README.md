@@ -4,17 +4,13 @@
 
 ## 本地运行
 
-需要 Go 1.27、Node.js 24、PostgreSQL 18、Windows PowerShell。管理后台使用 React 19、TypeScript 7、Ant Design、React Router、TanStack Query 和 Axios，版本及 lockfile 已固定。
+本地运行需要 Go 1.27、PostgreSQL 18 和 Windows PowerShell。管理后台使用 Go 模板、htmx 和浏览器原生 JavaScript。Go 将静态资源嵌入 `admin` 二进制，启动和部署无需 npm 安装或前端构建。前端回归测试使用 Node.js 24。
 
 IDE 可直接打开项目根目录；根目录的 `go.work` 引用 `backend` 模块，后端依赖仍由 `backend/go.mod` 管理。新增工作区配置后若仍显示导入错误，重新加载 IDE 的 Go 工作区或重启 Go 语言服务。从根目录检查后端使用 `go list ./backend/...`，在 `backend` 内使用 `go list ./...`。
 
 本机连接及口令存放在被忽略的 `.env`，示例字段见 `.env.example`。不要把 `.env`、商户密钥、上传目录或日志提交到 Git。
 
 ```powershell
-cd apps/admin
-npm ci
-cd ../..
-
 # 首次在本地 .env 设置 BOOTSTRAP_ADMIN_USERNAME 和 BOOTSTRAP_ADMIN_PASSWORD。
 # 执行 Ent 迁移并创建首个超级管理员。
 ./scripts/start.ps1 -Initialize -BootstrapAdmin
@@ -23,12 +19,27 @@ cd ../..
 # ./scripts/start.ps1 -Initialize -BootstrapAdmin -Seed
 ```
 
-- 运营后台位于 http://127.0.0.1:5173，使用运营账号的用户名和密码登录。超级管理员在「通用管理 → 运营账号」创建普通账号、配置页面与接口权限、重置密码或停用账号。首次初始化成功后可清除 `.env` 中的两个初始化字段。旧共享口令及其会话已退役。
-- 小程序 API：`127.0.0.1:8081`；运营 API：`127.0.0.1:8082`；后台任务独立进程。
-- 日志：`artifacts/logs/adminapi.log`、`miniapi.log`、`worker.log`，逐行 JSON 并按大小自动轮换、压缩及清理。配置及请求追踪见 [日志说明](docs/logging.md)。停止本项目进程：`./scripts/stop.ps1`。
-- 再次启动可使用 `./scripts/start.ps1 -SkipBuild` 复用已有二进制；改过后端必须重新构建。
+- 运营后台位于 http://127.0.0.1:8083，使用运营账号的用户名和密码登录。超级管理员在「通用管理 → 运营账号」创建普通账号、配置页面与接口权限、重置密码或停用账号。首次初始化成功后可清除 `.env` 中的两个初始化字段。旧共享口令及其会话已退役。
+- 小程序 API：`127.0.0.1:8081`；后台任务独立进程。
+- 日志：`artifacts/logs/admin.log`、`miniapi.log`、`worker.log`，逐行 JSON 并按大小自动轮换、压缩及清理。配置及请求追踪见 [日志说明](docs/logging.md)。停止本项目进程：`./scripts/stop.ps1`。
+- 再次启动可使用 `./scripts/start.ps1 -SkipBuild` 复用已有二进制。修改管理后台模板、脚本或样式后，重新编译并启动 `admin`。
 
 微信开发者工具导入 `apps/miniapp/`。目前采用游客 AppID 与本机地址；提供真实配置后替换项目 AppID、合法域名与 `src/services/config.js`。本地演示登录仅在开发者工具显式开启，不会在真实微信登录失败后自动降级。发布前关闭 `DEMO_ENABLED` 和 `allowLocalDemo`，开启项目域名校验。
+
+### htmx 管理后台
+
+在已有 PostgreSQL schema 和运营账号的本地环境中，从仓库根目录运行。
+
+```powershell
+. ./scripts/environment.ps1
+Push-Location backend
+go run -buildvcs=false ./cmd/admin
+Pop-Location
+```
+
+打开 [htmx 管理后台](http://127.0.0.1:8083)，使用现有运营账号登录。按 Ctrl+C 停止该进程。页面、静态资源和同源管理接口由 `cmd/admin` 提供。Go 模板位于 `backend/cmd/admin/templates/`，按功能模块组织。htmx 在同源请求中接收页面片段。
+
+JavaScript、CSS 和第三方浏览器库位于 `backend/cmd/admin/static/`，通过 `/assets/` 由 `admin` 同源提供。独立部署时静态资源随二进制发布。设置 `ADMIN_WEB_ADDR` 可以修改监听地址。正式站点使用 HTTPS，并设置 `ADMIN_WEB_SECURE_COOKIE=true`。该进程独立写入 `artifacts/logs/admin.log`。
 
 ## 目录
 
@@ -36,7 +47,8 @@ cd ../..
 backend/
   cmd/
     miniapi/               小程序 API 启动、handler、集中路由注册、支付通知入口
-    adminapi/              管理 API 启动、handler、集中路由注册
+    admin/                 htmx 管理后台，含模板、静态资源、会话和管理业务接口
+      tests/               组件与 Edge 回归测试，含 generated/ 前端契约
     worker/task/           outbox、租约、异步转账及查单恢复
     migrate/               独立 Ent 迁移入口
     adminbootstrap/        一次性初始化超级管理员
@@ -52,8 +64,6 @@ backend/
     platform/              配置、数据库、事务、金额、转账接口及 HTTP 基础能力
     business/              模块组装与跨模块 PG 集成测试
 apps/
-  admin/src/modules/       按业务拆分的 React 页面
-  admin/src/generated/     从 Go 生成的枚举与 DTO
   miniapp/src/pages/       任务、工作台、收益、我的
   miniapp/src/subpackages/ 任务详情、报名、协议、通知、反馈
 scripts/                   本地启动、停止、验证、Go 可读性检查
@@ -63,26 +73,35 @@ analysis/                  已部署原型的只读分析快照
 
 模块内部按 DTO、查询、业务动作拆分。生成的 Ent 文件不手工修改。项目规则见 `AGENTS.md` 和各应用目录中的同名文件。
 
-进程专有代码只放在对应 `cmd/<进程>/`，共享业务服务和基础能力放在 `internal/`。生产代码不能从 `internal/` 反向导入 `cmd/`，不同进程之间也不互相导入。各 API 的 `handler/router.go` 集中声明路由，经 `httpx.Register` 统一注册。JSON 请求使用 `httpx.JSON(handler)`，泛型自动推导请求和响应类型，handler 直接接收明确类型的输入并返回 `(具体DTO, error)`；无请求体的接口使用 `httpx.Adapt(handler)`。无数据的操作返回 `(*httpx.NoData, error)`，成功时仍输出 `data: null`。响应封套为 `Envelope[T]`，`any` 仅保留在泛型约束、框架回调及最终协议分派边界。普通接口统一输出 `{code,msg,data}`，下载和支付回调分别返回专用文件及状态响应，保持既有协议。
+进程专有代码只放在对应 `cmd/<进程>/`，共享业务服务和基础能力放在 `internal/`。生产代码不能从 `internal/` 反向导入 `cmd/`，不同进程之间也不互相导入。小程序路由集中在 `miniapi/handler/router.go`，管理端操作路由集中在 `admin/operations`，两者均使用 `httpx.Register` 注册 JSON 接口。JSON 请求使用 `httpx.JSON(handler)`，泛型自动推导请求和响应类型，handler 直接接收明确类型的输入并返回 `(具体DTO, error)`；无请求体的接口使用 `httpx.Adapt(handler)`。无数据的操作返回 `(*httpx.NoData, error)`，成功时仍输出 `data: null`。响应封套为 `Envelope[T]`，`any` 仅保留在泛型约束、框架回调及最终协议分派边界。普通接口统一输出 `{code,msg,data}`，下载和支付回调分别返回专用文件及状态响应，保持既有协议。
 
 ## 验证与生成
 
 ```powershell
+npm --prefix backend/cmd/admin/tests ci
 ./scripts/check.ps1
 
 # 已启动本地后台并提供测试账号配置时，使用无头 Edge 验证登录、菜单与退出。
-cd apps/admin
-node scripts/smoke.mjs
+npm --prefix backend/cmd/admin/tests run test:browser
 ```
 
-全量检查包括可读性、真实 PG 集成测试、Go vet、进程入口构建、React 单元测试及生产构建。测试只创建和清理本次的 `btyx_test_` schema。小程序尚未进行开发者工具/真机联调，真实微信登录、转账与通知需要用户后续提供配置。
+从仓库根目录执行 htmx 后台浏览器回归。测试启动独立 HTTP 服务，连接临时 PostgreSQL schema，使用真实浏览器操作测试数据。
+
+```powershell
+. ./scripts/environment.ps1
+$env:BTYX_ADMIN_BROWSER = '1'
+go test -v ./backend/cmd/admin -run '^TestAdminBrowser$' -count=1
+Remove-Item Env:BTYX_ADMIN_BROWSER
+```
+
+全量检查包括 Go 可读性、真实 PostgreSQL 集成测试、Go vet、进程入口编译、管理后台格式和回归测试及小程序 JS 测试。数据库测试只创建和清理本次的 `btyx_test_` schema。小程序尚未进行开发者工具和真机联调，真实微信登录、转账与通知需要用户后续提供配置。
 
 ```powershell
 . ./scripts/environment.ps1
 cd backend
 go generate ./ent
 go run ./cmd/contracts
-cd ../apps/admin
+cd cmd/admin/tests
 npm run format
 ```
 

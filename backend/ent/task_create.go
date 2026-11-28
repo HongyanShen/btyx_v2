@@ -65,6 +65,12 @@ func (_c *TaskCreate) SetNillableDeleted(v *bool) *TaskCreate {
 	return _c
 }
 
+// SetDisplayNumber sets the "display_number" field.
+func (_c *TaskCreate) SetDisplayNumber(v int64) *TaskCreate {
+	_c.mutation.SetDisplayNumber(v)
+	return _c
+}
+
 // SetCurrentVersionID sets the "current_version_id" field.
 func (_c *TaskCreate) SetCurrentVersionID(v string) *TaskCreate {
 	_c.mutation.SetCurrentVersionID(v)
@@ -197,6 +203,14 @@ func (_c *TaskCreate) check() error {
 	if _, ok := _c.mutation.Deleted(); !ok {
 		return &ValidationError{Name: "deleted", err: errors.New(`ent: missing required field "Task.deleted"`)}
 	}
+	if _, ok := _c.mutation.DisplayNumber(); !ok {
+		return &ValidationError{Name: "display_number", err: errors.New(`ent: missing required field "Task.display_number"`)}
+	}
+	if v, ok := _c.mutation.DisplayNumber(); ok {
+		if err := task.DisplayNumberValidator(v); err != nil {
+			return &ValidationError{Name: "display_number", err: fmt.Errorf(`ent: validator failed for field "Task.display_number": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.CurrentVersionID(); !ok {
 		return &ValidationError{Name: "current_version_id", err: errors.New(`ent: missing required field "Task.current_version_id"`)}
 	}
@@ -258,6 +272,10 @@ func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Deleted(); ok {
 		_spec.SetField(task.FieldDeleted, field.TypeBool, value)
 		_node.Deleted = value
+	}
+	if value, ok := _c.mutation.DisplayNumber(); ok {
+		_spec.SetField(task.FieldDisplayNumber, field.TypeInt64, value)
+		_node.DisplayNumber = value
 	}
 	if value, ok := _c.mutation.CurrentVersionID(); ok {
 		_spec.SetField(task.FieldCurrentVersionID, field.TypeString, value)
@@ -402,6 +420,9 @@ func (u *TaskUpsertOne) UpdateNewValues() *TaskUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(task.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.DisplayNumber(); exists {
+			s.SetIgnore(task.FieldDisplayNumber)
 		}
 	}))
 	return u
@@ -689,6 +710,9 @@ func (u *TaskUpsertBulk) UpdateNewValues() *TaskUpsertBulk {
 			}
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(task.FieldCreatedAt)
+			}
+			if _, exists := b.mutation.DisplayNumber(); exists {
+				s.SetIgnore(task.FieldDisplayNumber)
 			}
 		}
 	}))

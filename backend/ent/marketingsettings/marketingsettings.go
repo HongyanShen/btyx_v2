@@ -27,10 +27,32 @@ const (
 	FieldPriceOverridden = "price_overridden"
 	// FieldOnline holds the string denoting the online field in the database.
 	FieldOnline = "online"
+	// FieldDailyLimit holds the string denoting the daily_limit field in the database.
+	FieldDailyLimit = "daily_limit"
+	// FieldCreativeLimit holds the string denoting the creative_limit field in the database.
+	FieldCreativeLimit = "creative_limit"
+	// FieldCreativeOnline holds the string denoting the creative_online field in the database.
+	FieldCreativeOnline = "creative_online"
 	// FieldExpiryMode holds the string denoting the expiry_mode field in the database.
 	FieldExpiryMode = "expiry_mode"
 	// FieldExpiryMinutes holds the string denoting the expiry_minutes field in the database.
 	FieldExpiryMinutes = "expiry_minutes"
+	// FieldSettlementFrequency holds the string denoting the settlement_frequency field in the database.
+	FieldSettlementFrequency = "settlement_frequency"
+	// FieldSettlementWeekday holds the string denoting the settlement_weekday field in the database.
+	FieldSettlementWeekday = "settlement_weekday"
+	// FieldSettlementMonthDay holds the string denoting the settlement_month_day field in the database.
+	FieldSettlementMonthDay = "settlement_month_day"
+	// FieldSettlementClock holds the string denoting the settlement_clock field in the database.
+	FieldSettlementClock = "settlement_clock"
+	// FieldSettlementDelayMinutes holds the string denoting the settlement_delay_minutes field in the database.
+	FieldSettlementDelayMinutes = "settlement_delay_minutes"
+	// FieldPlaybackCutoffClock holds the string denoting the playback_cutoff_clock field in the database.
+	FieldPlaybackCutoffClock = "playback_cutoff_clock"
+	// FieldPlaybackCutoffMinutes holds the string denoting the playback_cutoff_minutes field in the database.
+	FieldPlaybackCutoffMinutes = "playback_cutoff_minutes"
+	// FieldPlaybackDeferralPeriods holds the string denoting the playback_deferral_periods field in the database.
+	FieldPlaybackDeferralPeriods = "playback_deferral_periods"
 	// Table holds the table name of the marketingsettings in the database.
 	Table = "marketing_settings"
 )
@@ -44,8 +66,19 @@ var Columns = []string{
 	FieldPriceFen,
 	FieldPriceOverridden,
 	FieldOnline,
+	FieldDailyLimit,
+	FieldCreativeLimit,
+	FieldCreativeOnline,
 	FieldExpiryMode,
 	FieldExpiryMinutes,
+	FieldSettlementFrequency,
+	FieldSettlementWeekday,
+	FieldSettlementMonthDay,
+	FieldSettlementClock,
+	FieldSettlementDelayMinutes,
+	FieldPlaybackCutoffClock,
+	FieldPlaybackCutoffMinutes,
+	FieldPlaybackDeferralPeriods,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -69,8 +102,32 @@ var (
 	DefaultPriceOverridden bool
 	// DefaultOnline holds the default value on creation for the "online" field.
 	DefaultOnline bool
+	// DefaultDailyLimit holds the default value on creation for the "daily_limit" field.
+	DefaultDailyLimit int
+	// DailyLimitValidator is a validator for the "daily_limit" field. It is called by the builders before save.
+	DailyLimitValidator func(int) error
+	// DefaultCreativeLimit holds the default value on creation for the "creative_limit" field.
+	DefaultCreativeLimit int
+	// CreativeLimitValidator is a validator for the "creative_limit" field. It is called by the builders before save.
+	CreativeLimitValidator func(int) error
+	// DefaultCreativeOnline holds the default value on creation for the "creative_online" field.
+	DefaultCreativeOnline bool
 	// DefaultExpiryMinutes holds the default value on creation for the "expiry_minutes" field.
 	DefaultExpiryMinutes int
+	// DefaultSettlementWeekday holds the default value on creation for the "settlement_weekday" field.
+	DefaultSettlementWeekday int
+	// DefaultSettlementMonthDay holds the default value on creation for the "settlement_month_day" field.
+	DefaultSettlementMonthDay int
+	// DefaultSettlementClock holds the default value on creation for the "settlement_clock" field.
+	DefaultSettlementClock string
+	// DefaultSettlementDelayMinutes holds the default value on creation for the "settlement_delay_minutes" field.
+	DefaultSettlementDelayMinutes int
+	// DefaultPlaybackCutoffClock holds the default value on creation for the "playback_cutoff_clock" field.
+	DefaultPlaybackCutoffClock string
+	// DefaultPlaybackCutoffMinutes holds the default value on creation for the "playback_cutoff_minutes" field.
+	DefaultPlaybackCutoffMinutes int
+	// DefaultPlaybackDeferralPeriods holds the default value on creation for the "playback_deferral_periods" field.
+	DefaultPlaybackDeferralPeriods int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -86,6 +143,18 @@ func ExpiryModeValidator(em enum.MarketingExpiryMode) error {
 		return nil
 	default:
 		return fmt.Errorf("marketingsettings: invalid enum value for expiry_mode field: %q", em)
+	}
+}
+
+const DefaultSettlementFrequency enum.SettlementFrequency = "weekly"
+
+// SettlementFrequencyValidator is a validator for the "settlement_frequency" field enum values. It is called by the builders before save.
+func SettlementFrequencyValidator(sf enum.SettlementFrequency) error {
+	switch sf {
+	case "weekly", "daily", "monthly", "after_delay":
+		return nil
+	default:
+		return fmt.Errorf("marketingsettings: invalid enum value for settlement_frequency field: %q", sf)
 	}
 }
 
@@ -127,6 +196,21 @@ func ByOnline(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOnline, opts...).ToFunc()
 }
 
+// ByDailyLimit orders the results by the daily_limit field.
+func ByDailyLimit(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDailyLimit, opts...).ToFunc()
+}
+
+// ByCreativeLimit orders the results by the creative_limit field.
+func ByCreativeLimit(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreativeLimit, opts...).ToFunc()
+}
+
+// ByCreativeOnline orders the results by the creative_online field.
+func ByCreativeOnline(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreativeOnline, opts...).ToFunc()
+}
+
 // ByExpiryMode orders the results by the expiry_mode field.
 func ByExpiryMode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiryMode, opts...).ToFunc()
@@ -135,4 +219,44 @@ func ByExpiryMode(opts ...sql.OrderTermOption) OrderOption {
 // ByExpiryMinutes orders the results by the expiry_minutes field.
 func ByExpiryMinutes(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiryMinutes, opts...).ToFunc()
+}
+
+// BySettlementFrequency orders the results by the settlement_frequency field.
+func BySettlementFrequency(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementFrequency, opts...).ToFunc()
+}
+
+// BySettlementWeekday orders the results by the settlement_weekday field.
+func BySettlementWeekday(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementWeekday, opts...).ToFunc()
+}
+
+// BySettlementMonthDay orders the results by the settlement_month_day field.
+func BySettlementMonthDay(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementMonthDay, opts...).ToFunc()
+}
+
+// BySettlementClock orders the results by the settlement_clock field.
+func BySettlementClock(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementClock, opts...).ToFunc()
+}
+
+// BySettlementDelayMinutes orders the results by the settlement_delay_minutes field.
+func BySettlementDelayMinutes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementDelayMinutes, opts...).ToFunc()
+}
+
+// ByPlaybackCutoffClock orders the results by the playback_cutoff_clock field.
+func ByPlaybackCutoffClock(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPlaybackCutoffClock, opts...).ToFunc()
+}
+
+// ByPlaybackCutoffMinutes orders the results by the playback_cutoff_minutes field.
+func ByPlaybackCutoffMinutes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPlaybackCutoffMinutes, opts...).ToFunc()
+}
+
+// ByPlaybackDeferralPeriods orders the results by the playback_deferral_periods field.
+func ByPlaybackDeferralPeriods(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPlaybackDeferralPeriods, opts...).ToFunc()
 }

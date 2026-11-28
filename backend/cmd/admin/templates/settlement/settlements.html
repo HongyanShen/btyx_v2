@@ -1,0 +1,63 @@
+{{define "settlements"}}
+<section class="workspace-page settlement-page">
+  <h2>营销分发 · 分发结算</h2><nav aria-label="结算类目"><a href="/settlements?month={{.Month}}">全部</a>　<a href="/settlements?month={{.Month}}&amp;category=distribution">分发任务</a>　<a href="/settlements?month={{.Month}}&amp;category=creative">创作任务</a></nav>
+  <form class="settlement-months" action="/settlements" method="get" hx-get="/settlements" hx-target="#admin-workspace" hx-indicator="#admin-loading" hx-push-url="true" hx-sync="#admin-workspace:replace">
+    <input type="hidden" name="category" value="{{.Category}}">{{template "settlement-months" .}}
+    <button class="server-button settlement-refresh" type="submit" name="month" value="{{.Month}}"><span>刷新</span></button>
+    {{if .CanSettings}}<a class="server-button" href="/distribution/settings" hx-get="/distribution/settings" hx-target="#admin-workspace" hx-push-url="true" hx-indicator="#admin-loading" hx-sync="#admin-workspace:replace">结算与提交设置</a>{{end}}
+  </form>
+  <div class="settlement-kpis">
+    {{range .KPI}}<div><span>{{.Label}}</span><strong>{{.Value}}</strong><small>{{if .Link}}<a href="{{.Link}}">{{.Note}}</a>{{else}}{{.Note}}{{end}}</small></div>{{end}}
+  </div>
+  {{$page := .}}
+  {{range .Weeks}}
+  {{$week := .}}
+  <section class="settlement-week">
+    <h3>{{if ne .Label .Date}}{{.Label}}<span> </span>{{end}}<span class="settlement-note"><time datetime="{{.Through}}">{{.Date}}</time> 结算 · <span>{{.People}}</span> 人 ·<span> </span><span>{{.Amount}}</span></span> {{if .Badge}}<span class="settlement-badge settlement-badge-{{.Tone}}">{{.Badge}}</span>{{end}}</h3>
+    {{if .NextCredit}}<p class="settlement-note">下批 {{.NextCredit}} 开放入账（北京时间）</p>{{end}}
+    {{if and .Due .Groups}}<p class="settlement-playback">播放数据：已交齐 <strong>{{.Done}}</strong> 人 · 没交齐<span> </span><strong{{if .Waiting}} class="settlement-warning"{{end}}>{{.Waiting}}</strong><span> </span><span>人</span>{{if .Waiting}}<span>（</span><span>{{.WaitingLabel}}</span>）{{end}}</p>{{end}}
+    {{if .Projects}}<p class="settlement-note settlement-projects">按项目：{{.Projects}}</p>{{end}}
+    <div class="settlement-scroll">
+      <table class="settlement-table settlement-week-table">
+        <thead><tr><th scope="col">项目</th><th scope="col">分发员 / 抖音号</th><th scope="col">微信</th><th scope="col">条数</th><th scope="col">链接失效系统检测</th><th scope="col">按平台算</th><th scope="col">金额</th><th scope="col">状态</th></tr></thead>
+        <tbody>
+          {{range .Groups}}
+          <tr>
+            <td>{{range .Projects}}<div>{{.}}</div>{{else}}—{{end}}</td>
+            <td>{{if .Owner}}{{$url := settlementLink $page.Month $week.Through .ID "person"}}<a class="settlement-link settlement-person" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#settlement-dialog-slot" data-open-server-dialog>{{.Name}}</a>{{if .Owner.Blocked}} <span class="settlement-badge settlement-badge-waiting">已拉黑</span>{{end}}{{else}}{{.Name}}{{end}}
+              <div class="settlement-note">{{if and .Owner .Owner.Douyin}}{{.Owner.Douyin}}{{else}}—{{end}}</div>
+              {{$url := printf "%s&category=%s" (settlementLink $page.Month $week.Through .ID "detail") $page.Category}}<a class="server-button server-primary settlement-detail-trigger" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#settlement-dialog-slot" data-open-server-dialog><span>看明细</span></a></td>
+            <td>{{if and .Owner .Owner.Wechat}}{{.Owner.Wechat}}{{else}}—{{end}}</td>
+            <td>{{.Qualified}}{{if .Waiting}} <span class="settlement-badge settlement-badge-waiting">{{.Waiting}} 条等截图，晚交顺延</span>{{end}}{{if .Late}}<div class="settlement-note">含前期 {{.Late}} 条，顺延至本期</div>{{end}}</td>
+            <td class="settlement-check">{{range .Checks}}<div class="{{if .Danger}}settlement-danger{{else}}settlement-note{{end}}">{{.Text}}</div>{{else}}<span class="settlement-note">—</span>{{end}}</td>
+            <td>{{range .Prices}}<div>{{.}}</div>{{else}}—{{end}}</td><td><strong>{{.Amount}}</strong></td>
+            <td>{{if .Posted}}<div><span class="settlement-badge settlement-badge-success">已入账</span> <span class="settlement-note">{{.Posted}}</span></div>{{end}}
+              {{if .NeedsCredit}}{{if .Ready}}<span class="settlement-badge settlement-badge-waiting">待核对</span>{{else}}<span class="settlement-note">等结算开放</span>{{end}}{{else if not .Posted}}<span class="settlement-note">没有可结算的</span>{{end}}</td>
+          </tr>
+          {{else}}<tr><td colspan="8" class="settlement-note">这周没有要结算的</td></tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+    {{if or .Credit .Export}}<div class="settlement-week-actions">
+      {{if .Credit}}{{$url := settlementLink $page.Month .Through "" "confirm"}}<a class="server-button server-primary" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#settlement-dialog-slot" data-open-server-dialog><span>{{.Credit}}</span></a>{{end}}
+      {{if .Export}}<a class="settlement-export" href="/api/v1/settlements/export?through={{.Through}}" download>导出入账明细（Excel）</a>{{end}}
+    </div>{{end}}
+  </section>
+  {{else}}<p class="settlement-note">所选月份暂无结算记录</p>{{end}}
+  <div id="settlement-dialog-slot">{{with .Detail}}{{template "settlement-detail" .}}{{end}}{{with .Confirm}}{{template "settlement-confirm" .}}{{end}}{{with .Person}}{{template "distributor-dialog" .}}{{end}}</div>
+  {{template "playback-dialog" .}}
+</section>
+{{end}}
+{{define "settlement-months"}}
+<div class="month-picker" role="group" aria-label="结算月份" data-month-picker data-month="{{.Month}}" data-latest="{{.Latest}}">
+  {{range .Shortcuts}}<button type="submit" name="month" value="{{.Key}}" aria-pressed="{{.Selected}}">{{.Label}}</button>{{end}}
+  <button type="button" class="month-picker-trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="settlement-month-picker" aria-label="选择结算月份{{if .OlderSelected}}，当前 {{.MonthLabel}}{{end}}" data-selected="{{.OlderSelected}}">
+    <svg class="month-picker-calendar" viewBox="64 64 896 896" aria-hidden="true" focusable="false"><path d="M880 184H712v-64c0-4.4-3.6-8-8-8h-56c-4.4 0-8 3.6-8 8v64H384v-64c0-4.4-3.6-8-8-8h-56c-4.4 0-8 3.6-8 8v64H144c-17.7 0-32 14.3-32 32v664c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V216c0-17.7-14.3-32-32-32zm-40 656H184V460h656v380zM184 392V256h128v48c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8v-48h256v48c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8v-48h128v136H184z"/></svg>
+    <span>{{if .OlderSelected}}{{.MonthLabel}}{{else}}选月份{{end}}</span><span class="month-picker-chevron" aria-hidden="true">{{template "down-chevron" .}}</span>
+  </button>
+  <div class="month-picker-popup month-picker-popover" hidden><div class="month-picker-panel" role="dialog" id="settlement-month-picker" aria-label="选择结算月份">
+    <div class="month-picker-year"><button type="button" aria-label="上一年" data-month-year="-1">‹</button><strong tabindex="-1" aria-live="polite" data-month-heading></strong><button type="button" aria-label="下一年" data-month-year="1">›</button></div>
+    <div class="month-picker-grid">{{range .Months}}<button type="submit" name="month" aria-pressed="false" data-month-number="{{.}}">{{.}} 月</button>{{end}}</div>
+  </div></div>
+</div>
+{{end}}

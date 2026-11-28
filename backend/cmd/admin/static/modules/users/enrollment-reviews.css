@@ -1,0 +1,301 @@
+.enrollment-tag-library {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 1px solid #e6e1ef;
+  border-radius: 8px;
+  background: #f7f5fb;
+  color: #665f77;
+  font-size: 12px;
+}
+
+.enrollment-tag-library p {
+  margin: 0 0 8px;
+  line-height: 1.65;
+}
+
+.enrollment-tag-library strong {
+  margin-inline-end: 8px;
+  color: #2d2654;
+  font-size: 13px;
+}
+
+.enrollment-tag-library-controls,
+.enrollment-tag-add,
+.enrollment-row-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.enrollment-tag-add {
+  flex-wrap: nowrap;
+}
+
+.enrollment-tag-add .ant-input {
+  width: 152px;
+}
+
+.enrollment-library-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 4px;
+  border-radius: 5px;
+  background: #ede9f7;
+}
+
+.enrollment-library-tag .ant-tag {
+  margin: 0;
+  background: transparent;
+  color: #33295b;
+}
+
+.enrollment-library-tag .ant-btn-icon-only {
+  min-inline-size: 24px;
+  min-block-size: 24px;
+}
+
+.enrollment-tag-library > .ant-alert {
+  margin-top: 8px;
+}
+
+.enrollment-table .ant-table-thead > tr > th,
+.enrollment-table .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
+  padding: 10px 9px !important;
+}
+
+.enrollment-table .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
+  color: #33295b;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+}
+
+.enrollment-table .ant-table-thead > tr > th::before {
+  display: none;
+}
+
+.enrollment-table .enrollment-person {
+  max-width: 100%;
+  height: auto;
+  padding: 0;
+  text-align: start;
+  white-space: normal;
+}
+
+.enrollment-table .identity-photo-thumbnails {
+  gap: 6px;
+}
+
+.enrollment-table
+  :is(
+    .identity-photo-thumbnail,
+    .identity-photo-missing,
+    .identity-photo-thumbnail img
+  ) {
+  width: 60px;
+}
+
+.enrollment-table .identity-photo-thumbnail img {
+  height: 40px;
+}
+
+.enrollment-person {
+  font-weight: 700;
+}
+
+.enrollment-muted,
+.enrollment-reason {
+  margin: 3px 0 0;
+  color: #6d667e;
+  font-size: 12px;
+}
+
+.enrollment-reason {
+  white-space: pre-line;
+}
+
+.enrollment-row-tags .ant-tag {
+  margin: 0;
+}
+
+.enrollment-status-pending {
+  color: #805404;
+  background: #fff4d8;
+}
+
+.enrollment-status-approved {
+  color: #176d3f;
+  background: #e3f5e9;
+}
+
+.enrollment-status-rejected {
+  color: #a42834;
+  background: #fbe9eb;
+}
+
+.enrollment-action.ant-btn {
+  border-color: #a296c5;
+  color: #483970;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.enrollment-pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.enrollment-filters {
+  margin-bottom: 12px;
+}
+
+.enrollment-filters .ant-select {
+  min-width: 146px;
+}
+
+.server-dialog.enrollment-review-modal {
+  --enrollment-review-accent: #8b82be;
+  width: min(420px, calc(100% - 32px));
+  padding: 20px 22px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px #0003;
+}
+
+.server-dialog.enrollment-review-modal::backdrop {
+  background: #0006;
+}
+
+.enrollment-review-fields {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f6f5fa;
+  font-size: 13px;
+  line-height: 2;
+}
+
+.enrollment-review-section-head {
+  font-size: 13px;
+}
+
+.enrollment-review-section-head .enrollment-muted {
+  margin-left: 4px;
+}
+
+.enrollment-review-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  font-size: 12px;
+}
+
+.enrollment-review-links:not(:has(a)) {
+  display: none;
+}
+
+.enrollment-review-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.enrollment-review-options span {
+  white-space: nowrap;
+}
+
+.enrollment-review-modal .enrollment-review-options label {
+  position: relative;
+  margin: 0;
+  padding: 3px 10px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  border: 1px solid #c9c4e0;
+  border-radius: 12px;
+  color: #3b3568;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.enrollment-review-modal .enrollment-review-options label:has(:checked) {
+  border-color: var(--enrollment-review-accent);
+  background: var(--enrollment-review-accent);
+  color: #fff;
+}
+
+.enrollment-review-options label:has(:focus-visible) {
+  outline: 2px solid var(--enrollment-review-accent);
+  outline-offset: 1px;
+}
+
+.enrollment-review-options input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.enrollment-review-tags {
+  display: grid;
+  gap: 6px;
+}
+
+.enrollment-review-tags .enrollment-muted {
+  margin-block: 0;
+}
+
+.enrollment-review-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.server-dialog.enrollment-review-modal .enrollment-review-inline > input {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.enrollment-review-modal .server-button {
+  flex: none;
+  white-space: nowrap;
+}
+
+.enrollment-review-modal
+  .server-button:not(.server-primary, .server-button-danger) {
+  background: #eee;
+  border-color: #eee;
+  color: #333;
+}
+
+.enrollment-review-reject {
+  margin-top: 14px;
+}
+
+.enrollment-xhs-qr {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.enrollment-xhs-qr p {
+  margin: 0;
+  color: #6d667e;
+}
+
+.enrollment-document-images {
+  margin-top: 12px;
+}
+
+.enrollment-document-image {
+  min-width: 148px;
+  text-align: center;
+}

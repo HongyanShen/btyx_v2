@@ -20,17 +20,21 @@ type Principal struct {
 }
 
 type OperatorDTO struct {
-	ID         string   `json:"id"`
-	Username   string   `json:"username"`
-	SuperAdmin bool     `json:"super_admin"`
-	Disabled   bool     `json:"disabled"`
-	Pages      []string `json:"pages"`
-	Endpoints  []string `json:"endpoints"`
+	ID           string   `json:"id"`
+	Username     string   `json:"username"`
+	SuperAdmin   bool     `json:"super_admin"`
+	Disabled     bool     `json:"disabled"`
+	AllPages     bool     `json:"all_pages"`
+	AllEndpoints bool     `json:"all_endpoints"`
+	Pages        []string `json:"pages"`
+	Endpoints    []string `json:"endpoints"`
 }
 
 type OperatorGrants struct {
-	Pages     []string `json:"pages"`
-	Endpoints []string `json:"endpoints"`
+	AllPages     bool     `json:"all_pages,omitempty"`
+	AllEndpoints bool     `json:"all_endpoints,omitempty"`
+	Pages        []string `json:"pages"`
+	Endpoints    []string `json:"endpoints"`
 }
 
 type CreateOperatorInput struct {

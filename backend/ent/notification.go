@@ -3,11 +3,14 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"baituber.cn/yanxuan/v2/ent/notification"
+	"baituber.cn/yanxuan/v2/internal/domain/enum"
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
@@ -23,6 +26,16 @@ type Notification struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
+	// Card holds the value of the "card" field.
+	Card wxnotice.Card `json:"card,omitempty"`
+	// DeliveryState holds the value of the "delivery_state" field.
+	DeliveryState enum.DeliveryState `json:"delivery_state,omitempty"`
+	// DeliveryReason holds the value of the "delivery_reason" field.
+	DeliveryReason string `json:"delivery_reason,omitempty"`
+	// WechatCode holds the value of the "wechat_code" field.
+	WechatCode int `json:"wechat_code,omitempty"`
+	// ChoiceID holds the value of the "choice_id" field.
+	ChoiceID string `json:"choice_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Body holds the value of the "body" field.
@@ -39,9 +52,13 @@ func (*Notification) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case notification.FieldCard:
+			values[i] = new([]byte)
 		case notification.FieldRead:
 			values[i] = new(sql.NullBool)
-		case notification.FieldID, notification.FieldUserID, notification.FieldTitle, notification.FieldBody, notification.FieldReferenceID:
+		case notification.FieldWechatCode:
+			values[i] = new(sql.NullInt64)
+		case notification.FieldID, notification.FieldUserID, notification.FieldDeliveryState, notification.FieldDeliveryReason, notification.FieldChoiceID, notification.FieldTitle, notification.FieldBody, notification.FieldReferenceID:
 			values[i] = new(sql.NullString)
 		case notification.FieldCreatedAt, notification.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -83,6 +100,38 @@ func (_m *Notification) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				_m.UserID = value.String
+			}
+		case notification.FieldCard:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field card", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Card); err != nil {
+					return fmt.Errorf("unmarshal field card: %w", err)
+				}
+			}
+		case notification.FieldDeliveryState:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_state", values[i])
+			} else if value.Valid {
+				_m.DeliveryState = enum.DeliveryState(value.String)
+			}
+		case notification.FieldDeliveryReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_reason", values[i])
+			} else if value.Valid {
+				_m.DeliveryReason = value.String
+			}
+		case notification.FieldWechatCode:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field wechat_code", values[i])
+			} else if value.Valid {
+				_m.WechatCode = int(value.Int64)
+			}
+		case notification.FieldChoiceID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field choice_id", values[i])
+			} else if value.Valid {
+				_m.ChoiceID = value.String
 			}
 		case notification.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -152,6 +201,21 @@ func (_m *Notification) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)
+	builder.WriteString(", ")
+	builder.WriteString("card=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Card))
+	builder.WriteString(", ")
+	builder.WriteString("delivery_state=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DeliveryState))
+	builder.WriteString(", ")
+	builder.WriteString("delivery_reason=")
+	builder.WriteString(_m.DeliveryReason)
+	builder.WriteString(", ")
+	builder.WriteString("wechat_code=")
+	builder.WriteString(fmt.Sprintf("%v", _m.WechatCode))
+	builder.WriteString(", ")
+	builder.WriteString("choice_id=")
+	builder.WriteString(_m.ChoiceID)
 	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(_m.Title)

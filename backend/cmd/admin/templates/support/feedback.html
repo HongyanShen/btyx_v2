@@ -1,0 +1,51 @@
+{{define "feedback"}}
+<section class="page server-page">
+  <div class="page-heading"><div><h2>反馈与咨询</h2><p class="server-secondary">处理分发员在报名、任务执行和结算中的问题。</p></div></div>
+  <div class="ant-card server-card"><div class="ant-card-body">
+    <div class="ant-table-wrapper server-table-scroll" tabindex="0" role="region" aria-label="反馈与咨询表格">
+      <table class="ant-table server-table">
+        <thead class="ant-table-thead"><tr><th scope="col">分发员</th><th scope="col">反馈内容</th><th scope="col">状态</th><th scope="col">提交时间</th><th scope="col">操作</th></tr></thead>
+        <tbody class="ant-table-tbody">
+          {{$page := .}}
+          {{range .Rows}}
+            <tr>
+              <td>{{.Name}}</td><td class="server-ellipsis" title="{{.Body}}">{{.Body}}</td><td><span class="server-tag">{{.Label}}</span></td><td>{{.Date}}</td>
+              <td><a class="server-link" href="/feedback/{{.ID}}/reply?page={{$page.Pager.Current}}" hx-get="/feedback/{{.ID}}/reply?page={{$page.Pager.Current}}" hx-target="#feedback-dialog-slot" hx-indicator="#admin-loading" hx-sync="#feedback-dialog-slot:replace">{{if $page.CanReply}}查看 / 回复{{else}}查看{{end}}</a></td>
+            </tr>
+          {{else}}<tr><td colspan="5" class="server-empty">暂无数据</td></tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+    {{template "pagination" .Pager}}
+  </div></div>
+  <div id="feedback-dialog-slot">{{with .Dialog}}{{template "feedback-dialog" .}}{{end}}</div>
+</section>
+{{end}}
+{{define "feedback-dialog"}}
+<dialog class="server-dialog" data-feedback-dialog aria-labelledby="feedback-dialog-title">
+  <header>
+    <h3 id="feedback-dialog-title">{{if .CanReply}}回复反馈{{else}}反馈详情{{end}}</h3>
+    <form method="dialog"><button type="submit" aria-label="关闭">×</button></form>
+  </header>
+  <form class="server-dialog-form" action="/feedback/{{.Record.ID}}/reply?page={{.Page}}" method="post" hx-post="/feedback/{{.Record.ID}}/reply?page={{.Page}}" hx-target="#feedback-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop">
+    <div class="server-dialog-body">
+      <p class="requirements">{{.Record.Body}}</p>
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Error}}<div class="server-alert server-alert-error" role="alert">{{.Error}}</div>{{end}}
+      {{if .CanReply}}
+        <input name="csrf" type="hidden" value="{{.CSRF}}">
+        <label for="feedback-reply">回复内容</label>
+        <textarea id="feedback-reply" name="reply" rows="5" required autofocus>{{.Record.Reply}}</textarea>
+      {{else if .Record.Reply}}
+        <p class="requirements">已回复　{{.Record.Reply}}</p>
+      {{end}}
+    </div>
+    {{if .CanReply}}
+      <footer>
+        <button class="server-button" type="submit" formmethod="dialog" formnovalidate data-close-dialog>取消</button>
+        <button class="server-button server-primary" type="submit" data-send-reply>确定<span class="htmx-indicator" aria-hidden="true"> · 提交中</span></button>
+      </footer>
+    {{end}}
+  </form>
+</dialog>
+{{end}}

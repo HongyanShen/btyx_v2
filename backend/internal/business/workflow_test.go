@@ -11,6 +11,7 @@ import (
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/modules/identity"
 	"baituber.cn/yanxuan/v2/internal/modules/submission"
+	"github.com/shopspring/decimal"
 )
 
 type workflowIdentityCheck struct{}
@@ -160,6 +161,11 @@ func TestWorkflowPriceSnapshotPlatformReviewSettlementAndWithdrawal(t *testing.T
 		t.Fatalf("got status %s", d.Status)
 	}
 
+	w, err := s.Wallet(ctx, uid)
+	if err != nil || w.PendingFen != "750" || w.EarnedFen != "0" {
+		t.Fatalf("summary should include only the approved platform: %+v, %v", w, err)
+	}
+
 	if err := s.Submit(ctx, uid, a.ID, SubmitInput{
 		Platform:   "xhs",
 		URL:        "https://xhslink.cn/o/abc123",
@@ -211,12 +217,12 @@ func TestWorkflowPriceSnapshotPlatformReviewSettlementAndWithdrawal(t *testing.T
 		t.Fatal(err)
 	}
 
-	w, err := s.Wallet(ctx, uid)
+	w, err = s.Wallet(ctx, uid)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if w.AvailableFen != "1500" {
+	if w.AvailableFen != "1500" || w.PendingFen != "0" || w.EarnedFen != "1500" {
 		t.Fatalf("duplicate credit: %+v", w)
 	}
 
@@ -249,8 +255,60 @@ func TestWorkflowPriceSnapshotPlatformReviewSettlementAndWithdrawal(t *testing.T
 	}
 
 	w, _ = s.Wallet(ctx, uid)
-	if w.AvailableFen != "500" || w.FrozenFen != "0" || w.WithdrawnFen != "1000" {
+	if w.AvailableFen != "500" || w.FrozenFen != "0" || w.WithdrawnFen != "1000" || w.EarnedFen != "1500" {
 		t.Fatalf("got %+v", w)
+	}
+}
+
+func TestWalletEarnedUsesBeijingMonthAndOnlySettlementCredits(t *testing.T) {
+	s := testService(t)
+	ctx := context.Background()
+	s.Now = func() time.Time {
+		return time.Date(2026, 12, 1, 2, 0, 0, 0, time.FixedZone("CST", 8*3600))
+	}
+	user, err := s.DemoLogin(ctx, "wallet-month")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	boundary := time.Date(2026, 11, 30, 16, 0, 0, 0, time.UTC)
+	entries := []struct {
+		amount string
+		kind   enum.LedgerKind
+		at     time.Time
+	}{
+		{
+			amount: "750",
+			kind:   enum.LedgerSettlementCredit,
+			at:     boundary.Add(-time.Second),
+		},
+		{
+			amount: "1500",
+			kind:   enum.LedgerSettlementCredit,
+			at:     boundary,
+		},
+		{
+			amount: "900",
+			kind:   enum.LedgerAdjustment,
+			at:     boundary,
+		},
+	}
+	for _, entry := range entries {
+		if _, err := s.Client.LedgerEntry.Create().
+			SetUserID(user.UserID).
+			SetKind(entry.kind).
+			SetAmountFen(decimal.RequireFromString(entry.amount)).
+			SetBusinessKey(NewID()).
+			SetReferenceID(NewID()).
+			SetCreatedAt(entry.at).
+			Save(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	got, err := s.Wallet(ctx, user.UserID)
+	if err != nil || got.EarnedFen != "2250" || got.MonthEarnedFen != "1500" || got.PendingFen != "0" {
+		t.Fatalf("unexpected earnings summary: %+v, %v", got, err)
 	}
 }
 

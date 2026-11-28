@@ -120,6 +120,11 @@ func TestTransferTimeoutQueriesOriginalBillBeforeRetry(t *testing.T) {
 	if submits != 1 || queries != 1 {
 		t.Fatalf("unsafe retry: submits=%d, queries=%d", submits, queries)
 	}
+
+	record, err := services.Client.Withdrawal.Get(ctx, withdrawal.ID)
+	if err != nil || record.Status != enum.WithdrawalSuccess || record.Reason != "" {
+		t.Fatalf("confirmed transfer retained a previous processing reason: record=%v, err=%v", record, err)
+	}
 }
 
 func TestConfiguredGatewayResumesBlockedTransfer(t *testing.T) {
@@ -151,6 +156,11 @@ func TestConfiguredGatewayResumesBlockedTransfer(t *testing.T) {
 
 	if submits != 1 {
 		t.Fatal("configured worker did not resume the blocked transfer")
+	}
+
+	record, err := services.Client.Withdrawal.Get(ctx, withdrawal.ID)
+	if err != nil || record.Status != enum.WithdrawalSubmitting || record.Reason != "" {
+		t.Fatalf("resumed transfer retained a configuration error: record=%v, err=%v", record, err)
 	}
 }
 
@@ -196,5 +206,86 @@ func TestCrashBeforeDispatchResubmitsOnlyOriginalBillAfterNotFound(t *testing.T)
 
 	if submits != 1 {
 		t.Fatal("original bill was never recovered")
+	}
+}
+
+func TestWaitingConfirmationKeepsPackageWhenQueryOmitsIt(t *testing.T) {
+	services, withdrawal, openID := fundedWithdrawal(t)
+	ctx := context.Background()
+	queries := 0
+	gateway := testGateway{
+		submit: func(_ context.Context, request transfer.Request) (transfer.Result, error) {
+			return transfer.Result{
+				Status:      enum.WithdrawalWaitingConfirmation,
+				ProviderID:  "provider-original",
+				PackageInfo: "test-receipt-package",
+				AmountFen:   request.AmountFen,
+				OpenID:      request.OpenID,
+			}, nil
+		},
+		query: func(_ context.Context, id string) (transfer.Result, error) {
+			queries++
+			if id != withdrawal.ID {
+				t.Fatalf("queried a different bill: %s", id)
+			}
+
+			return transfer.Result{
+				Status:     enum.WithdrawalWaitingConfirmation,
+				ProviderID: "provider-original",
+				AmountFen:  "1000",
+				OpenID:     openID,
+			}, nil
+		},
+	}
+	runner := New(services, gateway)
+	if err := runner.Tick(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	now := services.Now()
+	services.Now = func() time.Time { return now.Add(time.Minute) }
+	if err := runner.Tick(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	row, err := services.Client.Withdrawal.Get(ctx, withdrawal.ID)
+	if err != nil || queries != 1 || row.Status != enum.WithdrawalWaitingConfirmation || row.PackageInfo != "test-receipt-package" {
+		t.Fatalf("polling lost the receipt package: status=%v, queries=%d, err=%v", row, queries, err)
+	}
+}
+
+func TestPreviouslyIssuedBillDoesNotResubmitWhenQueryReturnsNotFound(t *testing.T) {
+	services, withdrawal, _ := fundedWithdrawal(t)
+	ctx := context.Background()
+	_, err := services.Client.Withdrawal.UpdateOneID(withdrawal.ID).
+		SetStatus(enum.WithdrawalWaitingConfirmation).
+		SetProviderID("provider-original").
+		Save(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = services.Client.Job.Update().SetAttempts(1).Save(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	queries := 0
+	gateway := testGateway{
+		query: func(_ context.Context, id string) (transfer.Result, error) {
+			if id != withdrawal.ID {
+				t.Fatal("queried a different bill")
+			}
+
+			queries++
+			return transfer.Result{}, transfer.ErrNotFound
+		},
+		submit: func(context.Context, transfer.Request) (transfer.Result, error) {
+			t.Fatal("previously issued bill reached Submit")
+			return transfer.Result{}, nil
+		},
+	}
+	if err := New(services, gateway).Tick(ctx); err != nil || queries != 1 {
+		t.Fatalf("expected one read of the original bill: queries=%d, err=%v", queries, err)
 	}
 }

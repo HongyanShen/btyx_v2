@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 	"context"
 
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
@@ -78,12 +79,19 @@ func (s *Service) ApplyTransferResult(ctx context.Context, id string, status enu
 
 		if _, err = tx.Withdrawal.UpdateOneID(id).
 			SetStatus(status).
+			SetReason("").
 			SetProviderID(providerID).
 			Save(ctx); err != nil {
 			return false, err
 		}
 
-		return true, app.Notify(ctx, tx, withdrawalRecord.UserID, "提现结果", string(status), id)
+		reason := "微信转账失败"
+		if status == enum.WithdrawalCancelled {
+			reason = "微信转账已取消"
+		}
+
+		card := wxnotice.Transfer(withdrawalRecord.AmountFen.Shift(-2).StringFixed(2), withdrawalRecord.CreatedAt, status == enum.WithdrawalSuccess, reason)
+		return true, s.Notify(ctx, tx, withdrawalRecord.UserID, "提现结果", string(status), id, card)
 	})
 	return err
 }

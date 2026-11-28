@@ -90,9 +90,16 @@ func (s *Service) reviewDetails(ctx context.Context, rows []*ent.Assignment) ([]
 
 	assignmentIDs := make([]string, 0, len(rows))
 	versionIDs := make([]string, 0, len(rows))
+	taskIDs := make([]string, 0, len(rows))
 	for _, row := range rows {
+		taskIDs = append(taskIDs, row.TaskID)
 		assignmentIDs = append(assignmentIDs, row.ID)
 		versionIDs = append(versionIDs, row.VersionID)
+	}
+
+	codes, err := taskCodes(ctx, s.Client, taskIDs)
+	if err != nil {
+		return nil, err
 	}
 
 	versions, err := s.Client.TaskVersion.Query().
@@ -154,6 +161,7 @@ func (s *Service) reviewDetails(ctx context.Context, rows []*ent.Assignment) ([]
 
 		records := submissionsByAssignment[row.ID]
 		detail := assignmentDetail(row, version, records)
+		detail.TaskCode = codes[row.TaskID]
 		for index, record := range records {
 			key := submissionKey{
 				assignmentID: row.ID,

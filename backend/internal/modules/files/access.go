@@ -6,7 +6,10 @@ import (
 	"baituber.cn/yanxuan/v2/ent"
 	"baituber.cn/yanxuan/v2/ent/assignment"
 	"baituber.cn/yanxuan/v2/ent/auditevent"
+	"baituber.cn/yanxuan/v2/ent/creativetask"
+	"baituber.cn/yanxuan/v2/ent/creativework"
 	"baituber.cn/yanxuan/v2/ent/fileobject"
+	"baituber.cn/yanxuan/v2/ent/marketingsettings"
 	"baituber.cn/yanxuan/v2/ent/operator"
 	"baituber.cn/yanxuan/v2/ent/taskversion"
 	"baituber.cn/yanxuan/v2/ent/userenrollment"
@@ -136,6 +139,30 @@ func (s *Service) FileForRead(ctx context.Context, userID string, role enum.Role
 			},
 		).
 		Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if allowed {
+		return record, nil
+	}
+
+	policy, err := s.Client.MarketingSettings.Query().Where(marketingsettings.ScopeEQ("marketing")).Only(ctx)
+	if err != nil && !ent.IsNotFound(err) {
+		return nil, err
+	}
+
+	available := policy == nil || policy.CreativeOnline
+	allowed, err = s.Client.CreativeTask.Query().Where(func(sel *sql.Selector) {
+		work := sql.Table(creativework.Table)
+		mine := sql.Select(work.C(creativework.FieldTaskID)).From(work).Where(sql.EQ(work.C(creativework.FieldUserID), userID))
+		access := sql.In(sel.C(creativetask.FieldID), mine)
+		if available {
+			access = sql.Or(access, sql.And(sql.EQ(sel.C(creativetask.FieldOnline), true), sql.LTE(sel.C(creativetask.FieldStartsAt), s.Now()), sql.GT(sel.C(creativetask.FieldEndsAt), s.Now())))
+		}
+
+		sel.Where(sql.And(access, sqljson.ValueContains(sel.C(creativetask.FieldFiles), id)))
+	}).Exist(ctx)
 	if err != nil {
 		return nil, err
 	}

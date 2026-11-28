@@ -1,6 +1,7 @@
 const { request, post } = require("../../../services/request");
 const { takeClaimedAssignment } = require("../../../services/marketing-tasks");
 const { doubleFen, formatFen } = require("../../../services/money");
+const { isPlaybackReviewed, workCard } = require("../../../services/work-view");
 const {
   chooseImage,
   materialTicket,
@@ -22,6 +23,7 @@ const {
 const {
   isClosed,
   taskDeadline,
+  beijingDateTime,
   taskProgress,
 } = require("../../../services/task-progress");
 const {
@@ -31,6 +33,8 @@ const {
   sharePlaceholder,
   taskRequirements,
 } = require("./presentation");
+
+const { subscribe } = require("../../../services/subscriptions");
 
 Page({
   data: {
@@ -94,20 +98,17 @@ Page({
       if (this.unloaded || !task) return;
       const closed = isClosed(task);
       const reissued = task.source === AssignmentSource.SourceReissued;
-      const files = task.files || [];
+      const files = [...(task.files || [])];
       const links = {};
       const screenshots = {};
-      const platforms = task.platforms.map((platform) => {
+      const platforms = Array.from(task.platforms, (platform) => {
         const submission = task.submissions.find(
           (submission) => submission.platform === platform,
         );
         const invalid =
           submission?.status === SubmissionStatus.SubmissionInvalid;
         const readOnly = closed || !!submission?.settled || invalid;
-        const reviewed = [
-          SubmissionStatus.SubmissionApproved,
-          SubmissionStatus.SubmissionWaived,
-        ].includes(submission?.status);
+        const reviewed = isPlaybackReviewed(submission?.status);
         const linkLocked = readOnly || reviewed;
         const draft = this.drafts[platform];
         const submittedURL = submission?.url || "";
@@ -117,7 +118,7 @@ Page({
         links[platform] =
           (!linkLocked ? draft?.text : undefined) ?? submittedText;
         screenshots[platform] =
-          (!readOnly ? draft?.screenshot : undefined) ??
+          (!readOnly && reviewed ? draft?.screenshot : undefined) ??
           submission?.screenshot ??
           "";
 
@@ -138,22 +139,29 @@ Page({
           reissued: invalid,
           readOnly,
           linkLocked,
+          showPlayback: reviewed && !!submittedURL,
         };
       });
       const deadline = taskDeadline(task);
+      const summary = workCard(task);
       const progress = taskProgress(task);
       const platformNames = platforms.map((platform) => platform.label);
       const timeline = executionTimeline(progress, platformNames);
-      const openStage =
-        this.section === "screenshots"
-          ? TaskStep.StepLinks
-          : this.data.task?.timeline?.active === timeline.active
-            ? this.data.openStage
-            : timeline.active;
+      const hasPlaybackPlatforms = platforms.some(
+        ({ showPlayback }) => showPlayback,
+      );
+      const openScreenshots =
+        this.section === "screenshots" && hasPlaybackPlatforms;
+      const openStage = openScreenshots
+        ? TaskStep.StepLinks
+        : this.data.task?.timeline?.active === timeline.active
+          ? this.data.openStage
+          : timeline.active;
 
       this.setData({
         task: {
           ...task,
+          summary,
           files,
           price: formatFen(task.price_fen),
           dualPlatformPrice:
@@ -170,9 +178,8 @@ Page({
           contentDone: progress.items[0].state === "done",
           publishDone: progress.items[1].state === "done",
           canSubmitLinks: platforms.some(({ linkLocked }) => !linkLocked),
-          hasSubmittedLinks: platforms.some(
-            ({ submittedURL }) => !!submittedURL,
-          ),
+          hasPlaybackPlatforms,
+          playbackDeadline: beijingDateTime(task.playback_deadline),
           progress,
           timeline,
           filesUpdated:
@@ -184,7 +191,7 @@ Page({
         links,
         screenshots,
         screenshotsOpen:
-          this.section === "screenshots" || this.data.screenshotsOpen,
+          hasPlaybackPlatforms && (openScreenshots || this.data.screenshotsOpen),
         deadline,
         openStage,
       });
@@ -208,7 +215,7 @@ Page({
       if (this.unloaded) return;
       this.setData({ loading: false }, () => {
         const target =
-          this.section === "screenshots" && this.data.task?.hasSubmittedLinks
+          this.section === "screenshots" && this.data.screenshotsOpen
             ? "screenshots"
             : this.scrollToActiveStage && this.data.openStage
               ? `stage-${this.data.openStage}`
@@ -386,7 +393,7 @@ Page({
       (item) => item.key === event.currentTarget.dataset.platform,
     );
     if (
-      !platform ||
+      !platform?.showPlayback ||
       platform.readOnly ||
       this.data.uploading ||
       this.data.saving
@@ -466,6 +473,7 @@ Page({
     }
 
     this.setData({ saving: "links" });
+    if (wx.requestSubscribeMessage) await subscribe("links");
     const errors = [];
     try {
       for (const { platform, url, text, screenshot } of records) {
@@ -496,10 +504,8 @@ Page({
       (item) => item.key === event.currentTarget.dataset.platform,
     );
     if (
-      !platform ||
+      !platform?.showPlayback ||
       platform.readOnly ||
-      platform.rejected ||
-      !platform.submittedURL ||
       this.data.loading ||
       this.data.saving ||
       this.data.uploading
@@ -514,6 +520,7 @@ Page({
 
     this.setData({ saving: platform.key });
     try {
+      if (wx.requestSubscribeMessage) await subscribe("screenshots");
       await this.saveSubmission(
         platform.key,
         platform.submittedURL,
@@ -607,5 +614,21 @@ Page({
       url: `/subpackages/task/detail/index?reissueOf=${encodeURIComponent(this.id)}&platform=${encodeURIComponent(platform)}`,
       fail: () => wx.showToast({ title: "任务打开失败，请重试", icon: "none" }),
     });
+  },
+
+  openPlayback() {
+    wx.navigateTo({ url: "/subpackages/task/playback/index" });
+  },
+
+  goWork() {
+    wx.switchTab({ url: "/pages/work/index" });
+  },
+
+  goHome() {
+    wx.switchTab({ url: "/pages/home/index" });
+  },
+
+  goWallet() {
+    wx.switchTab({ url: "/pages/wallet/index" });
   },
 });

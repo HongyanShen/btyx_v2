@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/httpx"
 	"baituber.cn/yanxuan/v2/internal/platform/logging"
 	"github.com/gin-gonic/gin"
@@ -22,12 +23,12 @@ func TestHTTPLogsShareServerRequestIDOnSuccessFailureAndPanic(t *testing.T) {
 		t.Run(outcome, func(t *testing.T) {
 			var output bytes.Buffer
 			root := logging.WithLogger(context.Background(), logging.New(&output, "testapi"))
-			router := NewRouter(nil)
+			router := NewRouter(nil, enum.AuditPlatformAdmin)
 			httpx.Register(router.Group(""), httpx.Route{
 				Method: http.MethodPost,
 				Path:   "/business",
 				Handler: httpx.Adapt(func(ctx *gin.Context) (*httpx.NoData, error) {
-					logging.From(ctx.Request.Context()).Info().Msg("business action")
+					logging.Info(ctx.Request.Context()).Msg("business action")
 					if outcome == "panic" {
 						panic("secret-panic-password")
 					}
@@ -43,7 +44,7 @@ func TestHTTPLogsShareServerRequestIDOnSuccessFailureAndPanic(t *testing.T) {
 			request = request.WithContext(root)
 			request.Header.Set("Authorization", "Bearer secret-authorization-token")
 			request.Header.Set("X-Request-ID", "untrusted-client-id")
-			request.Header.Set("Origin", "http://127.0.0.1:5173")
+			request.Header.Set("Origin", "https://other.example.com")
 			response := httptest.NewRecorder()
 			router.ServeHTTP(response, request)
 			requestID := response.Header().Get("X-Request-ID")
@@ -56,8 +57,8 @@ func TestHTTPLogsShareServerRequestIDOnSuccessFailureAndPanic(t *testing.T) {
 				wantStatus = http.StatusInternalServerError
 			}
 
-			if response.Code != wantStatus || !strings.Contains(response.Header().Get("Access-Control-Expose-Headers"), "X-Request-ID") {
-				t.Fatalf("incorrect response status or invisible request ID: %d", response.Code)
+			if response.Code != wantStatus || response.Header().Get("Access-Control-Allow-Origin") != "" {
+				t.Fatalf("incorrect response status or cross-origin grant: %d", response.Code)
 			}
 
 			startedCount := 0
@@ -107,7 +108,7 @@ func TestHTTPLogsShareServerRequestIDOnSuccessFailureAndPanic(t *testing.T) {
 func TestHTTPStartIsLoggedBeforeHandlerRuns(t *testing.T) {
 	var output bytes.Buffer
 	root := logging.WithLogger(context.Background(), logging.New(&output, "testapi"))
-	router := NewRouter(nil)
+	router := NewRouter(nil, enum.AuditPlatformAdmin)
 	router.GET("/slow", func(ctx *gin.Context) {
 		var entry struct {
 			RequestID string `json:"request_id"`
@@ -157,7 +158,7 @@ func TestHTTPBoundaryRequestsLogStartAndCompletion(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			var output bytes.Buffer
 			root := logging.WithLogger(context.Background(), logging.New(&output, "testapi"))
-			router := NewRouter(nil)
+			router := NewRouter(nil, enum.AuditPlatformAdmin)
 			router.POST("/business", func(ctx *gin.Context) {
 				t.Fatal("boundary request unexpectedly reached handler")
 			})

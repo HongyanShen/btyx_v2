@@ -13,9 +13,7 @@
     <view>
       <text wx:if="{{editable}}">改好后重新提交；</text>
       <text>对结果有疑问，可以去</text>
-      <text class="enrollment-feedback-link" role="link" bindtap="openFeedback"
-        >「我的反馈」咨询</text
-      >
+      <button class="enrollment-feedback-link" open-type="contact">「我的反馈」咨询</button>
     </view>
   </view>
   <view class="enrollment-banner">
@@ -47,7 +45,7 @@
             placeholder="填写抖音号，或粘贴抖音主页链接"
             data-field="douyin"
             bindinput="change"
-            disabled="{{submitting}}"
+            disabled="{{submitting || agreementLoading}}"
           />
         </view>
         <view class="identity-field">
@@ -60,7 +58,7 @@
             placeholder="在小红书「我」页面查看小红书号"
             data-field="xhs"
             bindinput="change"
-            disabled="{{submitting}}"
+            disabled="{{submitting || agreementLoading}}"
           />
           <view
             wx:if="{{needsXiaohongshuNumber && !xhs}}"
@@ -72,7 +70,7 @@
           <view class="identity-label">实名认证</view>
           <identity-photos
             id="identity-photos"
-            disabled="{{submitting}}"
+            disabled="{{submitting || agreementLoading}}"
             retained-front="{{rejected && !!user.enrollment_document.front_file_id}}"
             retained-back="{{rejected && !!user.enrollment_document.back_file_id}}"
             bind:photo="photoChanged"
@@ -112,8 +110,8 @@
     <button
       wx:if="{{editable}}"
       class="identity-submit"
-      loading="{{submitting}}"
-      disabled="{{submitting || uploading || !!ageError}}"
+      loading="{{submitting || agreementLoading}}"
+      disabled="{{submitting || uploading || agreementLoading || !!ageError}}"
       bindtap="submit"
     >
       {{rejected ? '重新提交报名' : '提交报名'}}

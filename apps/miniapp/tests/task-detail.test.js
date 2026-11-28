@@ -22,7 +22,7 @@ test("小红书分享链接校验兼容新旧短链并检查完整域名", () =>
   assert.equal(publicationLink("dy", "https://xhslink.cn/o/test"), "");
 });
 
-test("交链接表单仅在从补交入口打开时显示播放量截图区", () => {
+test("交链接表单的补交入口只显示审核已处理的平台", () => {
   const markup = readFileSync(
     join(__dirname, "../src/subpackages/task/detail/index.wxml"),
     "utf8",
@@ -30,7 +30,11 @@ test("交链接表单仅在从补交入口打开时显示播放量截图区", ()
   assert.doesNotMatch(markup, /bindtap="toggleScreenshots"/);
   assert.match(
     markup,
-    /wx:if="{{screenshotsOpen && task.hasSubmittedLinks}}"\s+id="screenshots"/,
+    /wx:if="{{screenshotsOpen && task.hasPlaybackPlatforms}}"\s+id="screenshots"/,
+  );
+  assert.match(
+    markup,
+    /wx:if="{{item.showPlayback}}" class="execution-screenshot-row"/,
   );
 });
 
@@ -153,10 +157,20 @@ test("统一提交保留各平台输入，部分成功后只重试失败平台",
     const dyRecord = assignment.submissions.find(
       ({ platform }) => platform === "dy",
     );
+    page.onLoad({ id: "assignment", section: "screenshots" });
+    await page.load();
+    assert.equal(page.data.task.hasPlaybackPlatforms, false);
+    assert.deepEqual(scrollTargets, []);
+    page.setData({ "screenshots.dy": "ineligible" });
+    await page.submitScreenshot(dy);
+    assert.equal(submissions.length, 5);
+
     dyRecord.status = "approved";
+    page.onLoad({ id: "assignment" });
     await page.load();
     assert.equal(page.data.platforms[0].linkLocked, true);
-    assert.equal(page.data.screenshotsOpen, false);
+    assert.equal(page.data.platforms[0].showPlayback, true);
+    assert.equal(page.data.platforms[1].showPlayback, false);
 
     page.onLoad({ id: "assignment", section: "screenshots" });
     await page.load();

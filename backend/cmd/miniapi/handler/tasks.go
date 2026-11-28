@@ -14,7 +14,7 @@ type completeStepInput struct {
 }
 
 func (handler *Handler) todayAvailability(ctx *gin.Context) (task.TodayAvailabilityDTO, error) {
-	return handler.services.TodayAvailability(ctx.Request.Context())
+	return handler.services.UserTodayAvailability(ctx.Request.Context(), httpapi.CurrentUser(ctx))
 }
 
 func (handler *Handler) claimTask(ctx *gin.Context) (task.AssignmentDTO, error) {

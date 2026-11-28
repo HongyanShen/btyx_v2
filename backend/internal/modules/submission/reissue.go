@@ -1,6 +1,7 @@
 package submission
 
 import (
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 	"context"
 	"strings"
 
@@ -100,7 +101,8 @@ func (s *Service) Reissue(ctx context.Context, actorID, id string, platform enum
 				return "", err
 			}
 
-			return id, app.Audit(ctx, tx, actorID, enum.AuditSubmissionWaive, platformSubmission.ID, reason)
+			return id, app.Audit(ctx, tx, actorID, enum.AuditSubmissionWaive, platformSubmission.ID, reason,
+				"平台："+string(platform), app.AuditFlag("照常结算", keepPay))
 		}
 
 		if err = agreements.CheckEligibility(ctx, tx, assignmentRecord.UserID); err != nil {
@@ -127,10 +129,7 @@ func (s *Service) Reissue(ctx context.Context, actorID, id string, platform enum
 
 		allocatedAt := s.Now()
 		day := app.BusinessDay(allocatedAt)
-		quotaKey := assignmentRecord.UserID + ":" + day
-		hasDailyQuota, err := tx.Assignment.Query().
-			Where(assignment.QuotaKeyEQ(quotaKey)).
-			Exist(ctx)
+		quotaKey, err := tasks.DailyQuotaSlot(ctx, tx, assignmentRecord.UserID, day, policy.DailyLimit)
 		if err != nil {
 			return "", err
 		}
@@ -144,11 +143,12 @@ func (s *Service) Reissue(ctx context.Context, actorID, id string, platform enum
 			SetSource(enum.SourceReissued).
 			SetSourceID(id).
 			SetBusinessDate(day).
+			SetCreatedAt(allocatedAt).
 			SetDueDate(day).
 			SetExpiresAt(policy.Deadline(allocatedAt)).
 			SetRequestKey(requestKey).
 			SetActorID(actorID)
-		if !hasDailyQuota {
+		if quotaKey != "" {
 			createAssignment.SetQuotaKey(quotaKey)
 		}
 
@@ -161,11 +161,13 @@ func (s *Service) Reissue(ctx context.Context, actorID, id string, platform enum
 			return "", err
 		}
 
-		if err = app.Notify(ctx, tx, assignmentRecord.UserID, "任务重新派发", reason, newAssignment.ID); err != nil {
+		card := wxnotice.Assignment(version.Title, "重新派发 · "+wxnotice.Platform(platform), reason, newAssignment.ID, *newAssignment.ExpiresAt)
+		if err = s.Notify(ctx, tx, assignmentRecord.UserID, "任务重新派发", reason, newAssignment.ID, card); err != nil {
 			return "", err
 		}
 
-		return newAssignment.ID, app.Audit(ctx, tx, actorID, enum.AuditTaskReissue, newAssignment.ID, reason)
+		return newAssignment.ID, app.Audit(ctx, tx, actorID, enum.AuditTaskReissue, newAssignment.ID, reason,
+			"平台："+string(platform), app.AuditFlag("照常结算", keepPay))
 	})
 	if err != nil {
 		return tasks.AssignmentDTO{}, err

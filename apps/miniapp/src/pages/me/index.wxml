@@ -12,7 +12,6 @@
           <text class="me-identity">{{identityTag}}</text>
         </block>
       </view>
-      <text wx:if="{{user && !user.avatar_file_id}}" class="me-avatar-action">用微信头像</text>
     </view>
   </view>
 
@@ -79,11 +78,11 @@
       <text wx:if="{{unread}}" class="me-unread">{{unread > 99 ? '99+' : unread}}</text>
       <text class="me-chevron">›</text>
     </view>
-    <view class="me-row" aria-role="button" bindtap="navigate" data-page="feedback" hover-class="me-pressed">
+    <button class="me-row me-contact" open-type="contact" hover-class="me-pressed">
       <image src="/assets/me/feedback.png" mode="aspectFit" />
       <text class="grow">我的反馈</text>
       <text class="me-chevron">›</text>
-    </view>
+    </button>
     <view class="me-row" aria-role="button" bindtap="navigate" data-page="agreement" hover-class="me-pressed">
       <image src="/assets/me/record.png" mode="aspectFit" />
       <text class="grow">营销分发任务协议</text>

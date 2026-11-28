@@ -85,7 +85,7 @@ Page({
     this.overview = overview;
 
     try {
-      const { user, hasContent, today, priceFen } = await overview.pending;
+      const { user, hasContent, today, priceFen, dailyLimit = 1, used = today ? 1 : 0, creativeOnline } = await overview.pending;
       if (this.overview !== overview) return;
 
       overview.token = wx.getStorageSync(tokenKey) || "";
@@ -93,6 +93,7 @@ Page({
       this.setData({
         loading: false,
         user,
+        dailyLimit,used,creativeOnline,
         guide: homeGuide(user, today),
         today: today
           ? { ...today, cardStatus: marketingTaskStatus(today) }
@@ -143,7 +144,7 @@ Page({
   },
 
   marketing() {
-    wx.pageScrollTo({ selector: "#marketing", duration: 240 });
+    wx.navigateTo({url:"/subpackages/task/market/index"});
   },
 
   openTodayTask() {

@@ -28,7 +28,7 @@ func Transaction[T any](ctx context.Context, runtime *Runtime, fn func(*ent.Tx) 
 		return zero, err
 	}
 
-	logging.From(ctx).Info().
+	logging.Info(ctx).
 		Msg("business transaction committed")
 
 	return result, nil

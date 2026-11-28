@@ -67,7 +67,8 @@ async function restoreSession() {
   const token = wx.getStorageSync(tokenKey);
   if (token) {
     try {
-      await sendRequest("/me", {}, token);
+      const member = await sendRequest("/me", {}, token);
+      if (member?.id && isCurrentSession(token)) wx.setStorageSync("btyx-member-id", member.id);
       return;
     } catch (error) {
       if (error.status === 401) await renewSession(token);
@@ -100,13 +101,14 @@ async function login() {
           data: { code: login.code },
         }),
       )
-      .then(({ token }) => {
+      .then(({ token, user_id }) => {
         if (!token) {
           throw new Error("微信登录失败，请重试");
         }
 
         if (hasSession()) return;
 
+        wx.setStorageSync("btyx-member-id", user_id || "");
         wx.setStorageSync(tokenKey, token);
         return token;
       })
@@ -157,6 +159,7 @@ async function localLogin() {
     method: "POST",
     data: { device },
   });
+  wx.setStorageSync("btyx-member-id", result.user_id || "");
   wx.setStorageSync(tokenKey, result.token);
 }
 

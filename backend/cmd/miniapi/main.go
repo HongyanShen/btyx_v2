@@ -6,6 +6,7 @@ import (
 
 	"baituber.cn/yanxuan/v2/internal/platform/config"
 	"baituber.cn/yanxuan/v2/internal/platform/logging"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 )
 
 func main() {
@@ -24,6 +25,13 @@ func main() {
 
 	defer closer.Close()
 	ctx = logging.WithLogger(ctx, logger)
+	closeTrace, err := telemetry.Open(ctx, cfg, "miniapi")
+	if err != nil {
+		logging.Error(ctx, err).Msg("初始化链路追踪失败")
+		os.Exit(1)
+	}
+
+	defer closeTrace()
 	if err := serve(ctx, cfg); err != nil {
 		logging.Error(ctx, err).Msg("小程序 API 启动失败")
 		_ = closer.Close()

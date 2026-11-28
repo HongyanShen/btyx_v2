@@ -88,7 +88,7 @@ func (s *Service) CreateMarketingTag(ctx context.Context, actorID, name string) 
 			return MarketingTagDTO{}, err
 		}
 
-		return marketingTagDTO(tag), app.Audit(ctx, tx, actorID, enum.AuditMarketingTagCreate, tag.ID, tag.Name)
+		return marketingTagDTO(tag), app.Audit(ctx, tx, actorID, enum.AuditMarketingTagCreate, tag.ID, tag.Name, "标签："+tag.Name)
 	})
 }
 
@@ -128,7 +128,7 @@ func (s *Service) RenameMarketingTag(ctx context.Context, actorID, tagID, name, 
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditMarketingTagRename, tag.ID, previousName+" → "+name)
+		return true, app.Audit(ctx, tx, actorID, enum.AuditMarketingTagRename, tag.ID, previousName+" → "+name, "原标签："+previousName, "新标签："+name)
 	})
 	return err
 }
@@ -180,7 +180,7 @@ func (s *Service) DeleteMarketingTag(ctx context.Context, actorID, tagID string,
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditMarketingTagDelete, tag.ID, tag.Name)
+		return true, app.Audit(ctx, tx, actorID, enum.AuditMarketingTagDelete, tag.ID, tag.Name, "标签："+tag.Name)
 	})
 	return err
 }

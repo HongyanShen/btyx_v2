@@ -10,6 +10,15 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
+func ValidatedHTML(markup string) string {
+	_, rich, err := agreementBody(markup)
+	if err != nil {
+		return ""
+	}
+
+	return rich
+}
+
 // Both clients render this same attribute-free HTML. Older clients receive the derived text.
 func agreementBody(markup string) (string, string, error) {
 	root := &html.Node{

@@ -6,7 +6,7 @@ const {
   openLogin,
   pendingSession,
 } = require("../../services/session");
-const config = require("../../services/config");
+const { subscribeTasks } = require("../../services/subscriptions");
 
 Page({
   data: {
@@ -121,12 +121,6 @@ Page({
   subscribe() {
     if (!hasSession()) return openLogin();
 
-    if (!config.subscriptionTemplates.length) {
-      wx.showToast({ title: "站内消息已开启", icon: "none" });
-
-      return;
-    }
-
-    wx.requestSubscribeMessage({ tmplIds: config.subscriptionTemplates });
+    return subscribeTasks();
   },
 });

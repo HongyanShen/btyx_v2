@@ -17,13 +17,48 @@ import (
 
 var errPoolCandidateChanged = errors.New("content pool candidate changed")
 
+// DailyQuotaSlot runs after the caller locks the recipient's user row.
+func DailyQuotaSlot(ctx context.Context, tx *ent.Tx, userID, day string, limit int) (string, error) {
+	used, err := dailyQuotaUsed(ctx, tx.Client(), userID, day)
+	if err != nil || used >= limit {
+		return "", err
+	}
+
+	if used == 0 {
+		return userID + ":" + day, nil
+	}
+
+	return userID + ":" + day + ":" + app.NewID(), nil
+}
+
+func dailyQuotaUsed(ctx context.Context, client *ent.Client, userID, day string) (int, error) {
+	return client.Assignment.Query().Where(assignment.UserIDEQ(userID), assignment.BusinessDateEQ(day), assignment.QuotaKeyNotNil()).Count(ctx)
+}
+
 func (s *Service) TodayAvailability(ctx context.Context) (TodayAvailabilityDTO, error) {
+	return s.UserTodayAvailability(ctx, "")
+}
+
+func (s *Service) UserTodayAvailability(ctx context.Context, userID string) (TodayAvailabilityDTO, error) {
 	policy, err := LoadMarketingPolicy(ctx, s.Client)
 	if err != nil {
 		return TodayAvailabilityDTO{}, err
 	}
 
-	result := TodayAvailabilityDTO{PriceFen: policy.PriceFen.String()}
+	result := TodayAvailabilityDTO{
+		DailyLimit:      policy.DailyLimit,
+		CreativeLimit:   policy.CreativeLimit,
+		CreativeOnline:  policy.CreativeOnline,
+		PriceFen:        policy.PriceFen.String(),
+		SettlementLabel: policy.Schedule.SettlementLabel(),
+	}
+	if userID != "" {
+		result.Used, err = dailyQuotaUsed(ctx, s.Client, userID, s.Day())
+		if err != nil {
+			return TodayAvailabilityDTO{}, err
+		}
+	}
+
 	if !policy.Online {
 		return result, nil
 	}

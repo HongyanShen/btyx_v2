@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"baituber.cn/yanxuan/v2/ent/notification"
+	"baituber.cn/yanxuan/v2/internal/domain/enum"
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -54,6 +56,76 @@ func (_c *NotificationCreate) SetNillableUpdatedAt(v *time.Time) *NotificationCr
 // SetUserID sets the "user_id" field.
 func (_c *NotificationCreate) SetUserID(v string) *NotificationCreate {
 	_c.mutation.SetUserID(v)
+	return _c
+}
+
+// SetCard sets the "card" field.
+func (_c *NotificationCreate) SetCard(v wxnotice.Card) *NotificationCreate {
+	_c.mutation.SetCard(v)
+	return _c
+}
+
+// SetNillableCard sets the "card" field if the given value is not nil.
+func (_c *NotificationCreate) SetNillableCard(v *wxnotice.Card) *NotificationCreate {
+	if v != nil {
+		_c.SetCard(*v)
+	}
+	return _c
+}
+
+// SetDeliveryState sets the "delivery_state" field.
+func (_c *NotificationCreate) SetDeliveryState(v enum.DeliveryState) *NotificationCreate {
+	_c.mutation.SetDeliveryState(v)
+	return _c
+}
+
+// SetNillableDeliveryState sets the "delivery_state" field if the given value is not nil.
+func (_c *NotificationCreate) SetNillableDeliveryState(v *enum.DeliveryState) *NotificationCreate {
+	if v != nil {
+		_c.SetDeliveryState(*v)
+	}
+	return _c
+}
+
+// SetDeliveryReason sets the "delivery_reason" field.
+func (_c *NotificationCreate) SetDeliveryReason(v string) *NotificationCreate {
+	_c.mutation.SetDeliveryReason(v)
+	return _c
+}
+
+// SetNillableDeliveryReason sets the "delivery_reason" field if the given value is not nil.
+func (_c *NotificationCreate) SetNillableDeliveryReason(v *string) *NotificationCreate {
+	if v != nil {
+		_c.SetDeliveryReason(*v)
+	}
+	return _c
+}
+
+// SetWechatCode sets the "wechat_code" field.
+func (_c *NotificationCreate) SetWechatCode(v int) *NotificationCreate {
+	_c.mutation.SetWechatCode(v)
+	return _c
+}
+
+// SetNillableWechatCode sets the "wechat_code" field if the given value is not nil.
+func (_c *NotificationCreate) SetNillableWechatCode(v *int) *NotificationCreate {
+	if v != nil {
+		_c.SetWechatCode(*v)
+	}
+	return _c
+}
+
+// SetChoiceID sets the "choice_id" field.
+func (_c *NotificationCreate) SetChoiceID(v string) *NotificationCreate {
+	_c.mutation.SetChoiceID(v)
+	return _c
+}
+
+// SetNillableChoiceID sets the "choice_id" field if the given value is not nil.
+func (_c *NotificationCreate) SetNillableChoiceID(v *string) *NotificationCreate {
+	if v != nil {
+		_c.SetChoiceID(*v)
+	}
 	return _c
 }
 
@@ -154,6 +226,22 @@ func (_c *NotificationCreate) defaults() {
 		v := notification.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.DeliveryState(); !ok {
+		v := notification.DefaultDeliveryState
+		_c.mutation.SetDeliveryState(v)
+	}
+	if _, ok := _c.mutation.DeliveryReason(); !ok {
+		v := notification.DefaultDeliveryReason
+		_c.mutation.SetDeliveryReason(v)
+	}
+	if _, ok := _c.mutation.WechatCode(); !ok {
+		v := notification.DefaultWechatCode
+		_c.mutation.SetWechatCode(v)
+	}
+	if _, ok := _c.mutation.ChoiceID(); !ok {
+		v := notification.DefaultChoiceID
+		_c.mutation.SetChoiceID(v)
+	}
 	if _, ok := _c.mutation.ReferenceID(); !ok {
 		v := notification.DefaultReferenceID
 		_c.mutation.SetReferenceID(v)
@@ -178,6 +266,23 @@ func (_c *NotificationCreate) check() error {
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Notification.user_id"`)}
+	}
+	if _, ok := _c.mutation.DeliveryState(); !ok {
+		return &ValidationError{Name: "delivery_state", err: errors.New(`ent: missing required field "Notification.delivery_state"`)}
+	}
+	if v, ok := _c.mutation.DeliveryState(); ok {
+		if err := notification.DeliveryStateValidator(v); err != nil {
+			return &ValidationError{Name: "delivery_state", err: fmt.Errorf(`ent: validator failed for field "Notification.delivery_state": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DeliveryReason(); !ok {
+		return &ValidationError{Name: "delivery_reason", err: errors.New(`ent: missing required field "Notification.delivery_reason"`)}
+	}
+	if _, ok := _c.mutation.WechatCode(); !ok {
+		return &ValidationError{Name: "wechat_code", err: errors.New(`ent: missing required field "Notification.wechat_code"`)}
+	}
+	if _, ok := _c.mutation.ChoiceID(); !ok {
+		return &ValidationError{Name: "choice_id", err: errors.New(`ent: missing required field "Notification.choice_id"`)}
 	}
 	if _, ok := _c.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Notification.title"`)}
@@ -243,6 +348,26 @@ func (_c *NotificationCreate) createSpec() (*Notification, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.UserID(); ok {
 		_spec.SetField(notification.FieldUserID, field.TypeString, value)
 		_node.UserID = value
+	}
+	if value, ok := _c.mutation.Card(); ok {
+		_spec.SetField(notification.FieldCard, field.TypeJSON, value)
+		_node.Card = value
+	}
+	if value, ok := _c.mutation.DeliveryState(); ok {
+		_spec.SetField(notification.FieldDeliveryState, field.TypeEnum, value)
+		_node.DeliveryState = value
+	}
+	if value, ok := _c.mutation.DeliveryReason(); ok {
+		_spec.SetField(notification.FieldDeliveryReason, field.TypeString, value)
+		_node.DeliveryReason = value
+	}
+	if value, ok := _c.mutation.WechatCode(); ok {
+		_spec.SetField(notification.FieldWechatCode, field.TypeInt, value)
+		_node.WechatCode = value
+	}
+	if value, ok := _c.mutation.ChoiceID(); ok {
+		_spec.SetField(notification.FieldChoiceID, field.TypeString, value)
+		_node.ChoiceID = value
 	}
 	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(notification.FieldTitle, field.TypeString, value)
@@ -333,6 +458,78 @@ func (u *NotificationUpsert) SetUserID(v string) *NotificationUpsert {
 // UpdateUserID sets the "user_id" field to the value that was provided on create.
 func (u *NotificationUpsert) UpdateUserID() *NotificationUpsert {
 	u.SetExcluded(notification.FieldUserID)
+	return u
+}
+
+// SetCard sets the "card" field.
+func (u *NotificationUpsert) SetCard(v wxnotice.Card) *NotificationUpsert {
+	u.Set(notification.FieldCard, v)
+	return u
+}
+
+// UpdateCard sets the "card" field to the value that was provided on create.
+func (u *NotificationUpsert) UpdateCard() *NotificationUpsert {
+	u.SetExcluded(notification.FieldCard)
+	return u
+}
+
+// ClearCard clears the value of the "card" field.
+func (u *NotificationUpsert) ClearCard() *NotificationUpsert {
+	u.SetNull(notification.FieldCard)
+	return u
+}
+
+// SetDeliveryState sets the "delivery_state" field.
+func (u *NotificationUpsert) SetDeliveryState(v enum.DeliveryState) *NotificationUpsert {
+	u.Set(notification.FieldDeliveryState, v)
+	return u
+}
+
+// UpdateDeliveryState sets the "delivery_state" field to the value that was provided on create.
+func (u *NotificationUpsert) UpdateDeliveryState() *NotificationUpsert {
+	u.SetExcluded(notification.FieldDeliveryState)
+	return u
+}
+
+// SetDeliveryReason sets the "delivery_reason" field.
+func (u *NotificationUpsert) SetDeliveryReason(v string) *NotificationUpsert {
+	u.Set(notification.FieldDeliveryReason, v)
+	return u
+}
+
+// UpdateDeliveryReason sets the "delivery_reason" field to the value that was provided on create.
+func (u *NotificationUpsert) UpdateDeliveryReason() *NotificationUpsert {
+	u.SetExcluded(notification.FieldDeliveryReason)
+	return u
+}
+
+// SetWechatCode sets the "wechat_code" field.
+func (u *NotificationUpsert) SetWechatCode(v int) *NotificationUpsert {
+	u.Set(notification.FieldWechatCode, v)
+	return u
+}
+
+// UpdateWechatCode sets the "wechat_code" field to the value that was provided on create.
+func (u *NotificationUpsert) UpdateWechatCode() *NotificationUpsert {
+	u.SetExcluded(notification.FieldWechatCode)
+	return u
+}
+
+// AddWechatCode adds v to the "wechat_code" field.
+func (u *NotificationUpsert) AddWechatCode(v int) *NotificationUpsert {
+	u.Add(notification.FieldWechatCode, v)
+	return u
+}
+
+// SetChoiceID sets the "choice_id" field.
+func (u *NotificationUpsert) SetChoiceID(v string) *NotificationUpsert {
+	u.Set(notification.FieldChoiceID, v)
+	return u
+}
+
+// UpdateChoiceID sets the "choice_id" field to the value that was provided on create.
+func (u *NotificationUpsert) UpdateChoiceID() *NotificationUpsert {
+	u.SetExcluded(notification.FieldChoiceID)
 	return u
 }
 
@@ -460,6 +657,90 @@ func (u *NotificationUpsertOne) SetUserID(v string) *NotificationUpsertOne {
 func (u *NotificationUpsertOne) UpdateUserID() *NotificationUpsertOne {
 	return u.Update(func(s *NotificationUpsert) {
 		s.UpdateUserID()
+	})
+}
+
+// SetCard sets the "card" field.
+func (u *NotificationUpsertOne) SetCard(v wxnotice.Card) *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetCard(v)
+	})
+}
+
+// UpdateCard sets the "card" field to the value that was provided on create.
+func (u *NotificationUpsertOne) UpdateCard() *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateCard()
+	})
+}
+
+// ClearCard clears the value of the "card" field.
+func (u *NotificationUpsertOne) ClearCard() *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.ClearCard()
+	})
+}
+
+// SetDeliveryState sets the "delivery_state" field.
+func (u *NotificationUpsertOne) SetDeliveryState(v enum.DeliveryState) *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetDeliveryState(v)
+	})
+}
+
+// UpdateDeliveryState sets the "delivery_state" field to the value that was provided on create.
+func (u *NotificationUpsertOne) UpdateDeliveryState() *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateDeliveryState()
+	})
+}
+
+// SetDeliveryReason sets the "delivery_reason" field.
+func (u *NotificationUpsertOne) SetDeliveryReason(v string) *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetDeliveryReason(v)
+	})
+}
+
+// UpdateDeliveryReason sets the "delivery_reason" field to the value that was provided on create.
+func (u *NotificationUpsertOne) UpdateDeliveryReason() *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateDeliveryReason()
+	})
+}
+
+// SetWechatCode sets the "wechat_code" field.
+func (u *NotificationUpsertOne) SetWechatCode(v int) *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetWechatCode(v)
+	})
+}
+
+// AddWechatCode adds v to the "wechat_code" field.
+func (u *NotificationUpsertOne) AddWechatCode(v int) *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.AddWechatCode(v)
+	})
+}
+
+// UpdateWechatCode sets the "wechat_code" field to the value that was provided on create.
+func (u *NotificationUpsertOne) UpdateWechatCode() *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateWechatCode()
+	})
+}
+
+// SetChoiceID sets the "choice_id" field.
+func (u *NotificationUpsertOne) SetChoiceID(v string) *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetChoiceID(v)
+	})
+}
+
+// UpdateChoiceID sets the "choice_id" field to the value that was provided on create.
+func (u *NotificationUpsertOne) UpdateChoiceID() *NotificationUpsertOne {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateChoiceID()
 	})
 }
 
@@ -762,6 +1043,90 @@ func (u *NotificationUpsertBulk) SetUserID(v string) *NotificationUpsertBulk {
 func (u *NotificationUpsertBulk) UpdateUserID() *NotificationUpsertBulk {
 	return u.Update(func(s *NotificationUpsert) {
 		s.UpdateUserID()
+	})
+}
+
+// SetCard sets the "card" field.
+func (u *NotificationUpsertBulk) SetCard(v wxnotice.Card) *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetCard(v)
+	})
+}
+
+// UpdateCard sets the "card" field to the value that was provided on create.
+func (u *NotificationUpsertBulk) UpdateCard() *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateCard()
+	})
+}
+
+// ClearCard clears the value of the "card" field.
+func (u *NotificationUpsertBulk) ClearCard() *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.ClearCard()
+	})
+}
+
+// SetDeliveryState sets the "delivery_state" field.
+func (u *NotificationUpsertBulk) SetDeliveryState(v enum.DeliveryState) *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetDeliveryState(v)
+	})
+}
+
+// UpdateDeliveryState sets the "delivery_state" field to the value that was provided on create.
+func (u *NotificationUpsertBulk) UpdateDeliveryState() *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateDeliveryState()
+	})
+}
+
+// SetDeliveryReason sets the "delivery_reason" field.
+func (u *NotificationUpsertBulk) SetDeliveryReason(v string) *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetDeliveryReason(v)
+	})
+}
+
+// UpdateDeliveryReason sets the "delivery_reason" field to the value that was provided on create.
+func (u *NotificationUpsertBulk) UpdateDeliveryReason() *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateDeliveryReason()
+	})
+}
+
+// SetWechatCode sets the "wechat_code" field.
+func (u *NotificationUpsertBulk) SetWechatCode(v int) *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetWechatCode(v)
+	})
+}
+
+// AddWechatCode adds v to the "wechat_code" field.
+func (u *NotificationUpsertBulk) AddWechatCode(v int) *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.AddWechatCode(v)
+	})
+}
+
+// UpdateWechatCode sets the "wechat_code" field to the value that was provided on create.
+func (u *NotificationUpsertBulk) UpdateWechatCode() *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateWechatCode()
+	})
+}
+
+// SetChoiceID sets the "choice_id" field.
+func (u *NotificationUpsertBulk) SetChoiceID(v string) *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.SetChoiceID(v)
+	})
+}
+
+// UpdateChoiceID sets the "choice_id" field to the value that was provided on create.
+func (u *NotificationUpsertBulk) UpdateChoiceID() *NotificationUpsertBulk {
+	return u.Update(func(s *NotificationUpsert) {
+		s.UpdateChoiceID()
 	})
 }
 

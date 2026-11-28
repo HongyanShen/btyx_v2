@@ -16,12 +16,15 @@
         "agreement/index",
         "feedback/index",
         "notifications/index",
-        "withdrawal/index"
+        "withdrawal/index",
+        "withdrawal-records/index",
+        "earnings/index",
+        "wallet-upcoming/index"
       ]
     },
     {
       "root": "subpackages/task",
-      "pages": ["detail/index", "today/index"]
+      "pages": ["detail/index", "today/index", "playback/index", "creative/index", "market/index"]
     }
   ],
   "window": {

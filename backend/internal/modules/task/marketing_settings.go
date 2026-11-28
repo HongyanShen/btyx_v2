@@ -17,6 +17,10 @@ import (
 const marketingScope = "marketing"
 
 type MarketingSettingsDTO struct {
+	DailyLimit     int  `json:"daily_limit"`
+	CreativeLimit  int  `json:"creative_limit"`
+	CreativeOnline bool `json:"creative_online"`
+
 	PriceFen      string                   `json:"price_fen"`
 	ExpiryMode    enum.MarketingExpiryMode `json:"expiry_mode"`
 	ExpiryMinutes int                      `json:"expiry_minutes"`
@@ -25,6 +29,10 @@ type MarketingSettingsDTO struct {
 }
 
 type MarketingSettingsInput struct {
+	DailyLimit     *int  `json:"daily_limit,omitempty"`
+	CreativeLimit  *int  `json:"creative_limit,omitempty"`
+	CreativeOnline *bool `json:"creative_online,omitempty"`
+
 	PriceFen      *string                   `json:"price_fen,omitempty"`
 	ExpiryMode    *enum.MarketingExpiryMode `json:"expiry_mode,omitempty"`
 	ExpiryMinutes *int                      `json:"expiry_minutes,omitempty"`
@@ -32,10 +40,14 @@ type MarketingSettingsInput struct {
 }
 
 type MarketingPolicy struct {
+	DailyLimit      int
+	CreativeLimit   int
+	CreativeOnline  bool
 	PriceFen        decimal.Decimal
 	ExpiryMode      enum.MarketingExpiryMode
 	ExpiryMinutes   int
 	Online          bool
+	Schedule        MarketingSchedule
 	priceOverridden bool
 }
 
@@ -45,10 +57,14 @@ func LoadMarketingPolicy(ctx context.Context, client *ent.Client) (MarketingPoli
 		Only(ctx)
 	if ent.IsNotFound(err) {
 		return MarketingPolicy{
-			PriceFen:      decimal.RequireFromString("750"),
-			ExpiryMode:    enum.MarketingExpiryFixedDuration,
-			ExpiryMinutes: 60,
-			Online:        true,
+			DailyLimit:     1,
+			CreativeLimit:  1,
+			CreativeOnline: true,
+			PriceFen:       decimal.RequireFromString("750"),
+			ExpiryMode:     enum.MarketingExpiryFixedDuration,
+			ExpiryMinutes:  60,
+			Online:         true,
+			Schedule:       defaultMarketingSchedule(),
 		}, nil
 	}
 
@@ -57,12 +73,29 @@ func LoadMarketingPolicy(ctx context.Context, client *ent.Client) (MarketingPoli
 	}
 
 	return MarketingPolicy{
+		DailyLimit:      record.DailyLimit,
+		CreativeLimit:   record.CreativeLimit,
+		CreativeOnline:  record.CreativeOnline,
 		PriceFen:        record.PriceFen,
 		ExpiryMode:      record.ExpiryMode,
 		ExpiryMinutes:   record.ExpiryMinutes,
 		Online:          record.Online,
+		Schedule:        marketingSchedule(record),
 		priceOverridden: record.PriceOverridden,
 	}, nil
+}
+
+func marketingSchedule(record *ent.MarketingSettings) MarketingSchedule {
+	return MarketingSchedule{
+		SettlementFrequency:     record.SettlementFrequency,
+		SettlementWeekday:       record.SettlementWeekday,
+		SettlementMonthDay:      record.SettlementMonthDay,
+		SettlementClock:         record.SettlementClock,
+		SettlementDelayMinutes:  record.SettlementDelayMinutes,
+		PlaybackCutoffClock:     record.PlaybackCutoffClock,
+		PlaybackCutoffMinutes:   record.PlaybackCutoffMinutes,
+		PlaybackDeferralPeriods: record.PlaybackDeferralPeriods,
+	}
 }
 
 func (policy MarketingPolicy) AllocationPrice(versionPrice decimal.Decimal) decimal.Decimal {
@@ -90,11 +123,14 @@ func marketingSettingsDTO(ctx context.Context, client *ent.Client, policy Market
 	}
 
 	return MarketingSettingsDTO{
-		PriceFen:      policy.PriceFen.String(),
-		ExpiryMode:    policy.ExpiryMode,
-		ExpiryMinutes: policy.ExpiryMinutes,
-		Online:        policy.Online,
-		PriceChanges:  changes,
+		DailyLimit:     policy.DailyLimit,
+		CreativeLimit:  policy.CreativeLimit,
+		CreativeOnline: policy.CreativeOnline,
+		PriceFen:       policy.PriceFen.String(),
+		ExpiryMode:     policy.ExpiryMode,
+		ExpiryMinutes:  policy.ExpiryMinutes,
+		Online:         policy.Online,
+		PriceChanges:   changes,
 	}, nil
 }
 
@@ -108,8 +144,21 @@ func (s *Service) MarketingSettings(ctx context.Context) (MarketingSettingsDTO, 
 }
 
 func (s *Service) UpdateMarketingSettings(ctx context.Context, actorID string, input MarketingSettingsInput) (MarketingSettingsDTO, error) {
-	if input.PriceFen == nil && input.ExpiryMode == nil && input.ExpiryMinutes == nil && input.Online == nil {
-		return MarketingSettingsDTO{}, app.Invalid("请填写要修改的营销设置")
+	policy, err := s.updateMarketingPolicy(ctx, actorID, input, nil)
+	if err != nil {
+		return MarketingSettingsDTO{}, err
+	}
+
+	return marketingSettingsDTO(ctx, s.Client, policy)
+}
+
+func (s *Service) updateMarketingPolicy(ctx context.Context, actorID string, input MarketingSettingsInput, schedule *MarketingSchedule) (MarketingPolicy, error) {
+	if input.PriceFen == nil && input.ExpiryMode == nil && input.ExpiryMinutes == nil && input.Online == nil && schedule == nil && input.DailyLimit == nil && input.CreativeLimit == nil && input.CreativeOnline == nil {
+		return MarketingPolicy{}, app.Invalid("请填写要修改的营销设置")
+	}
+
+	if (input.DailyLimit != nil && *input.DailyLimit < 1) || (input.CreativeLimit != nil && *input.CreativeLimit < 1) {
+		return MarketingPolicy{}, app.Invalid("每日领取名额须为正整数")
 	}
 
 	price := decimal.RequireFromString("750")
@@ -117,7 +166,7 @@ func (s *Service) UpdateMarketingSettings(ctx context.Context, actorID string, i
 	if input.PriceFen != nil {
 		validated, err := money.ParseFen(*input.PriceFen)
 		if err != nil || !validated.IsPositive() || validated.GreaterThan(decimal.RequireFromString("50000")) {
-			return MarketingSettingsDTO{}, app.Invalid("营销单价须大于 0 元且不超过 500 元")
+			return MarketingPolicy{}, app.Invalid("营销单价须大于 0 元且不超过 500 元")
 		}
 
 		price = validated
@@ -125,13 +174,13 @@ func (s *Service) UpdateMarketingSettings(ctx context.Context, actorID string, i
 
 	expiryMode := input.ExpiryMode
 	if expiryMode != nil && !expiryMode.Valid() {
-		return MarketingSettingsDTO{}, app.Invalid("失效规则无效")
+		return MarketingPolicy{}, app.Invalid("失效规则无效")
 	}
 
 	if input.ExpiryMinutes != nil {
 		minutes := *input.ExpiryMinutes
 		if !validMarketingExpiryMinutes(minutes) {
-			return MarketingSettingsDTO{}, app.Invalid("固定时长须在 0.5 至 24 小时之间，以半小时为单位")
+			return MarketingPolicy{}, app.Invalid("固定时长须在 0.5 至 24 小时之间，以半小时为单位")
 		}
 
 		if expiryMode == nil {
@@ -140,22 +189,12 @@ func (s *Service) UpdateMarketingSettings(ctx context.Context, actorID string, i
 		}
 
 		if *expiryMode != enum.MarketingExpiryFixedDuration {
-			return MarketingSettingsDTO{}, app.Invalid("当天截止无需设置固定时长")
+			return MarketingPolicy{}, app.Invalid("当天截止无需设置固定时长")
 		}
 
-		changes = append(changes, fmt.Sprintf("失效时长 %d 分钟", minutes))
 	}
 
-	if input.Online != nil {
-		visibility := "下架营销分发"
-		if *input.Online {
-			visibility = "上架营销分发"
-		}
-
-		changes = append(changes, visibility)
-	}
-
-	return app.Transaction(ctx, s.Runtime, func(tx *ent.Tx) (MarketingSettingsDTO, error) {
+	return app.Transaction(ctx, s.Runtime, func(tx *ent.Tx) (MarketingPolicy, error) {
 		err := tx.MarketingSettings.Create().
 			SetScope(marketingScope).
 			SetPriceFen(decimal.RequireFromString("750")).
@@ -163,7 +202,7 @@ func (s *Service) UpdateMarketingSettings(ctx context.Context, actorID string, i
 			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return MarketingSettingsDTO{}, err
+			return MarketingPolicy{}, err
 		}
 
 		record, err := tx.MarketingSettings.Query().
@@ -171,12 +210,16 @@ func (s *Service) UpdateMarketingSettings(ctx context.Context, actorID string, i
 			ForUpdate().
 			Only(ctx)
 		if err != nil {
-			return MarketingSettingsDTO{}, err
+			return MarketingPolicy{}, err
 		}
 
 		if expiryMode != nil && *expiryMode == enum.MarketingExpiryFixedDuration &&
 			input.ExpiryMinutes == nil && !validMarketingExpiryMinutes(record.ExpiryMinutes) {
-			return MarketingSettingsDTO{}, app.Invalid("请设置 0.5 至 24 小时的固定时长")
+			return MarketingPolicy{}, app.Invalid("请设置 0.5 至 24 小时的固定时长")
+		}
+
+		if input.ExpiryMinutes != nil && *input.ExpiryMinutes != record.ExpiryMinutes {
+			changes = append(changes, fmt.Sprintf("失效时长 %d → %d 分钟", record.ExpiryMinutes, *input.ExpiryMinutes))
 		}
 
 		if expiryMode != nil && *expiryMode != record.ExpiryMode {
@@ -188,10 +231,46 @@ func (s *Service) UpdateMarketingSettings(ctx context.Context, actorID string, i
 			changes = append(changes, "失效规则改为"+label)
 		}
 
+		if input.Online != nil && *input.Online != record.Online {
+			visibility := "下架营销分发"
+			if *input.Online {
+				visibility = "上架营销分发"
+			}
+
+			changes = append(changes, visibility)
+		}
+
+		if input.DailyLimit != nil && *input.DailyLimit != record.DailyLimit {
+			changes = append(changes, fmt.Sprintf("分发每日名额 %d → %d", record.DailyLimit, *input.DailyLimit))
+		}
+
+		if input.CreativeLimit != nil && *input.CreativeLimit != record.CreativeLimit {
+			changes = append(changes, fmt.Sprintf("创作每日名额 %d → %d", record.CreativeLimit, *input.CreativeLimit))
+		}
+
+		if input.CreativeOnline != nil && *input.CreativeOnline != record.CreativeOnline {
+			changes = append(changes, fmt.Sprintf("创作任务开关 %t → %t", record.CreativeOnline, *input.CreativeOnline))
+		}
+
 		update := tx.MarketingSettings.UpdateOneID(record.ID).
+			SetNillableDailyLimit(input.DailyLimit).
+			SetNillableCreativeLimit(input.CreativeLimit).
+			SetNillableCreativeOnline(input.CreativeOnline).
 			SetNillableOnline(input.Online).
 			SetNillableExpiryMode(expiryMode).
 			SetNillableExpiryMinutes(input.ExpiryMinutes)
+		if schedule != nil && *schedule != marketingSchedule(record) {
+			update.SetSettlementFrequency(schedule.SettlementFrequency).
+				SetSettlementWeekday(schedule.SettlementWeekday).
+				SetSettlementMonthDay(schedule.SettlementMonthDay).
+				SetSettlementClock(schedule.SettlementClock).
+				SetSettlementDelayMinutes(schedule.SettlementDelayMinutes).
+				SetPlaybackCutoffClock(schedule.PlaybackCutoffClock).
+				SetPlaybackCutoffMinutes(schedule.PlaybackCutoffMinutes).
+				SetPlaybackDeferralPeriods(schedule.PlaybackDeferralPeriods)
+			changes = append(changes, "时间规则改为"+schedule.auditDetail())
+		}
+
 		if input.PriceFen != nil {
 			update.SetPriceFen(price).SetPriceOverridden(true)
 			if !record.PriceFen.Equal(price) {
@@ -201,21 +280,17 @@ func (s *Service) UpdateMarketingSettings(ctx context.Context, actorID string, i
 		}
 
 		if err := update.Exec(ctx); err != nil {
-			return MarketingSettingsDTO{}, err
+			return MarketingPolicy{}, err
 		}
 
 		if len(changes) != 0 {
-			if err := app.Audit(ctx, tx, actorID, enum.AuditMarketingSettings, marketingScope, strings.Join(changes, "，")); err != nil {
-				return MarketingSettingsDTO{}, err
+			if err := app.Audit(ctx, tx, actorID, enum.AuditMarketingSettings, marketingScope, strings.Join(changes, "，"),
+				strings.Join(changes, "；")); err != nil {
+				return MarketingPolicy{}, err
 			}
 		}
 
-		policy, err := LoadMarketingPolicy(ctx, tx.Client())
-		if err != nil {
-			return MarketingSettingsDTO{}, err
-		}
-
-		return marketingSettingsDTO(ctx, tx.Client(), policy)
+		return LoadMarketingPolicy(ctx, tx.Client())
 	})
 }
 

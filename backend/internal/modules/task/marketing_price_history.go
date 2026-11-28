@@ -7,8 +7,8 @@ import (
 
 	"baituber.cn/yanxuan/v2/ent"
 	"baituber.cn/yanxuan/v2/ent/auditevent"
-	"baituber.cn/yanxuan/v2/ent/operator"
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
+	"baituber.cn/yanxuan/v2/internal/platform/app"
 )
 
 type MarketingPriceChange struct {
@@ -55,17 +55,9 @@ func marketingPriceChanges(ctx context.Context, client *ent.Client) ([]Marketing
 		actorIDs = append(actorIDs, event.ActorID)
 	}
 
-	operators, err := client.Operator.Query().
-		Where(operator.IDIn(actorIDs...)).
-		Select(operator.FieldID, operator.FieldUsername).
-		All(ctx)
+	names, err := app.LookupOperatorNames(ctx, client, actorIDs)
 	if err != nil {
 		return nil, err
-	}
-
-	names := make(map[string]string, len(operators))
-	for _, account := range operators {
-		names[account.ID] = account.Username
 	}
 
 	for index, event := range events[:min(len(events), displayLimit)] {
@@ -77,18 +69,50 @@ func marketingPriceChanges(ctx context.Context, client *ent.Client) ([]Marketing
 			}
 		}
 
-		name := names[event.ActorID]
-		if name == "" {
-			name = "运营账号"
-		}
-
 		result = append(result, MarketingPriceChange{
 			BeforeFen: before,
 			AfterFen:  after,
 			ChangedAt: event.CreatedAt,
-			Operator:  name,
+			Operator:  names.Label(event.ActorID),
 		})
 	}
 
 	return result, nil
+}
+
+type SettingsChange struct {
+	ChangedAt time.Time
+	Operator  string
+	Change    string
+}
+
+func (s *Service) MarketingHistory(ctx context.Context, page int) ([]SettingsChange, bool, error) {
+	const size = 10
+	rows, err := s.Client.AuditEvent.Query().Where(auditevent.ActionEQ(enum.AuditMarketingSettings), auditevent.ReferenceIDEQ(marketingScope)).Order(ent.Desc(auditevent.FieldCreatedAt), ent.Desc(auditevent.FieldID)).Offset((page - 1) * size).Limit(size + 1).All(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+
+	more := len(rows) > size
+	rows = rows[:min(len(rows), size)]
+	var ids []string
+	for _, row := range rows {
+		ids = append(ids, row.ActorID)
+	}
+
+	names, err := app.LookupOperatorNames(ctx, s.Client, ids)
+	if err != nil {
+		return nil, false, err
+	}
+
+	var result []SettingsChange
+	for _, row := range rows {
+		result = append(result, SettingsChange{
+			ChangedAt: app.BeijingTime(row.CreatedAt),
+			Operator:  names.Label(row.ActorID),
+			Change:    row.Reason,
+		})
+	}
+
+	return result, more, nil
 }

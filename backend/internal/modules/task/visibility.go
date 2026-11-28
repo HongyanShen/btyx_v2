@@ -18,7 +18,7 @@ func (s *Service) SetOnline(ctx context.Context, actorID, taskID string, online 
 			return false, app.WrapMissing(err)
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditTaskVisibility, taskID, "")
+		return true, app.Audit(ctx, tx, actorID, enum.AuditTaskVisibility, taskID, "", app.AuditFlag("上架", online))
 	})
 	return err
 }

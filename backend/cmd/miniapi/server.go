@@ -30,7 +30,7 @@ func serve(ctx context.Context, cfg config.Config) error {
 	}
 
 	router := handler.NewRouter(services, payments)
-	logging.From(ctx).Info().Str("address", cfg.MiniAddr).Str("role", string(enum.RoleUser)).Msg("API started")
+	logging.Info(ctx).Str("address", cfg.MiniAddr).Str("role", string(enum.RoleUser)).Msg("API started")
 
 	return httpx.Serve(ctx, cfg.MiniAddr, router)
 }

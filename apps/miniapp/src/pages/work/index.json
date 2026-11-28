@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "工作台",
-  "navigationBarBackgroundColor": "#f6f5fa",
-  "navigationBarTextStyle": "black"
+  "navigationBarBackgroundColor": "#ffffff",
+  "navigationBarTextStyle": "black",
+  "enablePullDownRefresh": true
 }

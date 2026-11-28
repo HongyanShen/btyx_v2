@@ -73,7 +73,7 @@ sequenceDiagram
 ## 桶端设置（拿到配置后联调）
 
 1. 设置私有 ACL，确保 Bucket Policy 未授予匿名读写。
-2. 浏览器直传需要 CORS：允许实际后台 Origin，开发环境为 `http://127.0.0.1:5173` / `http://localhost:5173`；允许 POST、GET、HEAD 和 Content-Type。生产按真实域名收窄，不发送 Cookie。
+2. 浏览器直传需要在 TOS 桶配置实际后台的 Origin。本地后台默认使用 `http://127.0.0.1:8083`。允许 POST、GET、HEAD 和 Content-Type。生产按实际后台域名收窄，直传不发送 Cookie。
 3. 为 `<prefix>uploads/` 配置短期生命周期清理，例如 1 天；已启用版本控制时同时考虑非当前版本。不要把该规则应用到 `objects/` 正式文件。
 4. 小程序后台将实际桶域名加入 `uploadFile` 和 `downloadFile` 合法域名。开发者工具本机设置不代表发布环境已配置。
 5. 真实联调核对：跨域、原生上传表单顺序、大小/类型限制、超时恢复、重复确认、私有匿名访问拒绝、下载过期、版本绑定及生命周期范围。

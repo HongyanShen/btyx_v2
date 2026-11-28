@@ -11,10 +11,10 @@ import (
 
 	"baituber.cn/yanxuan/v2/ent"
 	"baituber.cn/yanxuan/v2/ent/job"
-	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
 	"baituber.cn/yanxuan/v2/internal/platform/logging"
 	"baituber.cn/yanxuan/v2/internal/platform/transfer"
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 	"baituber.cn/yanxuan/v2/internal/testkit"
 	"github.com/shopspring/decimal"
 )
@@ -51,7 +51,7 @@ func TestJobsPersistOriginRequestIDAcrossWorkerRetries(t *testing.T) {
 			t.Errorf("worker attempt lost persisted request ID: %s", logging.RequestID(ctx))
 		}
 
-		logging.From(ctx).Info().Msg("transfer attempt")
+		logging.Info(ctx).Msg("transfer attempt")
 
 		return errors.New("secret-provider-token")
 	}
@@ -90,14 +90,15 @@ func TestJobsPersistOriginRequestIDAcrossWorkerRetries(t *testing.T) {
 	}
 
 	_, err = app.Transaction(requestContext, services.Runtime, func(tx *ent.Tx) (bool, error) {
-		return true, app.Notify(requestContext, tx, login.UserID, "test", "test", withdrawal.ID)
+		return true, services.Notify(requestContext, tx, login.UserID, "test", "test", withdrawal.ID, wxnotice.Credit("10.00"))
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	notification, err := services.Client.Job.Query().Where(job.KindEQ(enum.JobNotification)).Only(requestContext)
-	if err != nil || notification.RequestID != requestID {
-		t.Fatalf("notification outbox lost request ID: record=%v err=%v", notification, err)
+	var origin string
+	err = services.DB.QueryRowContext(requestContext, `SELECT args->>'request_id' FROM river_job WHERE kind='wechat_subscription' AND args->>'notification_id' IN (SELECT id FROM notifications WHERE title='test')`).Scan(&origin)
+	if err != nil || origin != requestID {
+		t.Fatalf("River lost request ID: origin=%s err=%v", origin, err)
 	}
 }

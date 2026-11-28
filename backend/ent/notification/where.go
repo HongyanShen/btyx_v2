@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"baituber.cn/yanxuan/v2/ent/predicate"
+	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -77,6 +78,21 @@ func UpdatedAt(v time.Time) predicate.Notification {
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldEQ(FieldUserID, v))
+}
+
+// DeliveryReason applies equality check predicate on the "delivery_reason" field. It's identical to DeliveryReasonEQ.
+func DeliveryReason(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldDeliveryReason, v))
+}
+
+// WechatCode applies equality check predicate on the "wechat_code" field. It's identical to WechatCodeEQ.
+func WechatCode(v int) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldWechatCode, v))
+}
+
+// ChoiceID applies equality check predicate on the "choice_id" field. It's identical to ChoiceIDEQ.
+func ChoiceID(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldChoiceID, v))
 }
 
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
@@ -242,6 +258,216 @@ func UserIDEqualFold(v string) predicate.Notification {
 // UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
 func UserIDContainsFold(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldContainsFold(FieldUserID, v))
+}
+
+// CardIsNil applies the IsNil predicate on the "card" field.
+func CardIsNil() predicate.Notification {
+	return predicate.Notification(sql.FieldIsNull(FieldCard))
+}
+
+// CardNotNil applies the NotNil predicate on the "card" field.
+func CardNotNil() predicate.Notification {
+	return predicate.Notification(sql.FieldNotNull(FieldCard))
+}
+
+// DeliveryStateEQ applies the EQ predicate on the "delivery_state" field.
+func DeliveryStateEQ(v enum.DeliveryState) predicate.Notification {
+	vc := v
+	return predicate.Notification(sql.FieldEQ(FieldDeliveryState, vc))
+}
+
+// DeliveryStateNEQ applies the NEQ predicate on the "delivery_state" field.
+func DeliveryStateNEQ(v enum.DeliveryState) predicate.Notification {
+	vc := v
+	return predicate.Notification(sql.FieldNEQ(FieldDeliveryState, vc))
+}
+
+// DeliveryStateIn applies the In predicate on the "delivery_state" field.
+func DeliveryStateIn(vs ...enum.DeliveryState) predicate.Notification {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Notification(sql.FieldIn(FieldDeliveryState, v...))
+}
+
+// DeliveryStateNotIn applies the NotIn predicate on the "delivery_state" field.
+func DeliveryStateNotIn(vs ...enum.DeliveryState) predicate.Notification {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Notification(sql.FieldNotIn(FieldDeliveryState, v...))
+}
+
+// DeliveryReasonEQ applies the EQ predicate on the "delivery_reason" field.
+func DeliveryReasonEQ(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonNEQ applies the NEQ predicate on the "delivery_reason" field.
+func DeliveryReasonNEQ(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldNEQ(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonIn applies the In predicate on the "delivery_reason" field.
+func DeliveryReasonIn(vs ...string) predicate.Notification {
+	return predicate.Notification(sql.FieldIn(FieldDeliveryReason, vs...))
+}
+
+// DeliveryReasonNotIn applies the NotIn predicate on the "delivery_reason" field.
+func DeliveryReasonNotIn(vs ...string) predicate.Notification {
+	return predicate.Notification(sql.FieldNotIn(FieldDeliveryReason, vs...))
+}
+
+// DeliveryReasonGT applies the GT predicate on the "delivery_reason" field.
+func DeliveryReasonGT(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldGT(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonGTE applies the GTE predicate on the "delivery_reason" field.
+func DeliveryReasonGTE(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldGTE(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonLT applies the LT predicate on the "delivery_reason" field.
+func DeliveryReasonLT(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldLT(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonLTE applies the LTE predicate on the "delivery_reason" field.
+func DeliveryReasonLTE(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldLTE(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonContains applies the Contains predicate on the "delivery_reason" field.
+func DeliveryReasonContains(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContains(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonHasPrefix applies the HasPrefix predicate on the "delivery_reason" field.
+func DeliveryReasonHasPrefix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasPrefix(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonHasSuffix applies the HasSuffix predicate on the "delivery_reason" field.
+func DeliveryReasonHasSuffix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasSuffix(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonEqualFold applies the EqualFold predicate on the "delivery_reason" field.
+func DeliveryReasonEqualFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEqualFold(FieldDeliveryReason, v))
+}
+
+// DeliveryReasonContainsFold applies the ContainsFold predicate on the "delivery_reason" field.
+func DeliveryReasonContainsFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContainsFold(FieldDeliveryReason, v))
+}
+
+// WechatCodeEQ applies the EQ predicate on the "wechat_code" field.
+func WechatCodeEQ(v int) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldWechatCode, v))
+}
+
+// WechatCodeNEQ applies the NEQ predicate on the "wechat_code" field.
+func WechatCodeNEQ(v int) predicate.Notification {
+	return predicate.Notification(sql.FieldNEQ(FieldWechatCode, v))
+}
+
+// WechatCodeIn applies the In predicate on the "wechat_code" field.
+func WechatCodeIn(vs ...int) predicate.Notification {
+	return predicate.Notification(sql.FieldIn(FieldWechatCode, vs...))
+}
+
+// WechatCodeNotIn applies the NotIn predicate on the "wechat_code" field.
+func WechatCodeNotIn(vs ...int) predicate.Notification {
+	return predicate.Notification(sql.FieldNotIn(FieldWechatCode, vs...))
+}
+
+// WechatCodeGT applies the GT predicate on the "wechat_code" field.
+func WechatCodeGT(v int) predicate.Notification {
+	return predicate.Notification(sql.FieldGT(FieldWechatCode, v))
+}
+
+// WechatCodeGTE applies the GTE predicate on the "wechat_code" field.
+func WechatCodeGTE(v int) predicate.Notification {
+	return predicate.Notification(sql.FieldGTE(FieldWechatCode, v))
+}
+
+// WechatCodeLT applies the LT predicate on the "wechat_code" field.
+func WechatCodeLT(v int) predicate.Notification {
+	return predicate.Notification(sql.FieldLT(FieldWechatCode, v))
+}
+
+// WechatCodeLTE applies the LTE predicate on the "wechat_code" field.
+func WechatCodeLTE(v int) predicate.Notification {
+	return predicate.Notification(sql.FieldLTE(FieldWechatCode, v))
+}
+
+// ChoiceIDEQ applies the EQ predicate on the "choice_id" field.
+func ChoiceIDEQ(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldChoiceID, v))
+}
+
+// ChoiceIDNEQ applies the NEQ predicate on the "choice_id" field.
+func ChoiceIDNEQ(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldNEQ(FieldChoiceID, v))
+}
+
+// ChoiceIDIn applies the In predicate on the "choice_id" field.
+func ChoiceIDIn(vs ...string) predicate.Notification {
+	return predicate.Notification(sql.FieldIn(FieldChoiceID, vs...))
+}
+
+// ChoiceIDNotIn applies the NotIn predicate on the "choice_id" field.
+func ChoiceIDNotIn(vs ...string) predicate.Notification {
+	return predicate.Notification(sql.FieldNotIn(FieldChoiceID, vs...))
+}
+
+// ChoiceIDGT applies the GT predicate on the "choice_id" field.
+func ChoiceIDGT(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldGT(FieldChoiceID, v))
+}
+
+// ChoiceIDGTE applies the GTE predicate on the "choice_id" field.
+func ChoiceIDGTE(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldGTE(FieldChoiceID, v))
+}
+
+// ChoiceIDLT applies the LT predicate on the "choice_id" field.
+func ChoiceIDLT(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldLT(FieldChoiceID, v))
+}
+
+// ChoiceIDLTE applies the LTE predicate on the "choice_id" field.
+func ChoiceIDLTE(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldLTE(FieldChoiceID, v))
+}
+
+// ChoiceIDContains applies the Contains predicate on the "choice_id" field.
+func ChoiceIDContains(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContains(FieldChoiceID, v))
+}
+
+// ChoiceIDHasPrefix applies the HasPrefix predicate on the "choice_id" field.
+func ChoiceIDHasPrefix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasPrefix(FieldChoiceID, v))
+}
+
+// ChoiceIDHasSuffix applies the HasSuffix predicate on the "choice_id" field.
+func ChoiceIDHasSuffix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasSuffix(FieldChoiceID, v))
+}
+
+// ChoiceIDEqualFold applies the EqualFold predicate on the "choice_id" field.
+func ChoiceIDEqualFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEqualFold(FieldChoiceID, v))
+}
+
+// ChoiceIDContainsFold applies the ContainsFold predicate on the "choice_id" field.
+func ChoiceIDContainsFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContainsFold(FieldChoiceID, v))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.

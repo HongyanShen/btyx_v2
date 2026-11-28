@@ -12,8 +12,14 @@ import (
 	"baituber.cn/yanxuan/v2/ent/agreement"
 	"baituber.cn/yanxuan/v2/ent/assignment"
 	"baituber.cn/yanxuan/v2/ent/auditevent"
+	"baituber.cn/yanxuan/v2/ent/audithttpresponse"
 	"baituber.cn/yanxuan/v2/ent/consent"
 	"baituber.cn/yanxuan/v2/ent/content"
+	"baituber.cn/yanxuan/v2/ent/creativeearning"
+	"baituber.cn/yanxuan/v2/ent/creativelink"
+	"baituber.cn/yanxuan/v2/ent/creativetask"
+	"baituber.cn/yanxuan/v2/ent/creativetier"
+	"baituber.cn/yanxuan/v2/ent/creativework"
 	"baituber.cn/yanxuan/v2/ent/feedback"
 	"baituber.cn/yanxuan/v2/ent/fileobject"
 	"baituber.cn/yanxuan/v2/ent/job"
@@ -27,7 +33,9 @@ import (
 	"baituber.cn/yanxuan/v2/ent/settlementbatch"
 	"baituber.cn/yanxuan/v2/ent/settlementline"
 	"baituber.cn/yanxuan/v2/ent/submission"
+	"baituber.cn/yanxuan/v2/ent/subscriptionchoice"
 	"baituber.cn/yanxuan/v2/ent/task"
+	"baituber.cn/yanxuan/v2/ent/tasknumbercounter"
 	"baituber.cn/yanxuan/v2/ent/taskversion"
 	"baituber.cn/yanxuan/v2/ent/user"
 	"baituber.cn/yanxuan/v2/ent/userenrollment"
@@ -102,8 +110,14 @@ func checkColumn(t, c string) error {
 			agreement.Table:            agreement.ValidColumn,
 			assignment.Table:           assignment.ValidColumn,
 			auditevent.Table:           auditevent.ValidColumn,
+			audithttpresponse.Table:    audithttpresponse.ValidColumn,
 			consent.Table:              consent.ValidColumn,
 			content.Table:              content.ValidColumn,
+			creativeearning.Table:      creativeearning.ValidColumn,
+			creativelink.Table:         creativelink.ValidColumn,
+			creativetask.Table:         creativetask.ValidColumn,
+			creativetier.Table:         creativetier.ValidColumn,
+			creativework.Table:         creativework.ValidColumn,
 			feedback.Table:             feedback.ValidColumn,
 			fileobject.Table:           fileobject.ValidColumn,
 			job.Table:                  job.ValidColumn,
@@ -117,7 +131,9 @@ func checkColumn(t, c string) error {
 			settlementbatch.Table:      settlementbatch.ValidColumn,
 			settlementline.Table:       settlementline.ValidColumn,
 			submission.Table:           submission.ValidColumn,
+			subscriptionchoice.Table:   subscriptionchoice.ValidColumn,
 			task.Table:                 task.ValidColumn,
+			tasknumbercounter.Table:    tasknumbercounter.ValidColumn,
 			taskversion.Table:          taskversion.ValidColumn,
 			user.Table:                 user.ValidColumn,
 			userenrollment.Table:       userenrollment.ValidColumn,

@@ -1,0 +1,36 @@
+{{define "settlement-detail"}}
+<dialog class="server-dialog settlement-modal settlement-detail" data-server-dialog aria-labelledby="settlement-detail-title">
+  <header><h3 id="settlement-detail-title">{{.Title}} {{if .Account}}<span class="settlement-note">{{.Account}}</span>{{end}}</h3></header>
+  <div class="server-dialog-body">
+    <p class="settlement-note settlement-dialog-intro">链接已经过「发布链接审核」。核对每条链接的检测结果、播放数据和金额，合计对得上再「确认入账」。</p>
+    <div class="settlement-scroll"><table class="settlement-table settlement-detail-table">
+      <thead><tr><th scope="col">发布日期</th><th scope="col">内容</th><th scope="col">平台</th><th scope="col">链接</th><th scope="col">播放数据</th><th scope="col">系统检测</th><th scope="col">这条算</th></tr></thead>
+      <tbody>{{range .Rows}}<tr>
+        <td>{{.Date}}</td><td>{{.Title}}</td><td>{{.PlatformName}}</td>
+        <td>{{if .URL}}<a href="{{.URL}}" target="_blank" rel="noopener noreferrer">{{.URL}}</a> <button class="settlement-copy" type="button" data-copy-text="{{.URL}}">复制</button>{{else}}—{{end}}</td>
+        <td>{{if .Creative}}{{.Project}}{{else if .HasScreenshot}}已交{{if .Screenshot}} · <button class="settlement-link" type="button" data-playback-id="{{.Screenshot}}" data-playback-title="{{.PlatformName}}播放量截图" data-playback-note="{{.Date}} · {{.Title}}">看截图</button>{{end}}{{else}}<span class="settlement-warning">截图没交</span>{{end}}</td>
+        <td{{if .Check.Danger}} class="settlement-danger"{{end}}>{{.Check.Text}}</td><td>{{if ne .AmountFen "0"}}{{.Amount}}{{else if .Waiting}}<span class="settlement-note">交了算下周</span>{{else}}<span class="settlement-danger">不结</span>{{end}}</td>
+      </tr>{{end}}</tbody>
+    </table></div>
+    <div class="settlement-detail-total">合计 <strong>{{.Amount}}</strong> {{if .Waiting}}<span class="settlement-note">播放数据还没交齐，交了算下周</span>{{else}}<span class="settlement-success">✓ 和上面金额一致</span>{{end}}</div>
+    <p data-copy-status role="status" hidden></p>
+  </div>
+  <footer><button type="button" class="server-button server-primary" data-close-dialog>关闭</button></footer>
+</dialog>
+{{end}}
+{{define "settlement-confirm"}}
+<dialog class="server-dialog settlement-modal settlement-confirm" data-server-dialog aria-labelledby="settlement-confirm-title">
+  <header><h3 id="settlement-confirm-title">确认入账</h3></header>
+  <form class="server-dialog-form" action="/settlements?month={{.Month}}" method="post" hx-post="/settlements?month={{.Month}}" hx-headers='{"Idempotency-Key":"{{.Key}}"}' hx-target="#settlement-dialog-slot" hx-sync="this:drop" hx-disabled-elt="find button[type=submit]">
+    <input name="csrf" type="hidden" value="{{.CSRF}}"><input name="key" type="hidden" value="{{.Key}}"><input name="review_token" type="hidden" value="{{.Token}}"><input name="through" type="hidden" value="{{.Through}}">
+    <div class="server-dialog-body">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      <p>{{.Label}}，共 <strong>{{.Total}}</strong>（{{.Count}} 条平台记录）。</p>
+      <p class="settlement-note">确认后，本次金额锁定并计入分发员的「可提现余额」。分发员在小程序点提现时，系统通过微信商户号把钱转到他的零钱。</p>
+      {{if .Waiting}}<p class="settlement-note">未交齐播放数据的记录不在本次入账范围内，晚交顺延。</p>{{end}}
+      {{if .Stale}}<p role="alert" class="settlement-danger">可入账记录已变化，请关闭后重新核对。</p>{{else if .Error}}<p role="alert" class="settlement-danger">{{.Error}}</p>{{end}}
+    </div>
+    <footer><button type="button" class="server-button" data-close-dialog>取消</button><button type="submit" class="server-button server-primary"{{if .Stale}} disabled{{end}}>确认入账</button></footer>
+  </form>
+</dialog>
+{{end}}

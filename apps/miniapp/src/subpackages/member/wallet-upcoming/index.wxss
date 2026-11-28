@@ -1,0 +1,14 @@
+@import "../../../styles/wallet.wxss";
+
+.upcoming-card {
+  padding: 68rpx 32rpx;
+  font-size: 34rpx;
+  font-weight: 750;
+  text-align: center;
+}
+.upcoming-icon {
+  display: block;
+  width: 96rpx;
+  height: 96rpx;
+  margin: 0 auto 24rpx;
+}

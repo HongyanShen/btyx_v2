@@ -1,0 +1,13 @@
+{{define "playback-dialog"}}
+<dialog class="server-dialog playback-screenshot-dialog" id="playback-dialog" aria-labelledby="playback-title" data-allow-local="{{.CanReadLocal}}">
+  <header><h3 id="playback-title"></h3><button type="button" aria-label="关闭截图" data-close-dialog>×</button></header>
+  <div class="server-dialog-body">
+    <p class="playback-screenshot-note" data-playback-description></p>
+    <p class="server-secondary" role="status" data-playback-status></p>
+    <button class="playback-screenshot-toggle" type="button" aria-label="放大截图" hidden><img alt="" referrerpolicy="no-referrer">
+      {{$username := .Username}}<span class="operator-watermark" aria-hidden="true">{{range watermarkTiles}}<span>管理员 · {{$username}}</span>{{end}}</span>
+    </button>
+    <p class="playback-screenshot-note" data-playback-zoom-note hidden>点击截图放大</p>
+  </div>
+</dialog>
+{{end}}

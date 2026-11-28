@@ -28,6 +28,14 @@ type AuditEvent struct {
 	ReferenceID string `json:"reference_id,omitempty"`
 	// Reason holds the value of the "reason" field.
 	Reason string `json:"reason,omitempty"`
+	// Endpoint holds the value of the "endpoint" field.
+	Endpoint string `json:"endpoint,omitempty"`
+	// RequestID holds the value of the "request_id" field.
+	RequestID string `json:"request_id,omitempty"`
+	// Platform holds the value of the "platform" field.
+	Platform enum.AuditPlatform `json:"platform,omitempty"`
+	// Parameters holds the value of the "parameters" field.
+	Parameters string `json:"parameters,omitempty"`
 	// SubmittedPhone holds the value of the "submitted_phone" field.
 	SubmittedPhone string `json:"submitted_phone,omitempty"`
 	// SubmittedWechatCipher holds the value of the "submitted_wechat_cipher" field.
@@ -48,7 +56,7 @@ func (*AuditEvent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case auditevent.FieldID, auditevent.FieldActorID, auditevent.FieldAction, auditevent.FieldReferenceID, auditevent.FieldReason, auditevent.FieldSubmittedPhone, auditevent.FieldSubmittedWechatCipher, auditevent.FieldSubmittedMaskedName, auditevent.FieldSubmittedMaskedIdentity, auditevent.FieldSubmittedFrontFileID, auditevent.FieldSubmittedBackFileID:
+		case auditevent.FieldID, auditevent.FieldActorID, auditevent.FieldAction, auditevent.FieldReferenceID, auditevent.FieldReason, auditevent.FieldEndpoint, auditevent.FieldRequestID, auditevent.FieldPlatform, auditevent.FieldParameters, auditevent.FieldSubmittedPhone, auditevent.FieldSubmittedWechatCipher, auditevent.FieldSubmittedMaskedName, auditevent.FieldSubmittedMaskedIdentity, auditevent.FieldSubmittedFrontFileID, auditevent.FieldSubmittedBackFileID:
 			values[i] = new(sql.NullString)
 		case auditevent.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -102,6 +110,30 @@ func (_m *AuditEvent) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field reason", values[i])
 			} else if value.Valid {
 				_m.Reason = value.String
+			}
+		case auditevent.FieldEndpoint:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field endpoint", values[i])
+			} else if value.Valid {
+				_m.Endpoint = value.String
+			}
+		case auditevent.FieldRequestID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field request_id", values[i])
+			} else if value.Valid {
+				_m.RequestID = value.String
+			}
+		case auditevent.FieldPlatform:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field platform", values[i])
+			} else if value.Valid {
+				_m.Platform = enum.AuditPlatform(value.String)
+			}
+		case auditevent.FieldParameters:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field parameters", values[i])
+			} else if value.Valid {
+				_m.Parameters = value.String
 			}
 		case auditevent.FieldSubmittedPhone:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -189,6 +221,18 @@ func (_m *AuditEvent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("reason=")
 	builder.WriteString(_m.Reason)
+	builder.WriteString(", ")
+	builder.WriteString("endpoint=")
+	builder.WriteString(_m.Endpoint)
+	builder.WriteString(", ")
+	builder.WriteString("request_id=")
+	builder.WriteString(_m.RequestID)
+	builder.WriteString(", ")
+	builder.WriteString("platform=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Platform))
+	builder.WriteString(", ")
+	builder.WriteString("parameters=")
+	builder.WriteString(_m.Parameters)
 	builder.WriteString(", ")
 	builder.WriteString("submitted_phone=")
 	builder.WriteString(_m.SubmittedPhone)

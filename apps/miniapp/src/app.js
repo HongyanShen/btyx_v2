@@ -1,6 +1,8 @@
 const { startSession } = require("./services/session");
 
 App({
-  onShow: startSession,
+  onShow() {
+    return startSession().then(() => require("./services/subscriptions").flushPending()).catch(() => {});
+  },
   globalData: {},
 });

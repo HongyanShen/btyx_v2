@@ -1,10 +1,10 @@
 package settlement
 
 import (
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 
@@ -26,11 +26,6 @@ func (s *Service) Settle(ctx context.Context, actorID string, input SettlementIn
 		return BatchDTO{}, app.Invalid("只能结算已到期的记录")
 	}
 
-	settlementDate, _ := time.Parse("2006-01-02", input.Through)
-	if settlementDate.Weekday() != time.Monday {
-		return BatchDTO{}, app.Invalid("周结算日期必须为周一")
-	}
-
 	return app.Transaction(ctx, s.Runtime, func(tx *ent.Tx) (BatchDTO, error) {
 		old, err := existingBatch(ctx, tx, input)
 		if err == nil {
@@ -41,7 +36,9 @@ func (s *Service) Settle(ctx context.Context, actorID string, input SettlementIn
 			return BatchDTO{}, err
 		}
 
-		preview, err := settlementPreview(ctx, tx.Submission, tx.Assignment, input.Through)
+		now := s.Now()
+		exactPeriod := input.ReviewToken != ""
+		preview, err := settlementPreview(ctx, tx.Client(), input.Through, now, exactPeriod)
 		if err != nil {
 			return BatchDTO{}, err
 		}
@@ -74,6 +71,35 @@ func (s *Service) Settle(ctx context.Context, actorID string, input SettlementIn
 			ForUpdate().
 			All(ctx); err != nil {
 			return BatchDTO{}, err
+		}
+
+		if err := lockCreative(ctx, tx, preview.Lines); err != nil {
+			return BatchDTO{}, err
+		}
+
+		if exactPeriod {
+			current, err := settlementPreview(ctx, tx.Client(), input.Through, s.Now(), true)
+			if err != nil {
+				return BatchDTO{}, err
+			}
+
+			if previewToken(current) != input.ReviewToken {
+				old, err := existingBatch(ctx, tx, input)
+				if err == nil {
+					return batchDTO(old), nil
+				}
+
+				if !ent.IsNotFound(err) {
+					return BatchDTO{}, err
+				}
+
+				return BatchDTO{}, app.Conflict("核对期间记录已变化，请重新核对")
+			}
+
+			// The records being credited must also be the records we locked above.
+			if previewToken(preview) != input.ReviewToken {
+				return BatchDTO{}, app.Conflict("核对期间记录已变化，请重新核对")
+			}
 		}
 
 		if _, err := tx.Wallet.Query().
@@ -111,6 +137,16 @@ func (s *Service) Settle(ctx context.Context, actorID string, input SettlementIn
 
 		credited := make(map[string]decimal.Decimal)
 		for _, line := range preview.Lines {
+			if line.Creative {
+				amount, err := creditCreative(ctx, tx, batch.ID, line)
+				if err != nil {
+					return BatchDTO{}, err
+				}
+
+				credited[line.UserID] = credited[line.UserID].Add(amount)
+				continue
+			}
+
 			platformSubmission, err := tx.Submission.Get(ctx, line.SubmissionID)
 			if err != nil {
 				return BatchDTO{}, err
@@ -120,7 +156,9 @@ func (s *Service) Settle(ctx context.Context, actorID string, input SettlementIn
 				return BatchDTO{}, app.Conflict("核对期间记录已变化，请重新核对")
 			}
 
-			if platformSubmission.Screenshot == "" || platformSubmission.EligibleDate > input.Through ||
+			if platformSubmission.Screenshot == "" || platformSubmission.EligibleDate == "" || platformSubmission.EligibleDate > input.Through ||
+				(exactPeriod && platformSubmission.EligibleDate != input.Through) ||
+				(platformSubmission.SettlementEligibleAt != nil && platformSubmission.SettlementEligibleAt.After(now)) ||
 				platformSubmission.Visibility != enum.VisibilityVisible && platformSubmission.Visibility != enum.VisibilityManualVerified {
 				return BatchDTO{}, app.Conflict("核对期间结算条件已变化，请重新核对")
 			}
@@ -175,12 +213,13 @@ func (s *Service) Settle(ctx context.Context, actorID string, input SettlementIn
 		}
 
 		for userID, amount := range credited {
-			message := "本次周结算奖励 " + amount.Div(decimal.NewFromInt(100)).StringFixed(2) + " 元已进入可提现余额"
-			if err := app.Notify(ctx, tx, userID, "周结算已入账", message, batch.ID); err != nil {
+			message := "本次分发结算奖励 " + amount.Div(decimal.NewFromInt(100)).StringFixed(2) + " 元已进入可提现余额"
+			if err := s.Notify(ctx, tx, userID, "分发结算已入账", message, batch.ID, wxnotice.Credit(amount.Shift(-2).StringFixed(2))); err != nil {
 				return BatchDTO{}, err
 			}
 		}
 
-		return batchDTO(batch), app.Audit(ctx, tx, actorID, enum.AuditSettlementCredit, batch.ID, "")
+		return batchDTO(batch), app.Audit(ctx, tx, actorID, enum.AuditSettlementCredit, batch.ID, "",
+			"结算截止日："+batch.Through, "入账金额："+batch.AmountFen.String()+" 分")
 	})
 }

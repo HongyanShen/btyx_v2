@@ -3,8 +3,10 @@
 package notification
 
 import (
+	"fmt"
 	"time"
 
+	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -19,6 +21,16 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldCard holds the string denoting the card field in the database.
+	FieldCard = "card"
+	// FieldDeliveryState holds the string denoting the delivery_state field in the database.
+	FieldDeliveryState = "delivery_state"
+	// FieldDeliveryReason holds the string denoting the delivery_reason field in the database.
+	FieldDeliveryReason = "delivery_reason"
+	// FieldWechatCode holds the string denoting the wechat_code field in the database.
+	FieldWechatCode = "wechat_code"
+	// FieldChoiceID holds the string denoting the choice_id field in the database.
+	FieldChoiceID = "choice_id"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
 	// FieldBody holds the string denoting the body field in the database.
@@ -37,6 +49,11 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldUserID,
+	FieldCard,
+	FieldDeliveryState,
+	FieldDeliveryReason,
+	FieldWechatCode,
+	FieldChoiceID,
 	FieldTitle,
 	FieldBody,
 	FieldReferenceID,
@@ -60,6 +77,12 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultDeliveryReason holds the default value on creation for the "delivery_reason" field.
+	DefaultDeliveryReason string
+	// DefaultWechatCode holds the default value on creation for the "wechat_code" field.
+	DefaultWechatCode int
+	// DefaultChoiceID holds the default value on creation for the "choice_id" field.
+	DefaultChoiceID string
 	// DefaultReferenceID holds the default value on creation for the "reference_id" field.
 	DefaultReferenceID string
 	// DefaultRead holds the default value on creation for the "read" field.
@@ -69,6 +92,18 @@ var (
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
+
+const DefaultDeliveryState enum.DeliveryState = "station_only"
+
+// DeliveryStateValidator is a validator for the "delivery_state" field enum values. It is called by the builders before save.
+func DeliveryStateValidator(ds enum.DeliveryState) error {
+	switch ds {
+	case "station_only", "pending", "sending", "sent", "skipped", "failed", "unknown":
+		return nil
+	default:
+		return fmt.Errorf("notification: invalid enum value for delivery_state field: %q", ds)
+	}
+}
 
 // OrderOption defines the ordering options for the Notification queries.
 type OrderOption func(*sql.Selector)
@@ -91,6 +126,26 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByDeliveryState orders the results by the delivery_state field.
+func ByDeliveryState(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryState, opts...).ToFunc()
+}
+
+// ByDeliveryReason orders the results by the delivery_reason field.
+func ByDeliveryReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryReason, opts...).ToFunc()
+}
+
+// ByWechatCode orders the results by the wechat_code field.
+func ByWechatCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWechatCode, opts...).ToFunc()
+}
+
+// ByChoiceID orders the results by the choice_id field.
+func ByChoiceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChoiceID, opts...).ToFunc()
 }
 
 // ByTitle orders the results by the title field.

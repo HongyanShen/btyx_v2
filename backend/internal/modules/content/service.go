@@ -2,6 +2,7 @@ package content
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"strings"
 	"time"
@@ -76,7 +77,7 @@ func CreateInTransaction(ctx context.Context, tx *ent.Tx, actorID string, input 
 		return nil, err
 	}
 
-	return record, app.Audit(ctx, tx, actorID, enum.AuditContentCreate, record.ID, "")
+	return record, app.Audit(ctx, tx, actorID, enum.AuditContentCreate, record.ID, "", fmt.Sprintf("附件数：%d；标签：%v", len(input.Files), input.Tags))
 }
 
 func (s *Service) UpdateContentTags(ctx context.Context, actorID, contentID string, input TagsInput) error {
@@ -109,7 +110,7 @@ func (s *Service) UpdateContentTags(ctx context.Context, actorID, contentID stri
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditContentTags, contentID, "")
+		return true, app.Audit(ctx, tx, actorID, enum.AuditContentTags, contentID, "", fmt.Sprintf("标签：%v", input.Tags))
 	})
 	return err
 }

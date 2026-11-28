@@ -65,9 +65,13 @@ var (
 		{Name: "id", Type: field.TypeString, Size: 27},
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "actor_id", Type: field.TypeString},
-		{Name: "action", Type: field.TypeEnum, Enums: []string{"enrollment.apply", "enrollment.approved", "enrollment.rejected", "enrollment.portrait_updated", "marketing_tag.create", "marketing_tag.rename", "marketing_tag.delete", "user.block", "user.profile_update", "user.phone_verify", "user.identity_verify", "user.identity_verify_failed", "enrollment.identity_verify", "enrollment.identity_verify_failed", "agreement.consent", "agreement.publish", "task.create", "task.publish_version", "task.visibility", "task.claim", "task.assigned", "task.revoke", "task.reissue", "task.expire", "marketing.settings", "submission.submit", "submission.approved", "submission.rejected", "submission.waive", "settlement.credit", "withdrawal.request", "ledger.adjust", "content.create", "content.tags_updated", "feedback.reply", "operator.create", "operator.update"}},
+		{Name: "action", Type: field.TypeEnum, Enums: []string{"request.failed", "creative.create", "creative.visibility", "creative.claim", "creative.submit", "creative.review", "creative.link", "creative.evidence", "creative.reward", "enrollment.apply", "enrollment.approved", "enrollment.rejected", "enrollment.portrait_updated", "marketing_tag.create", "marketing_tag.rename", "marketing_tag.delete", "user.block", "user.profile_update", "user.phone_verify", "user.identity_verify", "user.identity_verify_failed", "enrollment.identity_verify", "enrollment.identity_verify_failed", "agreement.consent", "agreement.publish", "task.create", "task.publish_version", "task.visibility", "task.claim", "task.assigned", "task.revoke", "task.reissue", "task.expire", "marketing.settings", "submission.submit", "submission.approved", "submission.rejected", "submission.waive", "settlement.credit", "withdrawal.request", "ledger.adjust", "content.create", "content.tags_updated", "feedback.reply", "operator.create", "operator.update"}},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "reason", Type: field.TypeString, Default: ""},
+		{Name: "endpoint", Type: field.TypeString, Default: ""},
+		{Name: "request_id", Type: field.TypeString, Nullable: true, Size: 27},
+		{Name: "platform", Type: field.TypeEnum, Nullable: true, Enums: []string{"admin", "miniapp"}},
+		{Name: "parameters", Type: field.TypeString, Default: ""},
 		{Name: "submitted_phone", Type: field.TypeString, Default: ""},
 		{Name: "submitted_wechat_cipher", Type: field.TypeString, Default: ""},
 		{Name: "submitted_masked_name", Type: field.TypeString, Default: ""},
@@ -82,9 +86,27 @@ var (
 		PrimaryKey: []*schema.Column{AuditEventsColumns[0]},
 		Indexes: []*schema.Index{
 			{
+				Name:    "auditevent_created_at_id",
+				Unique:  false,
+				Columns: []*schema.Column{AuditEventsColumns[1], AuditEventsColumns[0]},
+			},
+			{
+				Name:    "auditevent_request_id",
+				Unique:  false,
+				Columns: []*schema.Column{AuditEventsColumns[7]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "request_id IS NOT NULL",
+				},
+			},
+			{
+				Name:    "auditevent_endpoint_created_at_id",
+				Unique:  false,
+				Columns: []*schema.Column{AuditEventsColumns[6], AuditEventsColumns[1], AuditEventsColumns[0]},
+			},
+			{
 				Name:    "auditevent_submitted_front_file_id",
 				Unique:  false,
-				Columns: []*schema.Column{AuditEventsColumns[10]},
+				Columns: []*schema.Column{AuditEventsColumns[14]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "submitted_front_file_id <> ''",
 				},
@@ -92,12 +114,27 @@ var (
 			{
 				Name:    "auditevent_submitted_back_file_id",
 				Unique:  false,
-				Columns: []*schema.Column{AuditEventsColumns[11]},
+				Columns: []*schema.Column{AuditEventsColumns[15]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "submitted_back_file_id <> ''",
 				},
 			},
 		},
+	}
+	// AuditHTTPResponsesColumns holds the columns for the "audit_http_responses" table.
+	AuditHTTPResponsesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 27},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "status", Type: field.TypeInt},
+		{Name: "content_type", Type: field.TypeString},
+		{Name: "is_file", Type: field.TypeBool},
+		{Name: "body_cipher", Type: field.TypeString, Default: ""},
+	}
+	// AuditHTTPResponsesTable holds the schema information for the "audit_http_responses" table.
+	AuditHTTPResponsesTable = &schema.Table{
+		Name:       "audit_http_responses",
+		Columns:    AuditHTTPResponsesColumns,
+		PrimaryKey: []*schema.Column{AuditHTTPResponsesColumns[0]},
 	}
 	// ConsentsColumns holds the columns for the "consents" table.
 	ConsentsColumns = []*schema.Column{
@@ -137,6 +174,149 @@ var (
 		Name:       "contents",
 		Columns:    ContentsColumns,
 		PrimaryKey: []*schema.Column{ContentsColumns[0]},
+	}
+	// CreativeEarningsColumns holds the columns for the "creative_earnings" table.
+	CreativeEarningsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 27},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "work_id", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "likes_reward", Type: field.TypeBool},
+		{Name: "amount_fen", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(24,0)"}},
+		{Name: "eligible_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "batch_id", Type: field.TypeString, Default: ""},
+	}
+	// CreativeEarningsTable holds the schema information for the "creative_earnings" table.
+	CreativeEarningsTable = &schema.Table{
+		Name:       "creative_earnings",
+		Columns:    CreativeEarningsColumns,
+		PrimaryKey: []*schema.Column{CreativeEarningsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creativeearning_work_id_likes_reward",
+				Unique:  true,
+				Columns: []*schema.Column{CreativeEarningsColumns[3], CreativeEarningsColumns[5]},
+			},
+		},
+	}
+	// CreativeLinksColumns holds the columns for the "creative_links" table.
+	CreativeLinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 27},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "work_id", Type: field.TypeString},
+		{Name: "platform", Type: field.TypeEnum, Enums: []string{"dy", "xhs"}},
+		{Name: "url", Type: field.TypeString},
+		{Name: "screenshot", Type: field.TypeString, Default: ""},
+		{Name: "evidence_reason", Type: field.TypeString, Default: ""},
+		{Name: "likes", Type: field.TypeInt, Nullable: true},
+	}
+	// CreativeLinksTable holds the schema information for the "creative_links" table.
+	CreativeLinksTable = &schema.Table{
+		Name:       "creative_links",
+		Columns:    CreativeLinksColumns,
+		PrimaryKey: []*schema.Column{CreativeLinksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creativelink_work_id_platform",
+				Unique:  true,
+				Columns: []*schema.Column{CreativeLinksColumns[3], CreativeLinksColumns[4]},
+			},
+		},
+	}
+	// CreativeTasksColumns holds the columns for the "creative_tasks" table.
+	CreativeTasksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 27},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "display_number", Type: field.TypeInt64},
+		{Name: "creator_id", Type: field.TypeString},
+		{Name: "title", Type: field.TypeString},
+		{Name: "requirements", Type: field.TypeString},
+		{Name: "media_type", Type: field.TypeEnum, Enums: []string{"image/jpeg", "image/png", "image/gif", "image/webp", "video/mp4"}},
+		{Name: "copy_text", Type: field.TypeString},
+		{Name: "topics", Type: field.TypeString},
+		{Name: "files", Type: field.TypeJSON, Nullable: true},
+		{Name: "platforms", Type: field.TypeJSON},
+		{Name: "creation_fen", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(24,0)"}},
+		{Name: "publish_fen", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(24,0)"}},
+		{Name: "combined_likes", Type: field.TypeBool},
+		{Name: "publish_days", Type: field.TypeInt},
+		{Name: "starts_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "ends_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "reward_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "online", Type: field.TypeBool, Default: true},
+	}
+	// CreativeTasksTable holds the schema information for the "creative_tasks" table.
+	CreativeTasksTable = &schema.Table{
+		Name:       "creative_tasks",
+		Columns:    CreativeTasksColumns,
+		PrimaryKey: []*schema.Column{CreativeTasksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creativetask_display_number",
+				Unique:  true,
+				Columns: []*schema.Column{CreativeTasksColumns[3]},
+			},
+		},
+	}
+	// CreativeTiersColumns holds the columns for the "creative_tiers" table.
+	CreativeTiersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 27},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "task_id", Type: field.TypeString},
+		{Name: "likes", Type: field.TypeInt},
+		{Name: "reward_fen", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(24,0)"}},
+	}
+	// CreativeTiersTable holds the schema information for the "creative_tiers" table.
+	CreativeTiersTable = &schema.Table{
+		Name:       "creative_tiers",
+		Columns:    CreativeTiersColumns,
+		PrimaryKey: []*schema.Column{CreativeTiersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creativetier_task_id_likes",
+				Unique:  true,
+				Columns: []*schema.Column{CreativeTiersColumns[3], CreativeTiersColumns[4]},
+			},
+		},
+	}
+	// CreativeWorksColumns holds the columns for the "creative_works" table.
+	CreativeWorksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 27},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "task_id", Type: field.TypeString},
+		{Name: "publish_fen", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(24,0)"}},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "business_date", Type: field.TypeString},
+		{Name: "request_key", Type: field.TypeString, Unique: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "pending", "rejected", "approved", "linked", "rewarded"}, Default: "draft"},
+		{Name: "revision", Type: field.TypeInt, Default: 0},
+		{Name: "copy_text", Type: field.TypeString, Default: ""},
+		{Name: "files", Type: field.TypeJSON, Nullable: true},
+		{Name: "reason", Type: field.TypeString, Default: ""},
+		{Name: "reviewer_id", Type: field.TypeString, Default: ""},
+	}
+	// CreativeWorksTable holds the schema information for the "creative_works" table.
+	CreativeWorksTable = &schema.Table{
+		Name:       "creative_works",
+		Columns:    CreativeWorksColumns,
+		PrimaryKey: []*schema.Column{CreativeWorksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creativework_user_id_task_id",
+				Unique:  true,
+				Columns: []*schema.Column{CreativeWorksColumns[5], CreativeWorksColumns[3]},
+			},
+			{
+				Name:    "creativework_user_id_business_date",
+				Unique:  false,
+				Columns: []*schema.Column{CreativeWorksColumns[5], CreativeWorksColumns[6]},
+			},
+		},
 	}
 	// FeedbacksColumns holds the columns for the "feedbacks" table.
 	FeedbacksColumns = []*schema.Column{
@@ -189,6 +369,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "kind", Type: field.TypeEnum, Enums: []string{"transfer", "transfer_query", "notification", "visibility_check"}},
 		{Name: "reference_id", Type: field.TypeString},
+		{Name: "trace_parent", Type: field.TypeString, Size: 55, Default: ""},
 		{Name: "request_id", Type: field.TypeString, Size: 27, Default: ""},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"queued", "running", "done", "retry", "failed", "blocked_config"}, Default: "queued"},
 		{Name: "attempts", Type: field.TypeInt64, Default: 0},
@@ -235,8 +416,19 @@ var (
 		{Name: "price_fen", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "numeric(24,0)"}},
 		{Name: "price_overridden", Type: field.TypeBool, Default: false},
 		{Name: "online", Type: field.TypeBool, Default: true},
+		{Name: "daily_limit", Type: field.TypeInt, Default: 1},
+		{Name: "creative_limit", Type: field.TypeInt, Default: 1},
+		{Name: "creative_online", Type: field.TypeBool, Default: true},
 		{Name: "expiry_mode", Type: field.TypeEnum, Enums: []string{"fixed_duration", "end_of_day"}, Default: "fixed_duration"},
 		{Name: "expiry_minutes", Type: field.TypeInt, Default: 60},
+		{Name: "settlement_frequency", Type: field.TypeEnum, Enums: []string{"weekly", "daily", "monthly", "after_delay"}, Default: "weekly"},
+		{Name: "settlement_weekday", Type: field.TypeInt, Default: 1},
+		{Name: "settlement_month_day", Type: field.TypeInt, Default: 1},
+		{Name: "settlement_clock", Type: field.TypeString, Default: "00:00"},
+		{Name: "settlement_delay_minutes", Type: field.TypeInt, Default: 1440},
+		{Name: "playback_cutoff_clock", Type: field.TypeString, Default: "12:00"},
+		{Name: "playback_cutoff_minutes", Type: field.TypeInt, Default: 1440},
+		{Name: "playback_deferral_periods", Type: field.TypeInt, Default: 1},
 	}
 	// MarketingSettingsTable holds the schema information for the "marketing_settings" table.
 	MarketingSettingsTable = &schema.Table{
@@ -295,6 +487,11 @@ var (
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "user_id", Type: field.TypeString},
+		{Name: "card", Type: field.TypeJSON, Nullable: true},
+		{Name: "delivery_state", Type: field.TypeEnum, Enums: []string{"station_only", "pending", "sending", "sent", "skipped", "failed", "unknown"}, Default: "station_only"},
+		{Name: "delivery_reason", Type: field.TypeString, Default: ""},
+		{Name: "wechat_code", Type: field.TypeInt, Default: 0},
+		{Name: "choice_id", Type: field.TypeString, Default: ""},
 		{Name: "title", Type: field.TypeString},
 		{Name: "body", Type: field.TypeString},
 		{Name: "reference_id", Type: field.TypeString, Default: ""},
@@ -315,6 +512,8 @@ var (
 		{Name: "password_hash", Type: field.TypeString},
 		{Name: "super_admin", Type: field.TypeBool, Default: false},
 		{Name: "disabled", Type: field.TypeBool, Default: false},
+		{Name: "all_pages", Type: field.TypeBool, Default: false},
+		{Name: "all_endpoints", Type: field.TypeBool, Default: false},
 		{Name: "pages", Type: field.TypeJSON},
 		{Name: "endpoints", Type: field.TypeJSON},
 	}
@@ -399,6 +598,7 @@ var (
 		{Name: "approved_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "settlement_id", Type: field.TypeString, Default: ""},
 		{Name: "eligible_date", Type: field.TypeString, Default: ""},
+		{Name: "settlement_eligible_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "visibility", Type: field.TypeEnum, Enums: []string{"unchecked", "manual_verified", "visible", "unavailable", "unknown"}, Default: "unchecked"},
 	}
 	// SubmissionsTable holds the schema information for the "submissions" table.
@@ -412,10 +612,38 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{SubmissionsColumns[3], SubmissionsColumns[4]},
 			},
+		},
+	}
+	// SubscriptionChoicesColumns holds the columns for the "subscription_choices" table.
+	SubscriptionChoicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 27},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "attempt", Type: field.TypeString},
+		{Name: "scene", Type: field.TypeString},
+		{Name: "template_id", Type: field.TypeString},
+		{Name: "result", Type: field.TypeEnum, Enums: []string{"accept", "reject", "ban", "filter", "error", "unknown"}},
+		{Name: "observed_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "remembered", Type: field.TypeString, Default: ""},
+		{Name: "main_switch", Type: field.TypeBool, Nullable: true},
+		{Name: "error_code", Type: field.TypeInt, Default: 0},
+		{Name: "used_by", Type: field.TypeString, Default: ""},
+	}
+	// SubscriptionChoicesTable holds the schema information for the "subscription_choices" table.
+	SubscriptionChoicesTable = &schema.Table{
+		Name:       "subscription_choices",
+		Columns:    SubscriptionChoicesColumns,
+		PrimaryKey: []*schema.Column{SubscriptionChoicesColumns[0]},
+		Indexes: []*schema.Index{
 			{
-				Name:    "submission_platform_work_key",
+				Name:    "subscriptionchoice_user_id_attempt_template_id",
 				Unique:  true,
-				Columns: []*schema.Column{SubmissionsColumns[4], SubmissionsColumns[6]},
+				Columns: []*schema.Column{SubscriptionChoicesColumns[2], SubscriptionChoicesColumns[3], SubscriptionChoicesColumns[5]},
+			},
+			{
+				Name:    "subscriptionchoice_user_id_template_id_observed_at",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionChoicesColumns[2], SubscriptionChoicesColumns[5], SubscriptionChoicesColumns[7]},
 			},
 		},
 	}
@@ -425,6 +653,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "deleted", Type: field.TypeBool, Default: false},
+		{Name: "display_number", Type: field.TypeInt64},
 		{Name: "current_version_id", Type: field.TypeString, Default: ""},
 		{Name: "creator_id", Type: field.TypeString},
 		{Name: "online", Type: field.TypeBool, Default: true},
@@ -434,6 +663,29 @@ var (
 		Name:       "tasks",
 		Columns:    TasksColumns,
 		PrimaryKey: []*schema.Column{TasksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "task_display_number",
+				Unique:  true,
+				Columns: []*schema.Column{TasksColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "NOT deleted",
+				},
+			},
+		},
+	}
+	// TaskNumberCountersColumns holds the columns for the "task_number_counters" table.
+	TaskNumberCountersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 27},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "last_number", Type: field.TypeInt64},
+	}
+	// TaskNumberCountersTable holds the schema information for the "task_number_counters" table.
+	TaskNumberCountersTable = &schema.Table{
+		Name:       "task_number_counters",
+		Columns:    TaskNumberCountersColumns,
+		PrimaryKey: []*schema.Column{TaskNumberCountersColumns[0]},
 	}
 	// TaskVersionsColumns holds the columns for the "task_versions" table.
 	TaskVersionsColumns = []*schema.Column{
@@ -480,6 +732,16 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_nickname",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "NOT deleted",
+				},
+			},
+		},
 	}
 	// UserEnrollmentsColumns holds the columns for the "user_enrollments" table.
 	UserEnrollmentsColumns = []*schema.Column{
@@ -647,8 +909,14 @@ var (
 		AgreementsTable,
 		AssignmentsTable,
 		AuditEventsTable,
+		AuditHTTPResponsesTable,
 		ConsentsTable,
 		ContentsTable,
+		CreativeEarningsTable,
+		CreativeLinksTable,
+		CreativeTasksTable,
+		CreativeTiersTable,
+		CreativeWorksTable,
 		FeedbacksTable,
 		FileObjectsTable,
 		JobsTable,
@@ -662,7 +930,9 @@ var (
 		SettlementBatchesTable,
 		SettlementLinesTable,
 		SubmissionsTable,
+		SubscriptionChoicesTable,
 		TasksTable,
+		TaskNumberCountersTable,
 		TaskVersionsTable,
 		UsersTable,
 		UserEnrollmentsTable,
@@ -684,7 +954,16 @@ func init() {
 	}
 	AuditEventsTable.Annotation = &entsql.Annotation{}
 	AuditEventsTable.Annotation.Checks = map[string]string{
-		"audit_action_enum_v6": "\"action\" IN ('enrollment.apply', 'enrollment.approved', 'enrollment.rejected', 'enrollment.portrait_updated', 'marketing_tag.create', 'marketing_tag.rename', 'marketing_tag.delete', 'user.block', 'user.profile_update', 'user.phone_verify', 'user.identity_verify', 'user.identity_verify_failed', 'enrollment.identity_verify', 'enrollment.identity_verify_failed', 'agreement.consent', 'agreement.publish', 'task.create', 'task.publish_version', 'task.visibility', 'task.claim', 'task.assigned', 'task.revoke', 'task.reissue', 'task.expire', 'marketing.settings', 'submission.submit', 'submission.approved', 'submission.rejected', 'submission.waive', 'settlement.credit', 'withdrawal.request', 'ledger.adjust', 'content.create', 'content.tags_updated', 'feedback.reply', 'operator.create', 'operator.update')",
+		"audit_action_enum_v7": "\"action\" IN ('request.failed', 'creative.create', 'creative.visibility', 'creative.claim', 'creative.submit', 'creative.review', 'creative.link', 'creative.evidence', 'creative.reward', 'enrollment.apply', 'enrollment.approved', 'enrollment.rejected', 'enrollment.portrait_updated', 'marketing_tag.create', 'marketing_tag.rename', 'marketing_tag.delete', 'user.block', 'user.profile_update', 'user.phone_verify', 'user.identity_verify', 'user.identity_verify_failed', 'enrollment.identity_verify', 'enrollment.identity_verify_failed', 'agreement.consent', 'agreement.publish', 'task.create', 'task.publish_version', 'task.visibility', 'task.claim', 'task.assigned', 'task.revoke', 'task.reissue', 'task.expire', 'marketing.settings', 'submission.submit', 'submission.approved', 'submission.rejected', 'submission.waive', 'settlement.credit', 'withdrawal.request', 'ledger.adjust', 'content.create', 'content.tags_updated', 'feedback.reply', 'operator.create', 'operator.update')",
+		"platform_enum":        "\"platform\" IN ('admin', 'miniapp')",
+	}
+	CreativeLinksTable.Annotation = &entsql.Annotation{}
+	CreativeLinksTable.Annotation.Checks = map[string]string{
+		"platform_enum": "\"platform\" IN ('dy', 'xhs')",
+	}
+	CreativeWorksTable.Annotation = &entsql.Annotation{}
+	CreativeWorksTable.Annotation.Checks = map[string]string{
+		"status_enum": "\"status\" IN ('draft', 'pending', 'rejected', 'approved', 'linked', 'rewarded')",
 	}
 	FeedbacksTable.Annotation = &entsql.Annotation{}
 	FeedbacksTable.Annotation.Checks = map[string]string{
@@ -707,7 +986,8 @@ func init() {
 	}
 	MarketingSettingsTable.Annotation = &entsql.Annotation{}
 	MarketingSettingsTable.Annotation.Checks = map[string]string{
-		"expiry_mode_enum": "\"expiry_mode\" IN ('fixed_duration', 'end_of_day')",
+		"expiry_mode_enum":          "\"expiry_mode\" IN ('fixed_duration', 'end_of_day')",
+		"settlement_frequency_enum": "\"settlement_frequency\" IN ('weekly', 'daily', 'monthly', 'after_delay')",
 	}
 	OperatorsTable.Annotation = &entsql.Annotation{
 		Table: "operators",

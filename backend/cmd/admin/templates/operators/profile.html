@@ -1,0 +1,21 @@
+{{define "operator-profile"}}
+<section class="page server-page workspace-page personal-profile">
+  <div class="page-heading"><h2>个人信息</h2></div>
+  <section class="ant-card server-card"><div class="ant-card-body">
+    <h3>重置密码</h3>
+    <form method="post" action="/profile/password" hx-post="/profile/password" hx-target="#admin-workspace" hx-swap="outerHTML" hx-disabled-elt="find button" hx-sync="this:drop">
+      <input type="hidden" name="csrf" value="{{.CSRF}}">
+      {{if .Profile.PasswordError}}<div class="server-alert" role="alert">{{.Profile.PasswordError}}</div>{{end}}
+      <label for="profile-current-password">当前密码</label>
+      <input type="password" id="profile-current-password" name="current_password" autocomplete="current-password" required>
+      <label for="profile-new-password">新密码</label>
+      <input type="password" id="profile-new-password" name="new_password" autocomplete="new-password" minlength="12" aria-describedby="profile-password-help" required>
+      <small id="profile-password-help">至少 12 个字符，最多 72 字节。</small>
+      <label for="profile-confirm-password">确认新密码</label>
+      <input type="password" id="profile-confirm-password" name="confirm_password" autocomplete="new-password" required>
+      <small>修改后，所有设备都需要使用新密码重新登录。</small>
+      <button class="server-button server-primary" type="submit">确认重置密码</button>
+    </form>
+  </div></section>
+</section>
+{{end}}

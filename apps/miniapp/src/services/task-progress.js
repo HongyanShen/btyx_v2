@@ -39,7 +39,7 @@ function taskProgress(assignment) {
     ["发布", completed.has(TaskStep.StepPublish), "按要求到指定平台发布作品"],
     ["交链接", linksDone, "提交作品的发布链接"],
     ["审核", reviewDone, "你这边做完了，等运营审核"],
-    ["结算", settled, "审核通过了，等周一结算"],
+    ["结算", settled, "审核通过了，等结算入账"],
   ];
   const current = rejected ? 2 : definitions.findIndex(([, done]) => !done);
   const items = definitions.map(([label, done], index) => {
@@ -99,4 +99,11 @@ function taskDeadline(assignment, now = Date.now()) {
   };
 }
 
-module.exports = { isClosed, taskProgress, taskDeadline };
+function beijingDateTime(value) {
+  const time = Date.parse(value);
+  if (!Number.isFinite(time)) return "";
+  const local = new Date(time + 8 * 60 * 60 * 1000).toISOString();
+  return `${local.slice(0, 10)} ${local.slice(11, 16)}`;
+}
+
+module.exports = { isClosed, taskProgress, taskDeadline, beijingDateTime };

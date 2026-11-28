@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"strings"
 
@@ -14,11 +15,13 @@ import (
 	"baituber.cn/yanxuan/v2/ent"
 	"baituber.cn/yanxuan/v2/ent/task"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
+	"baituber.cn/yanxuan/v2/internal/platform/displaynumber"
 	"baituber.cn/yanxuan/v2/internal/platform/money"
 )
 
-func versionDTO(version *ent.TaskVersion) VersionDTO {
+func versionDTO(version *ent.TaskVersion, code string) VersionDTO {
 	return VersionDTO{
+		TaskCode:  code,
 		ID:        version.ID,
 		TaskID:    version.TaskID,
 		Number:    version.Number,
@@ -95,6 +98,11 @@ func writeVersion(ctx context.Context, tx *ent.Tx, actorID, taskID string, versi
 }
 
 func (s *Service) CreateTask(ctx context.Context, actorID string, input TaskInput) (VersionDTO, error) {
+	number, err := displaynumber.Task.Next(ctx, s.Client)
+	if err != nil {
+		return VersionDTO{}, err
+	}
+
 	return app.Transaction(ctx, s.Runtime, func(tx *ent.Tx) (VersionDTO, error) {
 		if input.PriceFen == "" {
 			policy, err := LoadMarketingPolicy(ctx, tx.Client())
@@ -143,6 +151,7 @@ func (s *Service) CreateTask(ctx context.Context, actorID string, input TaskInpu
 		}
 
 		taskRecord, err := tx.Task.Create().
+			SetDisplayNumber(number).
 			SetCreatorID(actorID).
 			Save(ctx)
 		if err != nil {
@@ -154,15 +163,22 @@ func (s *Service) CreateTask(ctx context.Context, actorID string, input TaskInpu
 			return VersionDTO{}, err
 		}
 
-		if _, err = tx.Task.UpdateOneID(taskRecord.ID).
+		err = tx.Task.UpdateOneID(taskRecord.ID).
 			SetCurrentVersionID(version.ID).
-			Save(ctx); err != nil {
+			Exec(ctx)
+		if err != nil {
 			return VersionDTO{}, err
 		}
 
-		result := versionDTO(version)
+		code, err := DisplayCode(taskRecord.DisplayNumber)
+		if err != nil {
+			return VersionDTO{}, err
+		}
+
+		result := versionDTO(version, code)
 		result.Online = taskRecord.Online
-		return result, app.Audit(ctx, tx, actorID, enum.AuditTaskCreate, taskRecord.ID, "")
+		return result, app.Audit(ctx, tx, actorID, enum.AuditTaskCreate, taskRecord.ID, "",
+			fmt.Sprintf("版本：%d；平台：%v；单价：%s 分", version.Number, version.Platforms, version.PriceFen.String()))
 	})
 }
 
@@ -213,8 +229,14 @@ func (s *Service) PublishVersion(ctx context.Context, actorID, taskID string, in
 			return VersionDTO{}, err
 		}
 
-		result := versionDTO(version)
+		code, err := DisplayCode(taskRecord.DisplayNumber)
+		if err != nil {
+			return VersionDTO{}, err
+		}
+
+		result := versionDTO(version, code)
 		result.Online = taskRecord.Online
-		return result, app.Audit(ctx, tx, actorID, enum.AuditTaskPublishVersion, version.ID, "")
+		return result, app.Audit(ctx, tx, actorID, enum.AuditTaskPublishVersion, version.ID, "",
+			fmt.Sprintf("版本：%d；平台：%v；单价：%s 分", version.Number, version.Platforms, version.PriceFen.String()))
 	})
 }

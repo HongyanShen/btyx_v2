@@ -96,9 +96,59 @@ func Online(v bool) predicate.MarketingSettings {
 	return predicate.MarketingSettings(sql.FieldEQ(FieldOnline, v))
 }
 
+// DailyLimit applies equality check predicate on the "daily_limit" field. It's identical to DailyLimitEQ.
+func DailyLimit(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldDailyLimit, v))
+}
+
+// CreativeLimit applies equality check predicate on the "creative_limit" field. It's identical to CreativeLimitEQ.
+func CreativeLimit(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldCreativeLimit, v))
+}
+
+// CreativeOnline applies equality check predicate on the "creative_online" field. It's identical to CreativeOnlineEQ.
+func CreativeOnline(v bool) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldCreativeOnline, v))
+}
+
 // ExpiryMinutes applies equality check predicate on the "expiry_minutes" field. It's identical to ExpiryMinutesEQ.
 func ExpiryMinutes(v int) predicate.MarketingSettings {
 	return predicate.MarketingSettings(sql.FieldEQ(FieldExpiryMinutes, v))
+}
+
+// SettlementWeekday applies equality check predicate on the "settlement_weekday" field. It's identical to SettlementWeekdayEQ.
+func SettlementWeekday(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldSettlementWeekday, v))
+}
+
+// SettlementMonthDay applies equality check predicate on the "settlement_month_day" field. It's identical to SettlementMonthDayEQ.
+func SettlementMonthDay(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldSettlementMonthDay, v))
+}
+
+// SettlementClock applies equality check predicate on the "settlement_clock" field. It's identical to SettlementClockEQ.
+func SettlementClock(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldSettlementClock, v))
+}
+
+// SettlementDelayMinutes applies equality check predicate on the "settlement_delay_minutes" field. It's identical to SettlementDelayMinutesEQ.
+func SettlementDelayMinutes(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldSettlementDelayMinutes, v))
+}
+
+// PlaybackCutoffClock applies equality check predicate on the "playback_cutoff_clock" field. It's identical to PlaybackCutoffClockEQ.
+func PlaybackCutoffClock(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffMinutes applies equality check predicate on the "playback_cutoff_minutes" field. It's identical to PlaybackCutoffMinutesEQ.
+func PlaybackCutoffMinutes(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldPlaybackCutoffMinutes, v))
+}
+
+// PlaybackDeferralPeriods applies equality check predicate on the "playback_deferral_periods" field. It's identical to PlaybackDeferralPeriodsEQ.
+func PlaybackDeferralPeriods(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldPlaybackDeferralPeriods, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -306,6 +356,96 @@ func OnlineNEQ(v bool) predicate.MarketingSettings {
 	return predicate.MarketingSettings(sql.FieldNEQ(FieldOnline, v))
 }
 
+// DailyLimitEQ applies the EQ predicate on the "daily_limit" field.
+func DailyLimitEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldDailyLimit, v))
+}
+
+// DailyLimitNEQ applies the NEQ predicate on the "daily_limit" field.
+func DailyLimitNEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldDailyLimit, v))
+}
+
+// DailyLimitIn applies the In predicate on the "daily_limit" field.
+func DailyLimitIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldIn(FieldDailyLimit, vs...))
+}
+
+// DailyLimitNotIn applies the NotIn predicate on the "daily_limit" field.
+func DailyLimitNotIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldDailyLimit, vs...))
+}
+
+// DailyLimitGT applies the GT predicate on the "daily_limit" field.
+func DailyLimitGT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGT(FieldDailyLimit, v))
+}
+
+// DailyLimitGTE applies the GTE predicate on the "daily_limit" field.
+func DailyLimitGTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGTE(FieldDailyLimit, v))
+}
+
+// DailyLimitLT applies the LT predicate on the "daily_limit" field.
+func DailyLimitLT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLT(FieldDailyLimit, v))
+}
+
+// DailyLimitLTE applies the LTE predicate on the "daily_limit" field.
+func DailyLimitLTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLTE(FieldDailyLimit, v))
+}
+
+// CreativeLimitEQ applies the EQ predicate on the "creative_limit" field.
+func CreativeLimitEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldCreativeLimit, v))
+}
+
+// CreativeLimitNEQ applies the NEQ predicate on the "creative_limit" field.
+func CreativeLimitNEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldCreativeLimit, v))
+}
+
+// CreativeLimitIn applies the In predicate on the "creative_limit" field.
+func CreativeLimitIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldIn(FieldCreativeLimit, vs...))
+}
+
+// CreativeLimitNotIn applies the NotIn predicate on the "creative_limit" field.
+func CreativeLimitNotIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldCreativeLimit, vs...))
+}
+
+// CreativeLimitGT applies the GT predicate on the "creative_limit" field.
+func CreativeLimitGT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGT(FieldCreativeLimit, v))
+}
+
+// CreativeLimitGTE applies the GTE predicate on the "creative_limit" field.
+func CreativeLimitGTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGTE(FieldCreativeLimit, v))
+}
+
+// CreativeLimitLT applies the LT predicate on the "creative_limit" field.
+func CreativeLimitLT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLT(FieldCreativeLimit, v))
+}
+
+// CreativeLimitLTE applies the LTE predicate on the "creative_limit" field.
+func CreativeLimitLTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLTE(FieldCreativeLimit, v))
+}
+
+// CreativeOnlineEQ applies the EQ predicate on the "creative_online" field.
+func CreativeOnlineEQ(v bool) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldCreativeOnline, v))
+}
+
+// CreativeOnlineNEQ applies the NEQ predicate on the "creative_online" field.
+func CreativeOnlineNEQ(v bool) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldCreativeOnline, v))
+}
+
 // ExpiryModeEQ applies the EQ predicate on the "expiry_mode" field.
 func ExpiryModeEQ(v enum.MarketingExpiryMode) predicate.MarketingSettings {
 	vc := v
@@ -374,6 +514,366 @@ func ExpiryMinutesLT(v int) predicate.MarketingSettings {
 // ExpiryMinutesLTE applies the LTE predicate on the "expiry_minutes" field.
 func ExpiryMinutesLTE(v int) predicate.MarketingSettings {
 	return predicate.MarketingSettings(sql.FieldLTE(FieldExpiryMinutes, v))
+}
+
+// SettlementFrequencyEQ applies the EQ predicate on the "settlement_frequency" field.
+func SettlementFrequencyEQ(v enum.SettlementFrequency) predicate.MarketingSettings {
+	vc := v
+	return predicate.MarketingSettings(sql.FieldEQ(FieldSettlementFrequency, vc))
+}
+
+// SettlementFrequencyNEQ applies the NEQ predicate on the "settlement_frequency" field.
+func SettlementFrequencyNEQ(v enum.SettlementFrequency) predicate.MarketingSettings {
+	vc := v
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldSettlementFrequency, vc))
+}
+
+// SettlementFrequencyIn applies the In predicate on the "settlement_frequency" field.
+func SettlementFrequencyIn(vs ...enum.SettlementFrequency) predicate.MarketingSettings {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.MarketingSettings(sql.FieldIn(FieldSettlementFrequency, v...))
+}
+
+// SettlementFrequencyNotIn applies the NotIn predicate on the "settlement_frequency" field.
+func SettlementFrequencyNotIn(vs ...enum.SettlementFrequency) predicate.MarketingSettings {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldSettlementFrequency, v...))
+}
+
+// SettlementWeekdayEQ applies the EQ predicate on the "settlement_weekday" field.
+func SettlementWeekdayEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldSettlementWeekday, v))
+}
+
+// SettlementWeekdayNEQ applies the NEQ predicate on the "settlement_weekday" field.
+func SettlementWeekdayNEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldSettlementWeekday, v))
+}
+
+// SettlementWeekdayIn applies the In predicate on the "settlement_weekday" field.
+func SettlementWeekdayIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldIn(FieldSettlementWeekday, vs...))
+}
+
+// SettlementWeekdayNotIn applies the NotIn predicate on the "settlement_weekday" field.
+func SettlementWeekdayNotIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldSettlementWeekday, vs...))
+}
+
+// SettlementWeekdayGT applies the GT predicate on the "settlement_weekday" field.
+func SettlementWeekdayGT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGT(FieldSettlementWeekday, v))
+}
+
+// SettlementWeekdayGTE applies the GTE predicate on the "settlement_weekday" field.
+func SettlementWeekdayGTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGTE(FieldSettlementWeekday, v))
+}
+
+// SettlementWeekdayLT applies the LT predicate on the "settlement_weekday" field.
+func SettlementWeekdayLT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLT(FieldSettlementWeekday, v))
+}
+
+// SettlementWeekdayLTE applies the LTE predicate on the "settlement_weekday" field.
+func SettlementWeekdayLTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLTE(FieldSettlementWeekday, v))
+}
+
+// SettlementMonthDayEQ applies the EQ predicate on the "settlement_month_day" field.
+func SettlementMonthDayEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldSettlementMonthDay, v))
+}
+
+// SettlementMonthDayNEQ applies the NEQ predicate on the "settlement_month_day" field.
+func SettlementMonthDayNEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldSettlementMonthDay, v))
+}
+
+// SettlementMonthDayIn applies the In predicate on the "settlement_month_day" field.
+func SettlementMonthDayIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldIn(FieldSettlementMonthDay, vs...))
+}
+
+// SettlementMonthDayNotIn applies the NotIn predicate on the "settlement_month_day" field.
+func SettlementMonthDayNotIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldSettlementMonthDay, vs...))
+}
+
+// SettlementMonthDayGT applies the GT predicate on the "settlement_month_day" field.
+func SettlementMonthDayGT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGT(FieldSettlementMonthDay, v))
+}
+
+// SettlementMonthDayGTE applies the GTE predicate on the "settlement_month_day" field.
+func SettlementMonthDayGTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGTE(FieldSettlementMonthDay, v))
+}
+
+// SettlementMonthDayLT applies the LT predicate on the "settlement_month_day" field.
+func SettlementMonthDayLT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLT(FieldSettlementMonthDay, v))
+}
+
+// SettlementMonthDayLTE applies the LTE predicate on the "settlement_month_day" field.
+func SettlementMonthDayLTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLTE(FieldSettlementMonthDay, v))
+}
+
+// SettlementClockEQ applies the EQ predicate on the "settlement_clock" field.
+func SettlementClockEQ(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldSettlementClock, v))
+}
+
+// SettlementClockNEQ applies the NEQ predicate on the "settlement_clock" field.
+func SettlementClockNEQ(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldSettlementClock, v))
+}
+
+// SettlementClockIn applies the In predicate on the "settlement_clock" field.
+func SettlementClockIn(vs ...string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldIn(FieldSettlementClock, vs...))
+}
+
+// SettlementClockNotIn applies the NotIn predicate on the "settlement_clock" field.
+func SettlementClockNotIn(vs ...string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldSettlementClock, vs...))
+}
+
+// SettlementClockGT applies the GT predicate on the "settlement_clock" field.
+func SettlementClockGT(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGT(FieldSettlementClock, v))
+}
+
+// SettlementClockGTE applies the GTE predicate on the "settlement_clock" field.
+func SettlementClockGTE(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGTE(FieldSettlementClock, v))
+}
+
+// SettlementClockLT applies the LT predicate on the "settlement_clock" field.
+func SettlementClockLT(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLT(FieldSettlementClock, v))
+}
+
+// SettlementClockLTE applies the LTE predicate on the "settlement_clock" field.
+func SettlementClockLTE(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLTE(FieldSettlementClock, v))
+}
+
+// SettlementClockContains applies the Contains predicate on the "settlement_clock" field.
+func SettlementClockContains(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldContains(FieldSettlementClock, v))
+}
+
+// SettlementClockHasPrefix applies the HasPrefix predicate on the "settlement_clock" field.
+func SettlementClockHasPrefix(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldHasPrefix(FieldSettlementClock, v))
+}
+
+// SettlementClockHasSuffix applies the HasSuffix predicate on the "settlement_clock" field.
+func SettlementClockHasSuffix(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldHasSuffix(FieldSettlementClock, v))
+}
+
+// SettlementClockEqualFold applies the EqualFold predicate on the "settlement_clock" field.
+func SettlementClockEqualFold(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEqualFold(FieldSettlementClock, v))
+}
+
+// SettlementClockContainsFold applies the ContainsFold predicate on the "settlement_clock" field.
+func SettlementClockContainsFold(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldContainsFold(FieldSettlementClock, v))
+}
+
+// SettlementDelayMinutesEQ applies the EQ predicate on the "settlement_delay_minutes" field.
+func SettlementDelayMinutesEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldSettlementDelayMinutes, v))
+}
+
+// SettlementDelayMinutesNEQ applies the NEQ predicate on the "settlement_delay_minutes" field.
+func SettlementDelayMinutesNEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldSettlementDelayMinutes, v))
+}
+
+// SettlementDelayMinutesIn applies the In predicate on the "settlement_delay_minutes" field.
+func SettlementDelayMinutesIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldIn(FieldSettlementDelayMinutes, vs...))
+}
+
+// SettlementDelayMinutesNotIn applies the NotIn predicate on the "settlement_delay_minutes" field.
+func SettlementDelayMinutesNotIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldSettlementDelayMinutes, vs...))
+}
+
+// SettlementDelayMinutesGT applies the GT predicate on the "settlement_delay_minutes" field.
+func SettlementDelayMinutesGT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGT(FieldSettlementDelayMinutes, v))
+}
+
+// SettlementDelayMinutesGTE applies the GTE predicate on the "settlement_delay_minutes" field.
+func SettlementDelayMinutesGTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGTE(FieldSettlementDelayMinutes, v))
+}
+
+// SettlementDelayMinutesLT applies the LT predicate on the "settlement_delay_minutes" field.
+func SettlementDelayMinutesLT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLT(FieldSettlementDelayMinutes, v))
+}
+
+// SettlementDelayMinutesLTE applies the LTE predicate on the "settlement_delay_minutes" field.
+func SettlementDelayMinutesLTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLTE(FieldSettlementDelayMinutes, v))
+}
+
+// PlaybackCutoffClockEQ applies the EQ predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockEQ(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockNEQ applies the NEQ predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockNEQ(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockIn applies the In predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockIn(vs ...string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldIn(FieldPlaybackCutoffClock, vs...))
+}
+
+// PlaybackCutoffClockNotIn applies the NotIn predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockNotIn(vs ...string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldPlaybackCutoffClock, vs...))
+}
+
+// PlaybackCutoffClockGT applies the GT predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockGT(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGT(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockGTE applies the GTE predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockGTE(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGTE(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockLT applies the LT predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockLT(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLT(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockLTE applies the LTE predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockLTE(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLTE(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockContains applies the Contains predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockContains(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldContains(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockHasPrefix applies the HasPrefix predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockHasPrefix(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldHasPrefix(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockHasSuffix applies the HasSuffix predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockHasSuffix(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldHasSuffix(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockEqualFold applies the EqualFold predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockEqualFold(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEqualFold(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffClockContainsFold applies the ContainsFold predicate on the "playback_cutoff_clock" field.
+func PlaybackCutoffClockContainsFold(v string) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldContainsFold(FieldPlaybackCutoffClock, v))
+}
+
+// PlaybackCutoffMinutesEQ applies the EQ predicate on the "playback_cutoff_minutes" field.
+func PlaybackCutoffMinutesEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldPlaybackCutoffMinutes, v))
+}
+
+// PlaybackCutoffMinutesNEQ applies the NEQ predicate on the "playback_cutoff_minutes" field.
+func PlaybackCutoffMinutesNEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldPlaybackCutoffMinutes, v))
+}
+
+// PlaybackCutoffMinutesIn applies the In predicate on the "playback_cutoff_minutes" field.
+func PlaybackCutoffMinutesIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldIn(FieldPlaybackCutoffMinutes, vs...))
+}
+
+// PlaybackCutoffMinutesNotIn applies the NotIn predicate on the "playback_cutoff_minutes" field.
+func PlaybackCutoffMinutesNotIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldPlaybackCutoffMinutes, vs...))
+}
+
+// PlaybackCutoffMinutesGT applies the GT predicate on the "playback_cutoff_minutes" field.
+func PlaybackCutoffMinutesGT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGT(FieldPlaybackCutoffMinutes, v))
+}
+
+// PlaybackCutoffMinutesGTE applies the GTE predicate on the "playback_cutoff_minutes" field.
+func PlaybackCutoffMinutesGTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGTE(FieldPlaybackCutoffMinutes, v))
+}
+
+// PlaybackCutoffMinutesLT applies the LT predicate on the "playback_cutoff_minutes" field.
+func PlaybackCutoffMinutesLT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLT(FieldPlaybackCutoffMinutes, v))
+}
+
+// PlaybackCutoffMinutesLTE applies the LTE predicate on the "playback_cutoff_minutes" field.
+func PlaybackCutoffMinutesLTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLTE(FieldPlaybackCutoffMinutes, v))
+}
+
+// PlaybackDeferralPeriodsEQ applies the EQ predicate on the "playback_deferral_periods" field.
+func PlaybackDeferralPeriodsEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldEQ(FieldPlaybackDeferralPeriods, v))
+}
+
+// PlaybackDeferralPeriodsNEQ applies the NEQ predicate on the "playback_deferral_periods" field.
+func PlaybackDeferralPeriodsNEQ(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNEQ(FieldPlaybackDeferralPeriods, v))
+}
+
+// PlaybackDeferralPeriodsIn applies the In predicate on the "playback_deferral_periods" field.
+func PlaybackDeferralPeriodsIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldIn(FieldPlaybackDeferralPeriods, vs...))
+}
+
+// PlaybackDeferralPeriodsNotIn applies the NotIn predicate on the "playback_deferral_periods" field.
+func PlaybackDeferralPeriodsNotIn(vs ...int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldNotIn(FieldPlaybackDeferralPeriods, vs...))
+}
+
+// PlaybackDeferralPeriodsGT applies the GT predicate on the "playback_deferral_periods" field.
+func PlaybackDeferralPeriodsGT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGT(FieldPlaybackDeferralPeriods, v))
+}
+
+// PlaybackDeferralPeriodsGTE applies the GTE predicate on the "playback_deferral_periods" field.
+func PlaybackDeferralPeriodsGTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldGTE(FieldPlaybackDeferralPeriods, v))
+}
+
+// PlaybackDeferralPeriodsLT applies the LT predicate on the "playback_deferral_periods" field.
+func PlaybackDeferralPeriodsLT(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLT(FieldPlaybackDeferralPeriods, v))
+}
+
+// PlaybackDeferralPeriodsLTE applies the LTE predicate on the "playback_deferral_periods" field.
+func PlaybackDeferralPeriodsLTE(v int) predicate.MarketingSettings {
+	return predicate.MarketingSettings(sql.FieldLTE(FieldPlaybackDeferralPeriods, v))
 }
 
 // And groups predicates with the AND operator between them.

@@ -49,16 +49,6 @@ page {
   font-size: 22rpx;
 }
 
-.me-avatar-action {
-  flex: none;
-  padding: 14rpx 24rpx;
-  border-radius: 34rpx;
-  background: #fff;
-  color: #3b3568;
-  font-size: 25rpx;
-  font-weight: 700;
-}
-
 .me-content {
   position: relative;
   margin: -68rpx 28rpx 0;
@@ -137,6 +127,15 @@ page {
   background: #fff;
   color: #3b3568;
   font-size: 28rpx;
+}
+
+.me-content .me-row.me-contact {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  text-align: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 .me-row image {

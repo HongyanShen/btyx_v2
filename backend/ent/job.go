@@ -26,6 +26,8 @@ type Job struct {
 	Kind enum.JobKind `json:"kind,omitempty"`
 	// ReferenceID holds the value of the "reference_id" field.
 	ReferenceID string `json:"reference_id,omitempty"`
+	// TraceParent holds the value of the "trace_parent" field.
+	TraceParent string `json:"trace_parent,omitempty"`
 	// RequestID holds the value of the "request_id" field.
 	RequestID string `json:"request_id,omitempty"`
 	// Status holds the value of the "status" field.
@@ -46,7 +48,7 @@ func (*Job) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case job.FieldAttempts:
 			values[i] = new(sql.NullInt64)
-		case job.FieldID, job.FieldKind, job.FieldReferenceID, job.FieldRequestID, job.FieldStatus, job.FieldLastError:
+		case job.FieldID, job.FieldKind, job.FieldReferenceID, job.FieldTraceParent, job.FieldRequestID, job.FieldStatus, job.FieldLastError:
 			values[i] = new(sql.NullString)
 		case job.FieldCreatedAt, job.FieldUpdatedAt, job.FieldNextAt:
 			values[i] = new(sql.NullTime)
@@ -94,6 +96,12 @@ func (_m *Job) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field reference_id", values[i])
 			} else if value.Valid {
 				_m.ReferenceID = value.String
+			}
+		case job.FieldTraceParent:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field trace_parent", values[i])
+			} else if value.Valid {
+				_m.TraceParent = value.String
 			}
 		case job.FieldRequestID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -172,6 +180,9 @@ func (_m *Job) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("reference_id=")
 	builder.WriteString(_m.ReferenceID)
+	builder.WriteString(", ")
+	builder.WriteString("trace_parent=")
+	builder.WriteString(_m.TraceParent)
 	builder.WriteString(", ")
 	builder.WriteString("request_id=")
 	builder.WriteString(_m.RequestID)

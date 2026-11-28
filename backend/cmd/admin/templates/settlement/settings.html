@@ -1,0 +1,133 @@
+{{define "distribution-settings"}}
+<section class="workspace-page settlement-page settings-page">
+  {{with .Marketing}}
+  <form class="distribution-settings" method="post" action="/distribution/settings/marketing">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}">
+    <input type="hidden" name="original_price" value="{{.Price}}">
+    <header class="settings-heading">
+      <h2>营销分发 · 营销设置</h2>
+      <div class="settings-actions">
+        <button class="server-button" type="button" commandfor="settings-history" command="show-modal">修改记录</button>
+        {{if .CanEdit}}<button class="server-button server-primary" type="submit">保存营销设置</button>{{end}}
+      </div>
+    </header>
+    <div class="settings-panel">
+      <section class="settings-group">
+        <div class="settings-caption">
+          <h3 id="dispatch-title">{{template "settings-icon" "dispatch"}}分发任务</h3>
+          <p>关闭派单后暂停领取和手动指派，已分配任务仍可继续。</p>
+        </div>
+        <fieldset aria-labelledby="dispatch-title" {{if not .CanEdit}}disabled{{end}}>
+          <label>开启派单 <input type="checkbox" name="online" {{if .Online}}checked{{end}}></label>
+          <label><span>每个平台单价（元）<small>新单价仅对后续分配生效。</small></span><input name="price" inputmode="decimal" value="{{.Price}}" required></label>
+          <label><span>每人每天可领（条）<small>调低名额后，今天已领的任务保留。</small></span><input name="daily_limit" type="number" step="1" min="1" value="{{.DailyLimit}}" required></label>
+        </fieldset>
+      </section>
+      <section class="settings-group">
+        <div class="settings-caption">
+          <h3 id="creative-title">{{template "settings-icon" "creative"}}创作任务</h3>
+          <p>关闭后隐藏小程序创作入口，已领作品仍可提交、审核与结算。</p>
+          {{if $.CanManageCreative}}<a class="settings-link" href="/creative/tasks">管理创作任务上架 / 下架</a>{{end}}
+        </div>
+        <fieldset aria-labelledby="creative-title" {{if not .CanEdit}}disabled{{end}}>
+          <label>开启创作任务 <input type="checkbox" name="creative_online" {{if .CreativeOnline}}checked{{end}}></label>
+          <label>每人每天可领（个）<input name="creative_limit" type="number" step="1" min="1" value="{{.CreativeLimit}}" required></label>
+        </fieldset>
+      </section>
+    </div>
+  </form>
+  {{else}}<h2>营销分发 · 营销设置</h2>{{end}}
+  {{if .Marketing}}
+  <dialog id="settings-history" class="server-dialog settings-history" aria-labelledby="settings-history-title">
+    <header><h3 id="settings-history-title">修改记录</h3><button type="button" aria-label="关闭" data-close-dialog>×</button></header>
+    <div class="settings-history-body">
+      <details><summary>单价修改记录</summary>{{range .Marketing.History}}<p>{{.}}</p>{{else}}<p>暂无记录</p>{{end}}</details>
+      <div id="settings-history-list">
+        {{range .History}}<article><small>{{.ChangedAt.Format "2006-01-02 15:04"}} · {{.Operator}}</small><p>{{.Change}}</p></article>{{else}}<p>暂无修改记录</p>{{end}}
+        {{if or (gt .HistoryPage 1) .HasMore}}
+        <form class="settings-actions" method="get" action="/distribution/settings" hx-get="/distribution/settings" hx-target="#settings-history-list" hx-select="#settings-history-list" hx-swap="outerHTML">
+          {{if gt .HistoryPage 1}}<button class="server-button" name="history_page" value="{{previousPage .HistoryPage}}">上一页</button>{{end}}
+          <span>第 {{.HistoryPage}} 页</span>
+          {{if .HasMore}}<button class="server-button" name="history_page" value="{{nextPage .HistoryPage}}">下一页</button>{{end}}
+        </form>
+        {{end}}
+      </div>
+    </div>
+  </dialog>
+  {{end}}
+  <form class="distribution-settings" method="post" action="/distribution/settings" hx-post="/distribution/settings" hx-target="#admin-workspace" hx-indicator="#admin-loading" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop" data-distribution-settings>
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <header class="settings-heading">
+      <h3>结算与提交规则</h3>
+      {{if .CanEdit}}<button type="submit" class="server-button server-primary">保存分发设置</button>{{else}}<span class="settlement-note">当前账号可查看分发设置。</span>{{end}}
+    </header>
+    {{if .Error}}<p class="settlement-danger" role="alert">{{.Error}}</p>{{end}}
+    <div class="settings-panel">
+      <section class="settings-group">
+        <div class="settings-caption">
+          <h3 id="settlement-title">{{template "settings-icon" "settlement"}}分发结算</h3>
+          <p>日、周、月结算分别覆盖前一天、上一自然周、上一自然月。开放后由运营核对并确认入账。</p>
+        </div>
+        <fieldset aria-labelledby="settlement-title"{{if not .CanEdit}} disabled{{end}}>
+          <label>结算方式
+            <select name="settlement_frequency">
+              <option value="daily"{{if eq .Schedule.SettlementFrequency "daily"}} selected{{end}}>每天</option>
+              <option value="weekly"{{if eq .Schedule.SettlementFrequency "weekly"}} selected{{end}}>每周</option>
+              <option value="monthly"{{if eq .Schedule.SettlementFrequency "monthly"}} selected{{end}}>每月</option>
+              <option value="after_delay"{{if eq .Schedule.SettlementFrequency "after_delay"}} selected{{end}}>分配后按时长</option>
+            </select>
+          </label>
+          <label data-schedule-modes="weekly"{{if ne .Schedule.SettlementFrequency "weekly"}} hidden{{end}}>每周结算日
+            <select name="settlement_weekday">
+              {{$weekday := .Schedule.SettlementWeekday}}{{range .Weekdays}}<option value="{{.Number}}"{{if eq .Number $weekday}} selected{{end}}>{{.Name}}</option>{{end}}
+            </select>
+          </label>
+          <label data-schedule-modes="monthly"{{if ne .Schedule.SettlementFrequency "monthly"}} hidden{{end}}>
+            <span>每月结算日<small>遇短月取该月最后一天。</small></span>
+            <span class="settings-unit"><input type="number" min="1" max="31" step="1" name="settlement_month_day" value="{{.Schedule.SettlementMonthDay}}"> 日</span>
+          </label>
+          <label data-schedule-modes="daily weekly monthly"{{if eq .Schedule.SettlementFrequency "after_delay"}} hidden{{end}}>开放入账时间（北京时间）
+            <input type="time" name="settlement_clock" value="{{.Schedule.SettlementClock}}">
+          </label>
+          <label data-schedule-modes="after_delay"{{if ne .Schedule.SettlementFrequency "after_delay"}} hidden{{end}}>领取、指派或重派后
+            <span class="settings-unit"><input type="number" min="1" step="1" name="settlement_delay_minutes" value="{{.Schedule.SettlementDelayMinutes}}"> 分钟开放入账</span>
+          </label>
+        </fieldset>
+      </section>
+      <section class="settings-group">
+        <div class="settings-caption">
+          <h3 id="submission-title">{{template "settings-icon" "time"}}小程序提交时间</h3>
+          <p>已分配任务保留原链接截止时间。已交截图保留原结算时间，待交截图按新规则计算。</p>
+        </div>
+        <fieldset aria-labelledby="submission-title"{{if not .CanEdit}} disabled{{end}}>
+          <label><span>首次提交发布链接<small>从领取、指派或重派后起算。</small></span>
+            <select name="expiry_mode">
+              <option value="end_of_day"{{if eq .ExpiryMode "end_of_day"}} selected{{end}}>当天 24:00 前</option>
+              <option value="fixed_duration"{{if eq .ExpiryMode "fixed_duration"}} selected{{end}}>指定时间内</option>
+            </select>
+          </label>
+          <label data-expiry-duration{{if ne .ExpiryMode "fixed_duration"}} hidden{{end}}>发布链接时限
+            <span class="settings-unit"><input type="number" min="0.5" max="24" step="0.5" name="hours" value="{{.Hours}}"> 小时</span>
+          </label>
+          <label data-schedule-modes="daily weekly monthly"{{if eq .Schedule.SettlementFrequency "after_delay"}} hidden{{end}}>播放数据截图截止
+            <span class="settings-unit">结算日 <input type="time" name="playback_cutoff_clock" value="{{.Schedule.PlaybackCutoffClock}}"> 前</span>
+          </label>
+          <label data-schedule-modes="after_delay"{{if ne .Schedule.SettlementFrequency "after_delay"}} hidden{{end}}>播放数据截图截止
+            <span class="settings-unit">分配后 <input type="number" min="1" step="1" name="playback_cutoff_minutes" value="{{.Schedule.PlaybackCutoffMinutes}}"> 分钟内</span>
+          </label>
+          <label><span>逾期补交顺延<small>截图可补交。按时长结算时，一期等于等待时长，从补交时起算。</small></span>
+            <span class="settings-unit"><input type="number" min="1" max="1200" step="1" name="playback_deferral_periods" value="{{.Schedule.PlaybackDeferralPeriods}}"> 期</span>
+          </label>
+        </fieldset>
+      </section>
+    </div>
+  </form>
+</section>
+{{end}}
+
+{{define "settings-icon"}}<svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  {{if eq . "dispatch"}}<path d="m21 3-7 18-4-8-8-4 19-6ZM10 13 21 3"/>
+  {{else if eq . "creative"}}<path d="M13 20h8M4 15 16 3a2 2 0 0 1 4 4L8 19l-5 1 1-5ZM14 5l4 4"/>
+  {{else if eq . "settlement"}}<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-14 5h4"/>
+  {{else}}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>{{end}}
+</svg>{{end}}

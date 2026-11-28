@@ -7,6 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (handler *Handler) recordChoices(ctx *gin.Context, input notification.ChoiceBatch) (*httpx.NoData, error) {
+	return nil, handler.services.RecordChoices(ctx.Request.Context(), httpapi.CurrentUser(ctx), input)
+}
+
 type createFeedbackInput struct {
 	Body string `json:"body"`
 }

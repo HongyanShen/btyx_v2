@@ -31,11 +31,33 @@ type MarketingSettings struct {
 	PriceOverridden bool `json:"price_overridden,omitempty"`
 	// Online holds the value of the "online" field.
 	Online bool `json:"online,omitempty"`
+	// DailyLimit holds the value of the "daily_limit" field.
+	DailyLimit int `json:"daily_limit,omitempty"`
+	// CreativeLimit holds the value of the "creative_limit" field.
+	CreativeLimit int `json:"creative_limit,omitempty"`
+	// CreativeOnline holds the value of the "creative_online" field.
+	CreativeOnline bool `json:"creative_online,omitempty"`
 	// ExpiryMode holds the value of the "expiry_mode" field.
 	ExpiryMode enum.MarketingExpiryMode `json:"expiry_mode,omitempty"`
 	// ExpiryMinutes holds the value of the "expiry_minutes" field.
 	ExpiryMinutes int `json:"expiry_minutes,omitempty"`
-	selectValues  sql.SelectValues
+	// SettlementFrequency holds the value of the "settlement_frequency" field.
+	SettlementFrequency enum.SettlementFrequency `json:"settlement_frequency,omitempty"`
+	// SettlementWeekday holds the value of the "settlement_weekday" field.
+	SettlementWeekday int `json:"settlement_weekday,omitempty"`
+	// SettlementMonthDay holds the value of the "settlement_month_day" field.
+	SettlementMonthDay int `json:"settlement_month_day,omitempty"`
+	// SettlementClock holds the value of the "settlement_clock" field.
+	SettlementClock string `json:"settlement_clock,omitempty"`
+	// SettlementDelayMinutes holds the value of the "settlement_delay_minutes" field.
+	SettlementDelayMinutes int `json:"settlement_delay_minutes,omitempty"`
+	// PlaybackCutoffClock holds the value of the "playback_cutoff_clock" field.
+	PlaybackCutoffClock string `json:"playback_cutoff_clock,omitempty"`
+	// PlaybackCutoffMinutes holds the value of the "playback_cutoff_minutes" field.
+	PlaybackCutoffMinutes int `json:"playback_cutoff_minutes,omitempty"`
+	// PlaybackDeferralPeriods holds the value of the "playback_deferral_periods" field.
+	PlaybackDeferralPeriods int `json:"playback_deferral_periods,omitempty"`
+	selectValues            sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -45,11 +67,11 @@ func (*MarketingSettings) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case marketingsettings.FieldPriceFen:
 			values[i] = new(decimal.Decimal)
-		case marketingsettings.FieldPriceOverridden, marketingsettings.FieldOnline:
+		case marketingsettings.FieldPriceOverridden, marketingsettings.FieldOnline, marketingsettings.FieldCreativeOnline:
 			values[i] = new(sql.NullBool)
-		case marketingsettings.FieldExpiryMinutes:
+		case marketingsettings.FieldDailyLimit, marketingsettings.FieldCreativeLimit, marketingsettings.FieldExpiryMinutes, marketingsettings.FieldSettlementWeekday, marketingsettings.FieldSettlementMonthDay, marketingsettings.FieldSettlementDelayMinutes, marketingsettings.FieldPlaybackCutoffMinutes, marketingsettings.FieldPlaybackDeferralPeriods:
 			values[i] = new(sql.NullInt64)
-		case marketingsettings.FieldID, marketingsettings.FieldScope, marketingsettings.FieldExpiryMode:
+		case marketingsettings.FieldID, marketingsettings.FieldScope, marketingsettings.FieldExpiryMode, marketingsettings.FieldSettlementFrequency, marketingsettings.FieldSettlementClock, marketingsettings.FieldPlaybackCutoffClock:
 			values[i] = new(sql.NullString)
 		case marketingsettings.FieldCreatedAt, marketingsettings.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -110,6 +132,24 @@ func (_m *MarketingSettings) assignValues(columns []string, values []any) error 
 			} else if value.Valid {
 				_m.Online = value.Bool
 			}
+		case marketingsettings.FieldDailyLimit:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field daily_limit", values[i])
+			} else if value.Valid {
+				_m.DailyLimit = int(value.Int64)
+			}
+		case marketingsettings.FieldCreativeLimit:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field creative_limit", values[i])
+			} else if value.Valid {
+				_m.CreativeLimit = int(value.Int64)
+			}
+		case marketingsettings.FieldCreativeOnline:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field creative_online", values[i])
+			} else if value.Valid {
+				_m.CreativeOnline = value.Bool
+			}
 		case marketingsettings.FieldExpiryMode:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field expiry_mode", values[i])
@@ -121,6 +161,54 @@ func (_m *MarketingSettings) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field expiry_minutes", values[i])
 			} else if value.Valid {
 				_m.ExpiryMinutes = int(value.Int64)
+			}
+		case marketingsettings.FieldSettlementFrequency:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_frequency", values[i])
+			} else if value.Valid {
+				_m.SettlementFrequency = enum.SettlementFrequency(value.String)
+			}
+		case marketingsettings.FieldSettlementWeekday:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_weekday", values[i])
+			} else if value.Valid {
+				_m.SettlementWeekday = int(value.Int64)
+			}
+		case marketingsettings.FieldSettlementMonthDay:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_month_day", values[i])
+			} else if value.Valid {
+				_m.SettlementMonthDay = int(value.Int64)
+			}
+		case marketingsettings.FieldSettlementClock:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_clock", values[i])
+			} else if value.Valid {
+				_m.SettlementClock = value.String
+			}
+		case marketingsettings.FieldSettlementDelayMinutes:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_delay_minutes", values[i])
+			} else if value.Valid {
+				_m.SettlementDelayMinutes = int(value.Int64)
+			}
+		case marketingsettings.FieldPlaybackCutoffClock:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field playback_cutoff_clock", values[i])
+			} else if value.Valid {
+				_m.PlaybackCutoffClock = value.String
+			}
+		case marketingsettings.FieldPlaybackCutoffMinutes:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field playback_cutoff_minutes", values[i])
+			} else if value.Valid {
+				_m.PlaybackCutoffMinutes = int(value.Int64)
+			}
+		case marketingsettings.FieldPlaybackDeferralPeriods:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field playback_deferral_periods", values[i])
+			} else if value.Valid {
+				_m.PlaybackDeferralPeriods = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -176,11 +264,44 @@ func (_m *MarketingSettings) String() string {
 	builder.WriteString("online=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Online))
 	builder.WriteString(", ")
+	builder.WriteString("daily_limit=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DailyLimit))
+	builder.WriteString(", ")
+	builder.WriteString("creative_limit=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreativeLimit))
+	builder.WriteString(", ")
+	builder.WriteString("creative_online=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreativeOnline))
+	builder.WriteString(", ")
 	builder.WriteString("expiry_mode=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ExpiryMode))
 	builder.WriteString(", ")
 	builder.WriteString("expiry_minutes=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ExpiryMinutes))
+	builder.WriteString(", ")
+	builder.WriteString("settlement_frequency=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SettlementFrequency))
+	builder.WriteString(", ")
+	builder.WriteString("settlement_weekday=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SettlementWeekday))
+	builder.WriteString(", ")
+	builder.WriteString("settlement_month_day=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SettlementMonthDay))
+	builder.WriteString(", ")
+	builder.WriteString("settlement_clock=")
+	builder.WriteString(_m.SettlementClock)
+	builder.WriteString(", ")
+	builder.WriteString("settlement_delay_minutes=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SettlementDelayMinutes))
+	builder.WriteString(", ")
+	builder.WriteString("playback_cutoff_clock=")
+	builder.WriteString(_m.PlaybackCutoffClock)
+	builder.WriteString(", ")
+	builder.WriteString("playback_cutoff_minutes=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PlaybackCutoffMinutes))
+	builder.WriteString(", ")
+	builder.WriteString("playback_deferral_periods=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PlaybackDeferralPeriods))
 	builder.WriteByte(')')
 	return builder.String()
 }

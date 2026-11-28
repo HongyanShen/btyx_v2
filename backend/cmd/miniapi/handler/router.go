@@ -17,7 +17,7 @@ type Handler struct {
 }
 
 func NewRouter(services *business.Service, payments ...*wechatpay.Gateway) *gin.Engine {
-	router := httpapi.NewRouter(services.Runtime)
+	router := httpapi.NewRouter(services.Runtime, enum.AuditPlatformMiniapp)
 	handler := &Handler{
 		services: services,
 	}
@@ -54,6 +54,7 @@ func NewRouter(services *business.Service, payments ...*wechatpay.Gateway) *gin.
 	httpx.Register(protected, httpapi.FileRoutes(services.FilesService, enum.RoleUser)...)
 	httpx.Register(protected, httpapi.AssignmentRoutes(services.TaskService)...)
 	httpx.Register(protected, httpapi.WalletRoutes(services.WalletService)...)
+	httpx.Register(protected, handler.creativeRoutes()...)
 	httpx.Register(protected, httpapi.FeedbackRoutes(services.FeedbackService)...)
 	httpx.Register(protected, []httpx.Route{
 		{
@@ -140,6 +141,11 @@ func NewRouter(services *business.Service, payments ...*wechatpay.Gateway) *gin.
 			Method:  http.MethodGet,
 			Path:    "/notifications",
 			Handler: httpx.Adapt(handler.notifications),
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/notifications/subscriptions",
+			Handler: httpx.JSON(handler.recordChoices),
 		},
 		{
 			Method:  http.MethodPost,

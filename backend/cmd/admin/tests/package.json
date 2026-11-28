@@ -1,0 +1,23 @@
+{
+  "name": "baitu-yanxuan-admin-tests",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:browser": "node browser/smoke.mjs",
+    "format": "prettier --write browser *.test.ts vitest.config.ts \"../static/{app,api,components,modules,styles}/**/*.{js,css}\"",
+    "format:check": "prettier --check browser *.test.ts vitest.config.ts \"../static/{app,api,components,modules,styles}/**/*.{js,css}\""
+  },
+  "devDependencies": {
+    "@testing-library/dom": "10.4.2",
+    "@types/node": "26.6.6",
+    "jsdom": "31.0.1",
+    "playwright-core": "1.65.1",
+    "prettier": "3.10.1",
+    "typescript": "7.0.2",
+    "vite": "8.3.8",
+    "vitest": "5.1.0"
+  }
+}

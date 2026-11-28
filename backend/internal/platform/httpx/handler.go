@@ -2,6 +2,7 @@ package httpx
 
 import (
 	"errors"
+	"mime"
 	"net/http"
 
 	"baituber.cn/yanxuan/v2/internal/platform/app"
@@ -24,6 +25,12 @@ type NoData struct{}
 
 type FileResponse struct {
 	Path      string
+	Name      string
+	MediaType string
+}
+
+type DownloadResponse struct {
+	Data      []byte
 	Name      string
 	MediaType string
 }
@@ -53,7 +60,7 @@ func Adapt[T any](handler Handler[T]) gin.HandlerFunc {
 		if err != nil {
 			var statusError *StatusError
 			if errors.As(err, &statusError) {
-				logging.From(ctx.Request.Context()).Warn().
+				logging.Warn(ctx.Request.Context()).
 					Int("status", statusError.Status).
 					Msg("protocol request rejected")
 
@@ -73,6 +80,10 @@ func Adapt[T any](handler Handler[T]) gin.HandlerFunc {
 			ctx.Header("Content-Type", response.MediaType)
 			ctx.Header("Cache-Control", "private, no-store")
 			ctx.FileAttachment(response.Path, response.Name)
+		case DownloadResponse:
+			ctx.Header("Cache-Control", "private, no-store")
+			ctx.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": response.Name}))
+			ctx.Data(http.StatusOK, response.MediaType, response.Data)
 		case EmptyResponse:
 			ctx.Status(response.Status)
 		default:

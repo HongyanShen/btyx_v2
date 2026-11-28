@@ -3,22 +3,39 @@ package database
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"fmt"
 	"strings"
 	"time"
 
 	atlas "ariga.io/atlas/sql/schema"
 	"baituber.cn/yanxuan/v2/ent"
+	"baituber.cn/yanxuan/v2/ent/migrate"
 	_ "baituber.cn/yanxuan/v2/ent/runtime"
 	"baituber.cn/yanxuan/v2/internal/platform/config"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
+	"github.com/riverqueue/river/riverdriver/riverdatabasesql"
+	"github.com/riverqueue/river/rivermigrate"
 )
 
+//go:embed legacy_operator_grants.sql
+var legacyOperatorGrantMigration string
+
+//go:embed legacy_operator_grants.json
+var legacyOperatorGrantCatalog string
+
+//go:embed legacy_task_numbers.sql
+var legacyTaskNumbers string
+
+//go:embed legacy_counter_names.sql
+var legacyCounterNames string
+
 func Open(ctx context.Context, c config.Config) (*sql.DB, *ent.Client, error) {
-	db, err := sql.Open("postgres", c.DSN(true))
+	db, err := telemetry.OpenPostgres(c.DSN(true))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -65,18 +82,44 @@ func Migrate(ctx context.Context, c config.Config) error {
 		return err
 	}
 
-	_, client, err := Open(ctx, c)
+	if _, err := conn.ExecContext(ctx, fmt.Sprintf(legacyOperatorGrantMigration, c.Schema, pq.QuoteLiteral(legacyOperatorGrantCatalog))); err != nil {
+		return err
+	}
+
+	schemaDB, client, err := Open(ctx, c)
 	if err != nil {
 		return err
 	}
 
 	defer client.Close()
+	if _, err := schemaDB.ExecContext(ctx, legacyCounterNames); err != nil {
+		return err
+	}
+
+	if err := migrate.Create(ctx, client.Schema, []*schema.Table{migrate.TaskNumberCountersTable},
+		schema.WithHooks(legacyTimeHook(conn, c.Schema))); err != nil {
+		return err
+	}
+
+	if _, err := schemaDB.ExecContext(ctx, legacyTaskNumbers); err != nil {
+		return err
+	}
+
 	if err = client.Schema.Create(
 		ctx,
 		schema.WithDropIndex(true),
 		schema.WithDiffHook(keepUnrelatedIndexes),
 		schema.WithHooks(legacyTimeHook(conn, c.Schema), userDomainsHook(conn, c.Schema)),
 	); err != nil {
+		return err
+	}
+
+	migrator, err := rivermigrate.New(riverdatabasesql.New(schemaDB), &rivermigrate.Config{Schema: c.Schema})
+	if err != nil {
+		return err
+	}
+
+	if _, err = migrator.Migrate(ctx, rivermigrate.DirectionUp, nil); err != nil {
 		return err
 	}
 
@@ -88,6 +131,7 @@ func Migrate(ctx context.Context, c config.Config) error {
 	for _, table := range []string{
 		"ledger_entries",
 		"audit_events",
+		"audit_http_responses",
 		"task_versions",
 		"settlement_lines",
 		"settlement_batches",
@@ -143,7 +187,7 @@ func keepUnrelatedIndexes(next schema.Differ) schema.Differ {
 			allowed := table.Changes[:0]
 			for _, change := range table.Changes {
 				drop, dropping := change.(*atlas.DropIndex)
-				if !dropping || replacedIndex(table.T.Name, drop.I.Name) {
+				if !dropping || retiredIndex(table.T.Name, drop.I.Name) {
 					allowed = append(allowed, change)
 				}
 			}
@@ -155,9 +199,10 @@ func keepUnrelatedIndexes(next schema.Differ) schema.Differ {
 	})
 }
 
-func replacedIndex(table, name string) bool {
+func retiredIndex(table, name string) bool {
 	return table == "user_enrollments" && name == "user_enrollments_user_id_key" ||
-		table == "marketing_tags" && (name == "marketing_tags_name_key" || name == "marketing_tags_key_key")
+		table == "marketing_tags" && (name == "marketing_tags_name_key" || name == "marketing_tags_key_key") ||
+		table == "submissions" && name == "submission_platform_work_key"
 }
 
 func DropTest(ctx context.Context, c config.Config) error {

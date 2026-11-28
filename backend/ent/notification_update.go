@@ -10,6 +10,8 @@ import (
 
 	"baituber.cn/yanxuan/v2/ent/notification"
 	"baituber.cn/yanxuan/v2/ent/predicate"
+	"baituber.cn/yanxuan/v2/internal/domain/enum"
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -44,6 +46,89 @@ func (_u *NotificationUpdate) SetUserID(v string) *NotificationUpdate {
 func (_u *NotificationUpdate) SetNillableUserID(v *string) *NotificationUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// SetCard sets the "card" field.
+func (_u *NotificationUpdate) SetCard(v wxnotice.Card) *NotificationUpdate {
+	_u.mutation.SetCard(v)
+	return _u
+}
+
+// SetNillableCard sets the "card" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableCard(v *wxnotice.Card) *NotificationUpdate {
+	if v != nil {
+		_u.SetCard(*v)
+	}
+	return _u
+}
+
+// ClearCard clears the value of the "card" field.
+func (_u *NotificationUpdate) ClearCard() *NotificationUpdate {
+	_u.mutation.ClearCard()
+	return _u
+}
+
+// SetDeliveryState sets the "delivery_state" field.
+func (_u *NotificationUpdate) SetDeliveryState(v enum.DeliveryState) *NotificationUpdate {
+	_u.mutation.SetDeliveryState(v)
+	return _u
+}
+
+// SetNillableDeliveryState sets the "delivery_state" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableDeliveryState(v *enum.DeliveryState) *NotificationUpdate {
+	if v != nil {
+		_u.SetDeliveryState(*v)
+	}
+	return _u
+}
+
+// SetDeliveryReason sets the "delivery_reason" field.
+func (_u *NotificationUpdate) SetDeliveryReason(v string) *NotificationUpdate {
+	_u.mutation.SetDeliveryReason(v)
+	return _u
+}
+
+// SetNillableDeliveryReason sets the "delivery_reason" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableDeliveryReason(v *string) *NotificationUpdate {
+	if v != nil {
+		_u.SetDeliveryReason(*v)
+	}
+	return _u
+}
+
+// SetWechatCode sets the "wechat_code" field.
+func (_u *NotificationUpdate) SetWechatCode(v int) *NotificationUpdate {
+	_u.mutation.ResetWechatCode()
+	_u.mutation.SetWechatCode(v)
+	return _u
+}
+
+// SetNillableWechatCode sets the "wechat_code" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableWechatCode(v *int) *NotificationUpdate {
+	if v != nil {
+		_u.SetWechatCode(*v)
+	}
+	return _u
+}
+
+// AddWechatCode adds value to the "wechat_code" field.
+func (_u *NotificationUpdate) AddWechatCode(v int) *NotificationUpdate {
+	_u.mutation.AddWechatCode(v)
+	return _u
+}
+
+// SetChoiceID sets the "choice_id" field.
+func (_u *NotificationUpdate) SetChoiceID(v string) *NotificationUpdate {
+	_u.mutation.SetChoiceID(v)
+	return _u
+}
+
+// SetNillableChoiceID sets the "choice_id" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableChoiceID(v *string) *NotificationUpdate {
+	if v != nil {
+		_u.SetChoiceID(*v)
 	}
 	return _u
 }
@@ -145,7 +230,20 @@ func (_u *NotificationUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *NotificationUpdate) check() error {
+	if v, ok := _u.mutation.DeliveryState(); ok {
+		if err := notification.DeliveryStateValidator(v); err != nil {
+			return &ValidationError{Name: "delivery_state", err: fmt.Errorf(`ent: validator failed for field "Notification.delivery_state": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(notification.Table, notification.Columns, sqlgraph.NewFieldSpec(notification.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -159,6 +257,27 @@ func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(notification.FieldUserID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Card(); ok {
+		_spec.SetField(notification.FieldCard, field.TypeJSON, value)
+	}
+	if _u.mutation.CardCleared() {
+		_spec.ClearField(notification.FieldCard, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DeliveryState(); ok {
+		_spec.SetField(notification.FieldDeliveryState, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.DeliveryReason(); ok {
+		_spec.SetField(notification.FieldDeliveryReason, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.WechatCode(); ok {
+		_spec.SetField(notification.FieldWechatCode, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWechatCode(); ok {
+		_spec.AddField(notification.FieldWechatCode, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ChoiceID(); ok {
+		_spec.SetField(notification.FieldChoiceID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(notification.FieldTitle, field.TypeString, value)
@@ -208,6 +327,89 @@ func (_u *NotificationUpdateOne) SetUserID(v string) *NotificationUpdateOne {
 func (_u *NotificationUpdateOne) SetNillableUserID(v *string) *NotificationUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// SetCard sets the "card" field.
+func (_u *NotificationUpdateOne) SetCard(v wxnotice.Card) *NotificationUpdateOne {
+	_u.mutation.SetCard(v)
+	return _u
+}
+
+// SetNillableCard sets the "card" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableCard(v *wxnotice.Card) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetCard(*v)
+	}
+	return _u
+}
+
+// ClearCard clears the value of the "card" field.
+func (_u *NotificationUpdateOne) ClearCard() *NotificationUpdateOne {
+	_u.mutation.ClearCard()
+	return _u
+}
+
+// SetDeliveryState sets the "delivery_state" field.
+func (_u *NotificationUpdateOne) SetDeliveryState(v enum.DeliveryState) *NotificationUpdateOne {
+	_u.mutation.SetDeliveryState(v)
+	return _u
+}
+
+// SetNillableDeliveryState sets the "delivery_state" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableDeliveryState(v *enum.DeliveryState) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetDeliveryState(*v)
+	}
+	return _u
+}
+
+// SetDeliveryReason sets the "delivery_reason" field.
+func (_u *NotificationUpdateOne) SetDeliveryReason(v string) *NotificationUpdateOne {
+	_u.mutation.SetDeliveryReason(v)
+	return _u
+}
+
+// SetNillableDeliveryReason sets the "delivery_reason" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableDeliveryReason(v *string) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetDeliveryReason(*v)
+	}
+	return _u
+}
+
+// SetWechatCode sets the "wechat_code" field.
+func (_u *NotificationUpdateOne) SetWechatCode(v int) *NotificationUpdateOne {
+	_u.mutation.ResetWechatCode()
+	_u.mutation.SetWechatCode(v)
+	return _u
+}
+
+// SetNillableWechatCode sets the "wechat_code" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableWechatCode(v *int) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetWechatCode(*v)
+	}
+	return _u
+}
+
+// AddWechatCode adds value to the "wechat_code" field.
+func (_u *NotificationUpdateOne) AddWechatCode(v int) *NotificationUpdateOne {
+	_u.mutation.AddWechatCode(v)
+	return _u
+}
+
+// SetChoiceID sets the "choice_id" field.
+func (_u *NotificationUpdateOne) SetChoiceID(v string) *NotificationUpdateOne {
+	_u.mutation.SetChoiceID(v)
+	return _u
+}
+
+// SetNillableChoiceID sets the "choice_id" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableChoiceID(v *string) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetChoiceID(*v)
 	}
 	return _u
 }
@@ -322,7 +524,20 @@ func (_u *NotificationUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *NotificationUpdateOne) check() error {
+	if v, ok := _u.mutation.DeliveryState(); ok {
+		if err := notification.DeliveryStateValidator(v); err != nil {
+			return &ValidationError{Name: "delivery_state", err: fmt.Errorf(`ent: validator failed for field "Notification.delivery_state": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notification, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(notification.Table, notification.Columns, sqlgraph.NewFieldSpec(notification.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -353,6 +568,27 @@ func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notificati
 	}
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(notification.FieldUserID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Card(); ok {
+		_spec.SetField(notification.FieldCard, field.TypeJSON, value)
+	}
+	if _u.mutation.CardCleared() {
+		_spec.ClearField(notification.FieldCard, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DeliveryState(); ok {
+		_spec.SetField(notification.FieldDeliveryState, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.DeliveryReason(); ok {
+		_spec.SetField(notification.FieldDeliveryReason, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.WechatCode(); ok {
+		_spec.SetField(notification.FieldWechatCode, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWechatCode(); ok {
+		_spec.AddField(notification.FieldWechatCode, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ChoiceID(); ok {
+		_spec.SetField(notification.FieldChoiceID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(notification.FieldTitle, field.TypeString, value)

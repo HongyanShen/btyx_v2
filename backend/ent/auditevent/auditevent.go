@@ -25,6 +25,14 @@ const (
 	FieldReferenceID = "reference_id"
 	// FieldReason holds the string denoting the reason field in the database.
 	FieldReason = "reason"
+	// FieldEndpoint holds the string denoting the endpoint field in the database.
+	FieldEndpoint = "endpoint"
+	// FieldRequestID holds the string denoting the request_id field in the database.
+	FieldRequestID = "request_id"
+	// FieldPlatform holds the string denoting the platform field in the database.
+	FieldPlatform = "platform"
+	// FieldParameters holds the string denoting the parameters field in the database.
+	FieldParameters = "parameters"
 	// FieldSubmittedPhone holds the string denoting the submitted_phone field in the database.
 	FieldSubmittedPhone = "submitted_phone"
 	// FieldSubmittedWechatCipher holds the string denoting the submitted_wechat_cipher field in the database.
@@ -49,6 +57,10 @@ var Columns = []string{
 	FieldAction,
 	FieldReferenceID,
 	FieldReason,
+	FieldEndpoint,
+	FieldRequestID,
+	FieldPlatform,
+	FieldParameters,
 	FieldSubmittedPhone,
 	FieldSubmittedWechatCipher,
 	FieldSubmittedMaskedName,
@@ -72,6 +84,12 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultReason holds the default value on creation for the "reason" field.
 	DefaultReason string
+	// DefaultEndpoint holds the default value on creation for the "endpoint" field.
+	DefaultEndpoint string
+	// RequestIDValidator is a validator for the "request_id" field. It is called by the builders before save.
+	RequestIDValidator func(string) error
+	// DefaultParameters holds the default value on creation for the "parameters" field.
+	DefaultParameters string
 	// DefaultSubmittedPhone holds the default value on creation for the "submitted_phone" field.
 	DefaultSubmittedPhone string
 	// DefaultSubmittedWechatCipher holds the default value on creation for the "submitted_wechat_cipher" field.
@@ -93,10 +111,20 @@ var (
 // ActionValidator is a validator for the "action" field enum values. It is called by the builders before save.
 func ActionValidator(a enum.AuditAction) error {
 	switch a {
-	case "enrollment.apply", "enrollment.approved", "enrollment.rejected", "enrollment.portrait_updated", "marketing_tag.create", "marketing_tag.rename", "marketing_tag.delete", "user.block", "user.profile_update", "user.phone_verify", "user.identity_verify", "user.identity_verify_failed", "enrollment.identity_verify", "enrollment.identity_verify_failed", "agreement.consent", "agreement.publish", "task.create", "task.publish_version", "task.visibility", "task.claim", "task.assigned", "task.revoke", "task.reissue", "task.expire", "marketing.settings", "submission.submit", "submission.approved", "submission.rejected", "submission.waive", "settlement.credit", "withdrawal.request", "ledger.adjust", "content.create", "content.tags_updated", "feedback.reply", "operator.create", "operator.update":
+	case "request.failed", "creative.create", "creative.visibility", "creative.claim", "creative.submit", "creative.review", "creative.link", "creative.evidence", "creative.reward", "enrollment.apply", "enrollment.approved", "enrollment.rejected", "enrollment.portrait_updated", "marketing_tag.create", "marketing_tag.rename", "marketing_tag.delete", "user.block", "user.profile_update", "user.phone_verify", "user.identity_verify", "user.identity_verify_failed", "enrollment.identity_verify", "enrollment.identity_verify_failed", "agreement.consent", "agreement.publish", "task.create", "task.publish_version", "task.visibility", "task.claim", "task.assigned", "task.revoke", "task.reissue", "task.expire", "marketing.settings", "submission.submit", "submission.approved", "submission.rejected", "submission.waive", "settlement.credit", "withdrawal.request", "ledger.adjust", "content.create", "content.tags_updated", "feedback.reply", "operator.create", "operator.update":
 		return nil
 	default:
 		return fmt.Errorf("auditevent: invalid enum value for action field: %q", a)
+	}
+}
+
+// PlatformValidator is a validator for the "platform" field enum values. It is called by the builders before save.
+func PlatformValidator(pl enum.AuditPlatform) error {
+	switch pl {
+	case "admin", "miniapp":
+		return nil
+	default:
+		return fmt.Errorf("auditevent: invalid enum value for platform field: %q", pl)
 	}
 }
 
@@ -131,6 +159,26 @@ func ByReferenceID(opts ...sql.OrderTermOption) OrderOption {
 // ByReason orders the results by the reason field.
 func ByReason(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldReason, opts...).ToFunc()
+}
+
+// ByEndpoint orders the results by the endpoint field.
+func ByEndpoint(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEndpoint, opts...).ToFunc()
+}
+
+// ByRequestID orders the results by the request_id field.
+func ByRequestID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRequestID, opts...).ToFunc()
+}
+
+// ByPlatform orders the results by the platform field.
+func ByPlatform(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPlatform, opts...).ToFunc()
+}
+
+// ByParameters orders the results by the parameters field.
+func ByParameters(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldParameters, opts...).ToFunc()
 }
 
 // BySubmittedPhone orders the results by the submitted_phone field.

@@ -1,84 +1,220 @@
-.data-entry {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  background: #fff5e7;
-  border: 1rpx solid #f1d7ae;
-  color: #865019;
-  text-align: left;
-  line-height: 1.5;
+.work-page {
+  padding: 24rpx 28rpx 48rpx;
 }
 
-.data-entry-title {
+.work-notice {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  width: 100%;
+  min-height: 88rpx;
+  margin-bottom: 24rpx;
+  padding: 18rpx 24rpx;
+  border: 1px solid #e2dff0;
+  border-radius: 24rpx;
+  background: #f6f5fa;
+  color: #6b6494;
+  font-size: 25rpx;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.work-notice-pending {
+  border-color: #f5d08a;
+  background: #fff6e6;
+  color: #8a4b12;
+}
+
+.work-subscribe {
+  border-color: #bce6cb;
+  background: #eef9f2;
+  color: #156b37;
+}
+
+.work-notice-action {
+  flex: none;
   font-weight: 700;
 }
 
 .work-tabs {
+  margin-bottom: 20rpx;
   white-space: nowrap;
-  margin-bottom: 22rpx;
+}
+
+.work-tabs-inner {
+  display: inline-flex;
+  gap: 12rpx;
+  padding-bottom: 16rpx;
 }
 
 .work-tab {
-  display: inline-block;
-  margin-right: 12rpx;
-  padding: 0 22rpx;
-  line-height: 62rpx;
-  font-size: 25rpx;
-  background: #eeeaf6;
-  color: #6b6285;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 72rpx;
+  padding: 10rpx 22rpx;
+  border: 1px solid #e5e5ea;
+  border-radius: 28rpx;
+  background: #fff;
+  color: #555;
+  font-size: 24rpx;
+  line-height: 1.35;
+  white-space: nowrap;
 }
 
 .work-tab-active {
-  background: #7b72aa;
+  border-color: #8b82be;
+  background: #8b82be;
   color: #fff;
   font-weight: 700;
 }
 
 .work-card {
-  border-radius: 30rpx;
-  padding: 23rpx;
+  margin-bottom: 20rpx;
+  padding: 24rpx;
+  border-radius: 32rpx;
+  background: #fff;
 }
 
 .work-card-header,
 .work-card-footer {
   display: flex;
   align-items: center;
-  gap: 15rpx;
+  gap: 20rpx;
+}
+
+.work-card-title {
+  color: #2d2654;
+  font-size: 29rpx;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .work-icon {
-  display: grid;
-  place-items: center;
-  width: 74rpx;
-  height: 74rpx;
-  background: linear-gradient(135deg, #b3aacf, #8377ad);
-  border-radius: 22rpx;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b5acd6, #7b72aa);
 }
 
 .work-icon image {
-  width: 48rpx;
-  height: 48rpx;
+  width: 40rpx;
+  height: 40rpx;
 }
 
-.work-card-header .badge {
+.work-meta {
+  margin-top: 4rpx;
+  color: #9d97b8;
+  font-size: 23rpx;
+  line-height: 1.45;
+}
+
+.work-badge {
+  display: inline-block;
   flex: none;
-  margin: 0;
+  padding: 4rpx 12rpx;
+  border-radius: 10rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.work-countdown {
+  color: #bf3a00;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.work-badge-brand {
+  background: #f0edf8;
+  color: #3b3568;
+}
+
+.work-badge-warning {
+  background: #fff6db;
+  color: #b07800;
+}
+
+.work-badge-success {
+  background: #e6f7ec;
+  color: #1e9e50;
+}
+
+.work-badge-danger {
+  background: #fdecec;
+  color: #d33;
+}
+
+.work-badge-neutral {
+  background: #f0f0f2;
+  color: #666;
+}
+
+.work-source-assigned,
+.work-source-reissued {
+  margin-left: 8rpx;
+  background: #fbf6f9;
+  color: #3b3568;
+}
+
+.work-source-reissued {
+  background: #fff1d6;
+  color: #b06200;
 }
 
 .work-card-footer {
-  margin-top: 16rpx;
-  padding-top: 15rpx;
-  border-top: 1rpx solid #f0edf7;
-}
-
-.work-arrow {
-  color: #796caa;
-  font-size: 35rpx;
-}
-
-.work-rejection {
-  margin-top: 12rpx;
-  color: #a34450;
-  white-space: pre-line;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1px dashed #e2dff0;
+  color: #6b6494;
   font-size: 24rpx;
+  line-height: 1.45;
+  white-space: pre-line;
 }
+
+.work-pill {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  padding: 12rpx 28rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(135deg, #8b82be, #7b72aa);
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.work-pill-quiet {
+  background: #e2dff0;
+  color: #6b6494;
+}
+
+.work-empty {
+  padding: 80rpx 20rpx;
+  color: #9d97b8;
+  font-size: 26rpx;
+  text-align: center;
+}
+
+.work-empty image {
+  display: block;
+  width: 128rpx;
+  height: 128rpx;
+  margin: 0 auto 20rpx;
+}
+
+.work-empty-button {
+  margin-top: 24rpx;
+}
+
+.creative-work-entry{padding:24rpx 32rpx;background:white;color:#453967;font-weight:600}

@@ -1,7 +1,11 @@
 package submission
 
 import (
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 	"context"
+	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"baituber.cn/yanxuan/v2/ent"
@@ -19,14 +23,14 @@ func (s *Service) ReviewAtRevision(ctx context.Context, actorID, id string, inpu
 			Revision: input.Revision,
 		},
 	}
-	return s.reviewAtRevisions(ctx, actorID, id, targets, input.Approved, input.Reason)
+	return s.reviewAtRevisions(ctx, actorID, id, targets, input.Approved, input.Reason, false)
 }
 
-func (s *Service) RejectAtRevisions(ctx context.Context, actorID, id string, targets []ReviewRevision, reason string) error {
-	return s.reviewAtRevisions(ctx, actorID, id, targets, false, reason)
+func (s *Service) ReviewAtRevisions(ctx context.Context, actorID, id string, targets []ReviewRevision, approved bool, reason string) error {
+	return s.reviewAtRevisions(ctx, actorID, id, targets, approved, reason, approved)
 }
 
-func (s *Service) reviewAtRevisions(ctx context.Context, actorID, id string, targets []ReviewRevision, approved bool, reason string) error {
+func (s *Service) reviewAtRevisions(ctx context.Context, actorID, id string, targets []ReviewRevision, approved bool, reason string, requireAllPending bool) error {
 	if len(targets) == 0 {
 		return app.Invalid("请选择发布平台")
 	}
@@ -68,6 +72,23 @@ func (s *Service) reviewAtRevisions(ctx context.Context, actorID, id string, tar
 			return false, app.WrapMissing(err)
 		}
 
+		if requireAllPending {
+			unreviewed, err := tx.Submission.Query().
+				Where(
+					submission.AssignmentIDEQ(id),
+					submission.StatusEQ(enum.SubmissionPending),
+					submission.PlatformNotIn(slices.Collect(maps.Keys(seen))...),
+				).
+				Exist(ctx)
+			if err != nil {
+				return false, err
+			}
+
+			if unreviewed {
+				return false, app.Conflict("待审核平台已变化，请刷新后重新审核")
+			}
+		}
+
 		changed := false
 		for _, target := range targets {
 			record, err := tx.Submission.Query().
@@ -106,11 +127,20 @@ func (s *Service) reviewAtRevisions(ctx context.Context, actorID, id string, tar
 			}
 
 			message := string(target.Platform) + "：" + string(status) + " " + reason
-			if err := app.Notify(ctx, tx, assignmentRecord.UserID, "发布审核结果", message, id); err != nil {
+			result := "已驳回"
+			remark := reason
+			if approved {
+				result = "已通过"
+				remark = "请按要求提交播放数据"
+			}
+
+			card := wxnotice.TaskStatus(wxnotice.Platform(target.Platform)+"发布链接", result, remark, wxnotice.Detail(id))
+			if err := s.Notify(ctx, tx, assignmentRecord.UserID, "发布审核结果", message, id, card); err != nil {
 				return false, err
 			}
 
-			if err := app.Audit(ctx, tx, actorID, auditAction, record.ID, reason); err != nil {
+			if err := app.Audit(ctx, tx, actorID, auditAction, record.ID, reason,
+				fmt.Sprintf("平台：%s；提交修订号：%d", target.Platform, target.Revision)); err != nil {
 				return false, err
 			}
 

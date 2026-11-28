@@ -1,0 +1,118 @@
+.month-picker {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-width: 100%;
+  background: #ededf0;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.month-picker > button {
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.month-picker > button:hover {
+  background: #f8f7fb;
+  color: #66578d;
+}
+
+.month-picker > button[aria-pressed="true"],
+.month-picker > .month-picker-trigger[data-selected="true"] {
+  background: white;
+  color: #66578d;
+  font-weight: 700;
+}
+
+.month-picker > .month-picker-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #66578d;
+}
+
+.month-picker > .month-picker-trigger[aria-expanded="true"] {
+  background: #e4dff2;
+}
+
+.month-picker-chevron {
+  font-size: 9px;
+}
+
+.month-picker-trigger[aria-expanded="true"] .month-picker-chevron {
+  transform: rotate(180deg);
+}
+
+.month-picker-popup.ant-popover-container {
+  border: 1px solid #e7e2f0;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 20px #2d26541c;
+}
+
+.month-picker-panel {
+  width: min(248px, calc(100vw - 56px));
+  color: #2d2654;
+}
+
+.month-picker-year {
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0edf5;
+  text-align: center;
+}
+
+.month-picker-panel button {
+  border: 0;
+  border-radius: 7px;
+  min-height: 34px;
+  background: white;
+  color: #4d4569;
+  cursor: pointer;
+}
+
+.month-picker-panel button:hover:enabled {
+  background: #f5f2fa;
+}
+
+.month-picker-panel button:disabled {
+  color: #a69fb5;
+  cursor: default;
+}
+
+.month-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.month-picker-grid button[aria-pressed="true"] {
+  background: #ede7f7;
+  color: #514184;
+  font-weight: 700;
+}
+
+.month-picker > button:focus-visible,
+.month-picker-panel button:focus-visible {
+  outline: 2px solid #8b82be;
+  outline-offset: -2px;
+}
+
+@media (max-width: 380px) {
+  .month-picker > button {
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+}

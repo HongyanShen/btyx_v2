@@ -1,0 +1,29 @@
+{{define "audits"}}
+<section class="page server-page">
+  <div class="page-heading"><h2>操作审计</h2></div>
+  <form class="audit-filters" method="get" action="/audits" hx-get="/audits" hx-target="#admin-workspace" hx-swap="outerHTML" hx-push-url="true" hx-indicator="#admin-loading" hx-sync="#admin-workspace:replace">
+    <label>操作人名字<input type="search" name="actor_name" value="{{.ActorName}}" placeholder="运营账号或用户昵称"></label>
+    <label><span id="audit-platform-label">平台</span><select name="platform" aria-labelledby="audit-platform-label"><option value="">全部平台</option><option value="miniapp" {{if eq .Platform "miniapp"}}selected{{end}}>小程序</option><option value="admin" {{if eq .Platform "admin"}}selected{{end}}>管理后台</option></select></label>
+    <label><span id="audit-endpoint-label">接口</span><select name="endpoint" aria-labelledby="audit-endpoint-label"><option value="">全部接口</option>{{range .Endpoints}}<option value="{{.}}" {{if eq $.Endpoint .}}selected{{end}}>{{.}}</option>{{end}}<option value="unrecorded" {{if eq .Endpoint "unrecorded"}}selected{{end}}>未记录接口</option></select></label>
+    <label>开始时间（北京时间）<admin-datetime><input type="datetime-local" name="start" value="{{.Start}}"></admin-datetime></label>
+    <label>结束时间（北京时间）<admin-datetime><input type="datetime-local" name="end" value="{{.End}}"></admin-datetime></label>
+    <button class="server-button server-primary" type="submit">查询</button>
+    <a class="server-button" href="/audits" hx-get="/audits" hx-target="#admin-workspace" hx-push-url="true">重置</a>
+  </form>
+  {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{else}}
+  <div class="ant-card server-card"><div class="ant-card-body">
+    <div class="ant-table-wrapper server-table-scroll" tabindex="0" role="region" aria-label="操作审计表格">
+      <table class="ant-table server-table audit-table">
+        <thead class="ant-table-thead"><tr><th scope="col">操作</th><th scope="col">操作人</th><th scope="col">平台</th><th scope="col">接口结果</th><th scope="col">原因 / 备注</th><th scope="col">关联编号</th><th scope="col">时间</th></tr></thead>
+        <tbody class="ant-table-tbody">
+          {{range .Rows}}
+            <tr><td><span class="server-tag">{{.Action}}</span></td><td>{{.Actor}}</td><td>{{.Platform}}</td><td>{{if .HTTPStatus}}{{if lt .HTTPStatus 400}}<span class="server-tag server-tag-green">成功</span>{{else}}<span class="server-tag audit-result-failure">失败</span>{{end}} HTTP {{.HTTPStatus}}{{else}}未记录{{end}}</td><td>{{.Reason}}</td><td class="server-ellipsis" title="{{.Ref}}">{{.Ref}}</td><td>{{.Date}}</td></tr>
+          {{else}}<tr><td colspan="7" class="server-empty">没有符合条件的审计记录</td></tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+    {{template "pagination" .Pager}}
+  </div></div>
+  {{end}}
+</section>
+{{end}}

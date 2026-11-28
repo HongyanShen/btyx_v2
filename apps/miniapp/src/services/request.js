@@ -46,4 +46,4 @@ function newKey() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
 }
 
-module.exports = { request, post, newKey, tokenKey };
+module.exports = { request, authenticatedRequest, post, newKey, tokenKey };

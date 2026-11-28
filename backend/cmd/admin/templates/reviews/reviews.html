@@ -1,0 +1,45 @@
+{{define "reviews"}}
+<section class="page server-page workspace-page">
+  <div class="page-heading"><div><h2>营销分发 · 发布链接审核</h2><span class="ant-typography-secondary">核对各平台的发布内容、分发语和必带 TAG。驳回原因会在分发员的小程序中显示。</span></div></div>
+  <form class="marketing-filters review-filters" aria-label="审核筛选" action="/reviews" method="get" hx-get="/reviews" hx-trigger="submit, change" hx-target="#admin-workspace" hx-indicator="#admin-loading" hx-sync="#admin-workspace:replace" hx-push-url="true">
+    <div class="marketing-filter-field"><label for="publish-review-status">状态</label><select id="publish-review-status" name="status"><option value="">全部状态</option>{{range .Statuses}}<option value="{{.Key}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select></div>
+    <div class="marketing-filter-field"><label for="publish-review-filter-platform">发布平台</label><select id="publish-review-filter-platform" name="platform"><option value="">全部平台</option>{{range .Platforms}}<option value="{{.Key}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select></div>
+    <button class="server-button ant-btn" type="submit"><span class="review-refresh-icon" aria-hidden="true">{{template "reload-icon" .}}</span><span>刷新</span></button>
+  </form>
+  <div class="marketing-table-scroll" tabindex="0" role="region" aria-label="发布审核列表，可横向滚动">
+  <table class="marketing-table publish-review-table" aria-label="发布链接审核">
+    <colgroup><col><col><col><col><col><col><col><col></colgroup>
+    <thead><tr><th scope="col">任务编号</th><th scope="col">类型</th><th scope="col">任务</th><th scope="col">分发员</th><th scope="col">链接</th><th scope="col">提交</th><th scope="col">状态</th><th scope="col">操作</th></tr></thead>
+    <tbody>
+      {{$pager := .Pager}}
+      {{range .Rows}}
+      <tr>
+        <td class="marketing-id">{{with .TaskCode}}{{.}}{{else}}—{{end}}</td><td><span class="server-tag ant-tag platform-tag publish-review-badge">营销分发</span></td>
+        <td>{{$url := reviewLink $pager "" "" "" .ID}}<a class="publish-review-task" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#review-drawer-slot" data-open-server-dialog>{{.Title}}</a>
+          {{if ne .Source "claim"}}<div class="review-note">{{.SourceText}}</div>{{end}}</td>
+        {{/* 保留昵称、分隔符及联系方式各自的文字节点，使中英文混排时的换行和字形位置与原版一致。 */}}
+        <td>{{if .Owner}}{{$url := reviewLink $pager .Owner.ID "person" "" ""}}<a class="publish-review-person" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#review-dialog-slot" data-open-server-dialog>{{.OwnerName}}</a><div class="review-note">{{if .Owner.Nickname}}{{.Owner.Nickname}}{{else}}微信用户{{end}}{{textBoundary}} ·{{textBoundary}} {{textBoundary}}{{if .Owner.Wechat}}微信号 {{.Owner.Wechat}}{{else}}微信号未填{{end}}</div>{{else}}<span class="review-note">分发员</span>{{end}}</td>
+        <td>{{range .Results}}<div class="publish-review-link">{{.PlatformName}} {{if .Link}}<a href="{{.Link}}" target="_blank" rel="noreferrer">{{.URL}}</a>{{else}}<span>{{.URL}}</span>{{end}}</div>{{else}}<span class="review-note">尚未提交</span>{{end}}</td>
+        <td>{{if .LatestISO}}<time datetime="{{.LatestISO}}" title="{{.LatestISO}}">{{.Latest}}</time>{{else}}<span class="review-note">—</span>{{end}}</td>
+        <td>{{if .Results}}<div class="publish-review-lines">
+          {{if .Uniform}}{{with index .Results 0}}<div>{{template "review-submission-badge" .}}{{if .Reason}}<div class="review-note">原因：{{.Reason}}</div>{{end}}</div>{{end}}
+          {{else}}{{range .Results}}<div><span class="publish-review-platform-name">{{.PlatformName}}</span>{{template "review-submission-badge" .}}{{if .Reason}}<div class="review-note">原因：{{.Reason}}</div>{{end}}</div>{{end}}{{end}}
+          {{if eq .Status "pending_settlement"}}<span class="review-note">待结算</span>{{end}}
+        </div>{{else}}<span class="server-tag ant-tag publish-review-badge">{{.StatusText}}</span>{{end}}</td>
+        <td><div class="publish-review-actions">
+          {{if .CanReview}}{{$url := reviewLink $pager .ID "approve" "" ""}}<a class="server-button server-primary ant-btn-sm ant-btn-primary" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#review-dialog-slot" data-open-server-dialog><span>通过</span></a>
+          {{$reject := reviewLink $pager .ID "reject" "" ""}}<a class="server-button server-button-danger ant-btn-sm ant-btn-dangerous" role="button" href="{{$reject}}" hx-get="{{$reject}}" hx-target="#review-dialog-slot" data-open-server-dialog><span>驳回</span></a>{{end}}
+          {{if .CanFlag}}{{$url := reviewLink $pager .ID "flag" "" ""}}<a class="server-button ant-btn-sm publish-flag-button" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#review-dialog-slot" data-open-server-dialog><span>违规 / 限流</span></a>{{end}}
+        </div></td>
+      </tr>
+      {{else}}<tr><td colspan="8" class="marketing-empty-cell">没有符合筛选的审核记录</td></tr>{{end}}
+    </tbody>
+  </table>
+  </div>
+  {{template "pagination" .Pager}}
+  <div id="review-drawer-slot">{{with .Drawer}}{{template "review-drawer" .}}{{end}}</div>
+  <div id="review-dialog-slot">{{with .Dialog}}{{template "review-dialog" .}}{{end}}{{with .Person}}{{template "distributor-dialog" .}}{{end}}</div>
+  {{template "playback-dialog" .}}
+</section>
+{{end}}
+{{define "review-submission-badge"}}<span class="server-tag ant-tag publish-review-badge is-{{.Color}}">{{.StatusText}}</span>{{end}}

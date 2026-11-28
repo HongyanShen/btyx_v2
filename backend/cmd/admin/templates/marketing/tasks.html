@@ -1,0 +1,57 @@
+{{define "marketing-tasks"}}
+<section class="page server-page workspace-page marketing-page" data-marketing-page data-allow-local="{{.CanReadLocal}}">
+  <div class="page-heading"><div><h2>营销分发 · 任务管理</h2></div></div>
+  {{if .LegacySettings}}{{template "marketing-settings" .}}{{end}}
+  <section class="marketing-pool" aria-labelledby="marketing-pool-heading">
+    <div class="marketing-section-heading"><h4 id="marketing-pool-heading" class="ant-typography">营销内容</h4><span class="ant-typography-secondary">一条内容就是一个任务，同一条只给一个人。状态下面的小圆点显示当前进度（拿内容 → 发布 → 交链接 → 审核 → 结算）。前两步由分发员在小程序确认，交了发布链接后系统才有凭据。</span></div>
+    {{if .CanCreate}}{{$url := marketingLink .Filter "" "new"}}<div class="marketing-toolbar"><a class="ant-btn server-button server-primary" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#marketing-dialog-slot" data-open-server-dialog><span aria-hidden="true">＋</span> 上传营销内容</a></div>{{end}}
+    <form action="/tasks" method="get" class="marketing-filters" hx-get="/tasks" hx-trigger="submit, change" hx-target="#admin-workspace" hx-indicator="#admin-loading" hx-sync="#admin-workspace:replace" hx-push-url="true" data-marketing-filters>
+      <input type="hidden" name="state" value="{{.Filter.State}}">
+      <div class="marketing-filter-field"><label for="marketing-task-code">任务编号</label><input type="search" id="marketing-task-code" name="task_code" value="{{.Filter.Code}}" placeholder="输入编号或后缀"></div>
+      <div class="marketing-filter-field"><label for="marketing-filter-artist">艺人</label><select name="artist" id="marketing-filter-artist"><option value="">全部艺人</option>{{$artist := .Filter.Artist}}{{range .Artists}}<option value="{{.}}"{{if eq . $artist}} selected{{end}}>{{.}}</option>{{end}}</select></div>
+      <div class="marketing-filter-field"><label for="marketing-filter-date">上传日期</label><select id="marketing-filter-date" name="date_mode">{{range .Dates}}<option value="{{.Key}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select></div>
+      {{if eq .Filter.Date "pick"}}<input type="date" name="picked" aria-label="指定上传日期" value="{{.Filter.Picked}}">{{end}}
+      <div class="marketing-status-filter"><span>状态</span><div role="group" aria-label="按状态筛选">{{range .States}}<button type="submit" data-marketing-state="{{.Text}}" aria-pressed="{{.Current}}">{{.Text}} {{.Count}}</button>{{end}}</div></div>
+    </form>
+    {{template "marketing-pool-results" .}}
+  </section>
+  <div id="marketing-dialog-slot">{{with .Dialog}}{{template "marketing-dialog" .}}{{end}}</div>
+  {{template "marketing-gallery-dialog" .}}
+</section>
+{{end}}
+{{define "marketing-pool-results"}}
+{{$current := marketingLink .Filter "" ""}}
+<div id="marketing-pool-results" hx-get="{{$current}}" hx-trigger="every 10s" hx-target="this" hx-swap="outerHTML" hx-sync="this:drop" hx-disinherit="hx-swap hx-sync" data-marketing-poll>
+  <div class="marketing-table-scroll" tabindex="0" role="region" aria-label="横向滚动查看营销内容">
+    <table class="marketing-table marketing-pool-table" aria-label="营销内容">
+      <colgroup><col style="width:90px"><col style="width:58px"><col style="width:104px"><col style="width:14%"><col style="width:88px"><col><col style="width:7%"><col style="width:10%"><col style="width:8%"><col style="width:188px"></colgroup>
+      <thead><tr><th scope="col">任务编号</th><th scope="col">艺人</th><th scope="col">类型 / 平台</th><th scope="col">标题</th><th scope="col">内容预览</th><th scope="col">内容（分发语 / TAG）</th><th scope="col">标签</th><th scope="col">状态</th><th scope="col">分发员</th><th scope="col">操作</th></tr></thead>
+      <tbody>
+        {{$page := .}}
+        {{range .Rows}}<tr class="marketing-content-row">
+          <td class="marketing-id">{{.TaskCode}}</td>
+          <td><span class="marketing-artist" title="{{.Project}}">{{.Artist}}</span></td>
+          <td>{{.Media}}<div class="marketing-note marketing-platform">{{.PlatformText}}</div></td>
+          <td>{{.Title}}<div class="marketing-note">上传 <span>{{shortUploadDate .UploadDate}}</span></div></td>
+          <td>{{if and $page.CanPreview .Files}}{{template "marketing-gallery-cover" .Files}}{{else}}<span class="marketing-note">—</span>{{end}}</td>
+          <td class="marketing-summary"><div class="marketing-pool-requirements">{{if .Copy.Text}}{{.Copy.Text}}{{else}}—{{end}}</div>{{if .Copy.Tags}}<div><span class="marketing-note">TAG</span> {{.Copy.Tags}}</div>{{end}}</td>
+          <td>{{range .TagLabels}}<span class="server-tag ant-tag platform-tag">#{{.}}</span> {{end}}</td>
+          <td><span class="server-tag ant-tag{{if eq .State "已发布"}} task-online-tag{{else if .Next}} marketing-next{{end}}"{{if .Next}} title="没有匹配标签时按队列优先取这条"{{end}}>{{if .Next}}下一条分配{{else}}{{.State}}{{end}}</span>{{if .Allocation}}{{template "marketing-progress" .}}{{end}}</td>
+          <td>{{if .Allocation}}{{if eq .Allocation.Source "assigned"}}已指派给 {{end}}<strong>{{.Recipient}}</strong>{{if .RecipientNote}}<div class="marketing-note">{{.RecipientNote}}</div>{{end}}{{else}}<span class="marketing-note">还没分出去</span>{{end}}</td>
+          <td><div class="marketing-row-actions">
+            {{if .CanAssign}}{{$url := marketingLink $page.Filter .TaskID "assign"}}<a class="server-button server-primary" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#marketing-dialog-slot" data-open-server-dialog><span>手动指派</span></a>{{end}}
+            {{if $page.CanEdit}}{{$url := marketingLink $page.Filter .TaskID "edit"}}<a class="server-button" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#marketing-dialog-slot" data-open-server-dialog><span>修改</span></a>{{end}}
+            {{$url := marketingLink $page.Filter .TaskID "detail"}}<a class="server-button" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#marketing-dialog-slot" data-open-server-dialog><span>详情</span></a>
+          </div></td>
+        </tr>{{else}}<tr><td colspan="10" class="marketing-empty-cell">没有符合筛选的内容</td></tr>{{end}}
+      </tbody>
+    </table>
+  </div>
+  {{template "pagination" .Pager}}
+</div>
+{{end}}
+{{define "marketing-progress"}}
+<div class="marketing-progress" aria-label="任务进度">
+  <ol>{{range .Steps}}<li class="{{.Class}}" title="{{.Label}}" aria-label="{{.Label}}{{if .Done}}已完成{{else}}未完成{{end}}"></li>{{end}}</ol><span class="marketing-note">{{.StepName}}</span>
+</div>
+{{end}}

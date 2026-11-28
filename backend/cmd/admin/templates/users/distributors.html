@@ -1,0 +1,104 @@
+{{define "distributors"}}
+<section class="page server-page workspace-page">
+  <div class="page-heading"><div><h2>营销分发 · 分发员管理</h2><span class="ant-typography-secondary">查看已通过报名的分发员。拉黑后暂停领取和接收新任务，可随时取消拉黑。</span></div></div>
+  <div class="ant-card server-card"><div class="ant-card-body">
+    <form class="table-toolbar distributor-toolbar" action="/users/manage" method="get" hx-get="/users/manage" hx-target="#distributor-results" hx-push-url="true" hx-indicator="#admin-loading" hx-sync="this:replace">
+      <div class="distributor-search">
+        <span class="distributor-search-field"><input class="server-field" type="search" name="q" value="{{.Search}}" aria-label="搜索分发员" placeholder="搜索姓名、手机号、抖音号或小红书号" data-distributor-search>
+        <button type="button" class="distributor-search-clear" aria-label="清除" data-clear-distributor-search>×</button></span>
+        <button type="submit" class="distributor-search-button" title="搜索">{{template "search-icon" .}}</button>
+      </div>
+      <button class="server-button" type="submit">刷新</button>
+    </form>
+    <div id="distributor-results">{{template "distributor-results" .}}</div>
+  </div></div>
+  <div id="distributor-dialog-slot">{{with .Dialog}}{{template "distributor-dialog" .}}{{end}}</div>
+</section>
+{{end}}
+{{define "distributor-results"}}
+<div class="server-table-frame">
+<div class="server-table-scroll" role="region" tabindex="0" aria-label="分发员管理表格">
+  <table class="server-table distributor-table">
+    <colgroup><col><col style="width:145px"><col style="width:145px"><col style="width:125px"><col><col><col style="width:184px"></colgroup>
+    <thead><tr><th scope="col">分发员</th><th scope="col">抖音号</th><th scope="col">小红书号</th><th scope="col">手机号</th><th scope="col">标签</th><th scope="col">状态</th><th scope="col">操作</th></tr></thead>
+    <tbody>
+      {{$page := .}}
+      {{range .Rows}}
+      {{$details := distributorLink $page.Pager.Current $page.Search .ID "details"}}
+      {{$mode := "block"}}{{if .Blocked}}{{$mode = "unblock"}}{{end}}
+      <tr>
+        <td><div><a class="server-link distributor-name" role="button" href="{{$details}}" hx-get="{{$details}}" hx-target="#distributor-dialog-slot" data-open-server-dialog><span>{{.DisplayName}}</span></a><span class="distributor-note">{{if .Nickname}}<span>{{.Nickname}} · </span>{{end}}微信号 <span>{{if .Wechat}}{{.Wechat}}{{else}}未填写{{end}}</span></span></div></td>
+        <td>{{template "platform-account" .DouyinLink}}</td><td>{{template "platform-account" .XHSLink}}</td><td>{{if .Phone}}{{.Phone}}{{else}}—{{end}}</td>
+        <td>{{template "distributor-tags" .TagLabels}}</td><td>{{template "distributor-status" .}}{{with .BlockInfo}}{{if .Reason}}<span class="server-secondary distributor-note">原因：{{.Reason}}</span>{{end}}{{end}}</td>
+        <td><div class="distributor-cell-actions"><a class="server-button" role="button" href="{{$details}}" hx-get="{{$details}}" hx-target="#distributor-dialog-slot" data-open-server-dialog><span>详情</span></a>
+        {{if $page.CanBlock}}{{$url := distributorLink $page.Pager.Current $page.Search .ID $mode}}<a class="server-button{{if not .Blocked}} distributor-danger-button{{end}}" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#distributor-dialog-slot" data-open-server-dialog><span>{{if .Blocked}}取消拉黑{{else}}拉黑{{end}}</span></a>{{end}}</div></td>
+      </tr>
+      {{else}}<tr><td colspan="7" class="server-empty">{{if .Search}}未找到匹配的分发员{{else}}还没有通过报名的分发员{{end}}</td></tr>{{end}}
+    </tbody>
+  </table>
+</div></div>
+{{template "pagination" .Pager}}
+{{end}}
+{{define "distributor-status"}}{{if .Blocked}}<span class="server-tag identity-result-failure">已拉黑</span>{{else}}<span class="server-tag server-tag-green">正常</span>{{end}}{{end}}
+{{define "distributor-tags"}}{{range .}}<span class="server-tag">#{{.}}</span> {{else}}<span class="server-secondary">未打标签</span>{{end}}{{end}}
+{{define "distributor-dialog"}}
+{{$profile := .Profile}}
+{{$details := eq .Mode "details"}}
+{{$block := eq .Mode "block"}}
+{{$action := "取消拉黑"}}{{if $block}}{{$action = "拉黑"}}{{end}}
+<dialog class="server-dialog distributor-modal{{if $block}} distributor-block-modal{{else if not $details}} distributor-unblock-modal{{end}}" data-server-dialog aria-labelledby="distributor-dialog-title">
+  <header><h3 id="distributor-dialog-title">{{if $details}}分发员详情{{else}}{{$action}} {{$profile.DisplayName}}{{end}}</h3></header>
+  {{if $details}}
+  <div class="server-dialog-body distributor-dialog-body">
+    <div class="distributor-profile-heading"><strong>{{$profile.DisplayName}}</strong>{{template "distributor-status" $profile}}</div>
+    {{if $profile.Blocked}}{{template "distributor-block-info" .}}{{end}}
+    <section><strong>实名信息</strong><dl class="distributor-description">
+      <dt>实名姓名</dt><dd>{{if $profile.Name}}{{$profile.Name}}{{else}}—{{end}}</dd>
+      <dt>身份证号</dt><dd>{{if $profile.DistributorDetails.Identity}}{{$profile.DistributorDetails.Identity}}{{else}}—{{end}}</dd>
+      <dt>手机号</dt><dd>{{if $profile.DistributorDetails.Phone}}{{$profile.DistributorDetails.Phone}}{{else}}—{{end}}</dd>
+      <dt>微信号</dt><dd>{{if $profile.Wechat}}{{$profile.Wechat}}{{else}}未填写{{end}}</dd>
+    </dl></section>
+    <section><strong>账号</strong><dl class="distributor-description">
+      <dt>微信昵称</dt><dd>{{if $profile.Nickname}}{{$profile.Nickname}}{{else}}—{{end}}</dd>
+      <dt>抖音号</dt><dd>{{template "platform-account" $profile.DouyinLink}}</dd><dt>小红书号</dt><dd>{{template "platform-account" $profile.XHSLink}}</dd>
+      <dt>标签</dt><dd>{{template "distributor-tags" $profile.TagLabels}}</dd><dt>报名时间</dt><dd>{{.EnrollmentDate}}</dd>
+      <dt>当前协议</dt><dd>{{if $profile.Consented}}已同意{{else}}待同意{{end}}</dd>
+    </dl></section>
+    {{template "distributor-today" .}}
+  </div>
+  <footer>
+    {{if .CanBlock}}{{$mode := "block"}}{{if $profile.Blocked}}{{$mode = "unblock"}}{{end}}{{$url := distributorLink .Page .Search $profile.ID $mode}}<a class="server-button" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#distributor-dialog-slot">{{if $profile.Blocked}}取消拉黑{{else}}拉黑{{end}}</a>{{end}}
+    <button class="server-button" type="button" data-close-dialog autofocus>关闭</button>
+  </footer>
+  {{else}}
+  <form class="server-dialog-form" method="post" action="/users/manage/{{$profile.ID}}/block?page={{.Page}}&amp;q={{queryEscape .Search}}" hx-post="/users/manage/{{$profile.ID}}/block?page={{.Page}}&amp;q={{queryEscape .Search}}" hx-target="#distributor-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop" novalidate>
+    <input type="hidden" name="mode" value="{{.Mode}}"><input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="updated_at" value="{{.Revision}}">
+    <div class="server-dialog-body distributor-block-body">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Stale}}<div class="server-alert server-alert-warning" role="alert">账号状态已更新，请关闭弹窗并刷新列表</div>
+      {{else if $block}}
+        <p class="distributor-block-impact">拉黑后，这个分发员<strong>不能领任务</strong>，系统也<strong>不再给他派</strong>任何任务；<strong>已发布的任务照常结算</strong>。可以随时取消拉黑。</p>
+        {{template "distributor-today" .}}
+        <input name="reason" aria-label="拉黑原因" aria-required="true" placeholder="拉黑原因（必填）" maxlength="300" value="{{.Reason}}" autofocus>
+      {{else}}
+        <p>取消拉黑后，符合领取条件的分发员可继续领取和接收任务。</p>
+        {{template "distributor-block-info" .}}
+      {{end}}
+      {{if .Error}}<div role="alert" class="distributor-block-error">{{.Error}}</div>{{end}}
+    </div>
+    <footer><button class="server-button" type="button" data-close-dialog>取消</button><button type="submit" class="server-button {{if $block}}server-button-danger{{else}}server-primary{{end}}"{{if .Stale}} disabled{{end}}>确认{{$action}}</button></footer>
+  </form>
+  {{end}}
+</dialog>
+{{end}}
+{{define "distributor-block-info"}}
+<div class="server-alert"><dl class="distributor-description"><dt>拉黑原因</dt><dd>{{with .Profile.BlockInfo}}{{if .Reason}}{{.Reason}}{{else}}—{{end}}{{else}}—{{end}}</dd><dt>拉黑时间</dt><dd>{{.BlockDate}}</dd><dt>操作人</dt><dd>{{with .Profile.BlockInfo}}{{if .Operator}}{{.Operator}}{{else}}—{{end}}{{else}}—{{end}}</dd></dl></div>
+{{end}}
+{{define "distributor-today"}}
+<section{{if eq .Mode "block"}} class="distributor-today-summary"{{end}}>
+  {{if eq .Mode "block"}}<span class="distributor-today-label">他今天的任务：</span>{{else}}<strong>今天的任务</strong>{{end}}
+  {{if .ShowCreative}}<details><summary>创作任务（{{len .Creative}} 个）</summary>{{range .Creative}}<p>{{.Task.Title}} · {{.BusinessDate}} · {{creativeStatus .Status}} · 第 {{.Revision}} 次提交 {{.Reason}}</p>{{else}}尚未领取创作任务{{end}}</details>{{end}}
+  {{if .Tasks}}<ul class="distributor-today-tasks">{{range .Tasks}}<li>{{.Title}} <span class="server-secondary">（{{.Description}}）</span></li>{{end}}</ul>{{else}}<span class="server-secondary">今天还没有任务</span>{{end}}
+  {{if and (eq .Mode "block") .Unpublished}}<div class="distributor-today-warning">还有未发布的任务，建议等分发员完成后再拉黑。</div>{{end}}
+</section>
+{{end}}

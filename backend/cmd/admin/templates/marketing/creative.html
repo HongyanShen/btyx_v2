@@ -1,0 +1,32 @@
+{{define "creative"}}
+<section class="workspace-page creative-page">{{if .Reviewing}}
+<h2>营销分发 · 创作作品审核</h2><nav class="creative-filters"><a href="?state=pending" {{if eq .Filter "pending"}}aria-current="page"{{end}}>待审作品</a><a href="?state=approved" {{if eq .Filter "approved"}}aria-current="page"{{end}}>已通过</a><a href="?state=rejected" {{if eq .Filter "rejected"}}aria-current="page"{{end}}>已驳回</a><a href="?state=linked" {{if eq .Filter "linked"}}aria-current="page"{{end}}>待核点赞</a><a href="?state=rewarded" {{if eq .Filter "rewarded"}}aria-current="page"{{end}}>已核奖励</a><a href="?state=all" {{if eq .Filter "all"}}aria-current="page"{{end}}>全部</a></nav>
+{{range .Works}}{{$work := .}}<article><h3>{{.Task.TaskCode}} · {{.Task.Title}} · {{creativeStatus .Status}}</h3><p>分发员 {{.UserID}} · 第 {{.Revision}} 次提交 · {{.BusinessDate}}</p>
+{{if .CopyText}}<p>发布文案　{{.CopyText}}</p>{{end}}
+{{if .Reason}}<p>驳回原因　{{.Reason}}</p>{{end}}
+{{if $.CanFiles}}{{range .Files}}<button type="button" class="server-button" data-creative-file="{{.}}">查看作品</button>{{end}}{{end}}
+{{if and $.CanReview (eq .Status "pending")}}<form data-creative-action="review" data-id="{{.ID}}" data-revision="{{.Revision}}"><label>驳回原因 <input name="reason"></label><button class="server-button" value="approve">审核通过</button><button class="server-button" value="reject">驳回</button><output role="status"></output></form>{{end}}
+{{if .Links}}<form data-creative-action="award" data-id="{{.ID}}"><fieldset><legend>点赞截图核对</legend>{{range .Links}}<div class="creative-platform"><b>{{creativePlatform .Platform}}</b> <a href="{{.URL}}" target="_blank" rel="noreferrer">发布链接</a>
+{{if .Screenshot}}{{if $.CanFiles}}<button type="button" class="server-button" data-playback-id="{{.Screenshot}}" data-playback-title="{{creativePlatform .Platform}}点赞截图" data-playback-note="{{$work.Task.Title}}">查看点赞截图</button>{{if and $.CanReturn (eq $work.Status "linked")}}<button type="button" class="server-button" data-return-evidence data-work="{{$work.ID}}" data-platform="{{.Platform}}" data-shot="{{.Screenshot}}">退回截图</button>{{end}}{{end}}
+{{else}}<span>待补交截图 {{.Reason}}</span>{{end}}
+{{if .Likes}}<span>已核定 {{.Likes}} 赞</span>{{else}}<label>点赞数 <input type="number" min="0" step="1" required data-platform="{{.Platform}}" data-shot="{{.Screenshot}}" {{if not (and $.CanAward $.CanFiles .Screenshot)}}disabled{{end}}></label>{{end}}</div>{{end}}</fieldset>
+{{if and $.CanAward $.CanFiles (eq .Status "linked")}}<button class="server-button server-primary" data-confirm="确认按已核实的点赞数计算奖励？确认后将进入待结算。">核定点赞奖励</button>{{end}}<output role="status"></output></form>{{end}}
+{{range .Earnings}}<p>{{if .LikesReward}}点赞奖励{{else}}创作费 + 发布费{{end}}　¥{{creativeFen .AmountFen}} · {{if eq .AmountFen "0"}}未达奖励档{{else if .BatchID}}已入账{{else}}待结算{{end}}</p>{{end}}</article>
+{{else}}<p>暂无创作作品</p>{{end}}{{template "playback-dialog" .}}
+{{else}}<h2>营销分发 · 创作任务</h2>
+{{if .CanCreate}}<button class="server-button server-primary" data-creative-create>＋ 新建创作任务</button><dialog class="server-dialog creative-editor"><header><h3>新建创作任务</h3><button type="button" data-close-dialog>关闭</button></header><div class="server-dialog-body"><form data-creative-action="create">
+<label>任务标题<input required name="title"></label><label>创作要求<textarea required name="requirements"></textarea></label>
+<label>参考文案<textarea name="copy_text"></textarea></label><label>必带话题<input name="topics"></label>
+<label>作品类型<select name="media_type"><option value="video/mp4">视频</option><option value="image/jpeg">图文</option></select></label>
+{{if .CanUpload}}<label>参考素材<input type="file" name="materials" multiple accept="image/*,video/mp4"></label>{{end}}
+<fieldset><legend>发布平台</legend><label><input type="checkbox" value="dy" name="platforms" checked>抖音</label><label><input type="checkbox" value="xhs" name="platforms">小红书</label></fieldset>
+<label>创作费（元）<input required name="fee" inputmode="decimal"></label><p>发布费按分发员领取时的每平台单价保存。</p>
+<fieldset data-creative-tiers><legend>点赞奖励档位</legend><div data-creative-tier><label>最低点赞数<input name="tier_likes" type="number" min="1" required></label><label>奖励（元）<input name="tier_reward" inputmode="decimal" required></label><button type="button" class="server-button" data-remove-tier disabled>删除档位</button></div><button type="button" class="server-button" data-add-tier>添加档位</button></fieldset>
+<label><input type="checkbox" name="combined">两个平台合计对档</label>
+<label>发布满几天可兑奖<input required type="number" min="1" value="3" name="days"></label>
+<label>投稿开始（北京时间）<admin-datetime><input required type="datetime-local" name="start"></admin-datetime></label>
+<label>投稿截止（北京时间）<admin-datetime><input required type="datetime-local" name="end"></admin-datetime></label>
+<label>兑奖时间（北京时间）<admin-datetime><input required type="datetime-local" name="reward"></admin-datetime></label>
+<button class="server-button server-primary">创建并上架</button><output role="status"></output></form></div></dialog>{{end}}
+<div class="creative-scroll"><table class="marketing-table"><thead><tr><th>任务</th><th>平台</th><th>费用</th><th>点赞奖励</th><th>投稿 / 兑奖（北京时间）</th><th>状态</th><th>操作</th></tr></thead><tbody>
+{{range .Tasks}}<tr><td><strong>{{.Title}}</strong><div class="marketing-note">{{.TaskCode}}</div><details><summary>查看要求</summary>{{.Requirements}} {{.CopyText}} {{.Topics}}</details></td><td>{{range .Platforms}}{{creativePlatform .}}　{{end}}</td><td>创作 ¥{{creativeFen .CreationFen}}<br>发布 ¥{{creativeFen .PublishFen}} / 平台</td><td>{{range .Tiers}}<div>{{.Likes}} 赞起 ¥{{creativeFen .RewardFen}}</div>{{end}}</td><td>{{creativeTime .StartsAt}} 至 {{creativeTime .EndsAt}}<br>{{creativeTime .RewardAt}} 兑奖</td><td>{{if .Online}}已上架{{else}}已下架{{end}}</td><td>{{if $.CanVisibility}}<form data-creative-action="visibility" data-id="{{.ID}}" data-online="{{if .Online}}false{{else}}true{{end}}"><button class="server-button" data-confirm="确认调整上架状态？已领取的任务可以继续做。">{{if .Online}}下架{{else}}上架{{end}}</button><output role="status"></output></form>{{end}}</td></tr>{{else}}<tr><td colspan="7">暂无创作任务</td></tr>{{end}}</tbody></table></div>{{end}}</section>{{end}}

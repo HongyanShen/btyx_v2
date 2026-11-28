@@ -46,6 +46,8 @@ type Submission struct {
 	SettlementID string `json:"settlement_id,omitempty"`
 	// EligibleDate holds the value of the "eligible_date" field.
 	EligibleDate string `json:"eligible_date,omitempty"`
+	// SettlementEligibleAt holds the value of the "settlement_eligible_at" field.
+	SettlementEligibleAt *time.Time `json:"settlement_eligible_at,omitempty"`
 	// Visibility holds the value of the "visibility" field.
 	Visibility   enum.Visibility `json:"visibility,omitempty"`
 	selectValues sql.SelectValues
@@ -60,7 +62,7 @@ func (*Submission) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case submission.FieldID, submission.FieldAssignmentID, submission.FieldPlatform, submission.FieldURL, submission.FieldWorkKey, submission.FieldScreenshot, submission.FieldStatus, submission.FieldReason, submission.FieldReviewerID, submission.FieldSettlementID, submission.FieldEligibleDate, submission.FieldVisibility:
 			values[i] = new(sql.NullString)
-		case submission.FieldCreatedAt, submission.FieldUpdatedAt, submission.FieldApprovedAt:
+		case submission.FieldCreatedAt, submission.FieldUpdatedAt, submission.FieldApprovedAt, submission.FieldSettlementEligibleAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -168,6 +170,13 @@ func (_m *Submission) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.EligibleDate = value.String
 			}
+		case submission.FieldSettlementEligibleAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_eligible_at", values[i])
+			} else if value.Valid {
+				_m.SettlementEligibleAt = new(time.Time)
+				*_m.SettlementEligibleAt = value.Time
+			}
 		case submission.FieldVisibility:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field visibility", values[i])
@@ -253,6 +262,11 @@ func (_m *Submission) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("eligible_date=")
 	builder.WriteString(_m.EligibleDate)
+	builder.WriteString(", ")
+	if v := _m.SettlementEligibleAt; v != nil {
+		builder.WriteString("settlement_eligible_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("visibility=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Visibility))

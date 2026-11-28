@@ -1,0 +1,38 @@
+{{define "enrollment-tag-library"}}
+<section class="enrollment-tag-library" aria-label="标签库">
+  <p><strong>标签库</strong><span>复核时按账号画像选择标签。营销内容也可选用这些标签，用于匹配分发员。改名后，使用该标签的分发员和内容会同步显示新名称。</span></p>
+  <div class="enrollment-tag-library-controls">
+    {{$page := .}}
+    {{range .Tags}}
+      <span class="enrollment-library-tag"><span class="server-tag">#{{.Name}}</span>
+        {{if $page.CanRename}}{{$url := enrollmentLink $page.Pager.Current $page.Filter $page.Tag .ID "" "rename"}}<a class="server-link" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#enrollment-dialog-slot" data-open-server-dialog aria-label="改名 {{.Name}}" title="改名">✎</a>{{end}}
+        {{if $page.CanDelete}}{{$url := enrollmentLink $page.Pager.Current $page.Filter $page.Tag .ID "" "delete"}}<a class="server-link" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#enrollment-dialog-slot" data-open-server-dialog aria-label="删除 {{.Name}}" title="删除">×</a>{{end}}
+      </span>
+    {{else}}<span>暂无标签</span>{{end}}
+    {{if .CanCreate}}
+    {{$action := printf "/users/tags?page=%d%s" .Pager.Current .Pager.Search}}
+    <form class="enrollment-tag-add" action="{{$action}}" method="post" hx-post="{{$action}}" hx-target="#admin-workspace" hx-disabled-elt="find button" hx-sync="this:drop">
+      <input name="csrf" type="hidden" value="{{.CSRF}}"><input class="server-field" name="name" aria-label="新标签" placeholder="新标签，例如 #健身" maxlength="25" required>
+      <button class="server-button" type="submit">＋ 添加</button>
+    </form>
+    {{end}}
+  </div>
+</section>
+{{end}}
+{{define "enrollment-tag-dialog"}}
+{{$rename := eq .Mode "rename"}}
+<dialog class="server-dialog" data-server-dialog aria-labelledby="enrollment-tag-title">
+  <header><h3 id="enrollment-tag-title">{{if $rename}}重命名标签{{else}}删除标签 #{{.Tag.Name}}{{end}}</h3><button type="button" aria-label="关闭" data-close-dialog>×</button></header>
+  <form class="server-dialog-form" action="{{.Action}}" method="post" hx-post="{{.Action}}" hx-target="#enrollment-dialog-slot" hx-sync="this:drop" hx-disabled-elt="find button[type=submit]">
+    <input name="csrf" type="hidden" value="{{.CSRF}}">
+    <input name="previous_name" type="hidden" value="{{.Tag.Name}}"><input name="revision" type="hidden" value="{{.Tag.Revision}}">
+    <div class="server-dialog-body">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{end}}
+      {{if $rename}}<input name="name" aria-label="标签名称" value="{{if .Error}}{{.Reason}}{{else}}{{.Tag.Name}}{{end}}" maxlength="25" required autofocus>
+      {{else}}<p>删除前请先解除该标签在分发员报名、内容池和任务上的绑定。</p>{{end}}
+    </div>
+    <footer><button type="button" class="server-button" data-close-dialog>取消</button><button type="submit" class="server-button {{if $rename}}server-primary{{else}}server-button-danger{{end}}">{{if $rename}}保存{{else}}删除{{end}}</button></footer>
+  </form>
+</dialog>
+{{end}}

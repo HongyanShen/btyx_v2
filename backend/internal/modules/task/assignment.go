@@ -1,6 +1,7 @@
 package task
 
 import (
+	"baituber.cn/yanxuan/v2/internal/platform/wxnotice"
 	"context"
 	"strings"
 
@@ -72,16 +73,13 @@ func (s *Service) assign(ctx context.Context, actorID, userID, taskID, key strin
 		}
 
 		day := s.Day()
-		quotaKey := userID + ":" + day
-		has, err := tx.Assignment.Query().
-			Where(assignment.QuotaKeyEQ(quotaKey)).
-			Exist(ctx)
+		quotaKey, err := DailyQuotaSlot(ctx, tx, userID, day, policy.DailyLimit)
 		if err != nil {
 			return "", err
 		}
 
-		if has {
-			return "", app.Conflict("今天已领取或被指派任务")
+		if quotaKey == "" {
+			return "", app.Conflict("今天已领取或被指派任务，名额已满")
 		}
 
 		selectedTaskID := taskID
@@ -159,6 +157,7 @@ func (s *Service) assign(ctx context.Context, actorID, userID, taskID, key strin
 			SetPlatforms(version.Platforms).
 			SetSource(source).
 			SetBusinessDate(day).
+			SetCreatedAt(allocatedAt).
 			SetDueDate(day).
 			SetExpiresAt(policy.Deadline(allocatedAt)).
 			SetQuotaKey(quotaKey).
@@ -175,11 +174,21 @@ func (s *Service) assign(ctx context.Context, actorID, userID, taskID, key strin
 			auditAction = enum.AuditTaskAssign
 		}
 
-		if err = app.Audit(ctx, tx, actorID, auditAction, assignmentRecord.ID, ""); err != nil {
+		code, err := DisplayCode(taskRecord.DisplayNumber)
+		if err != nil {
 			return "", err
 		}
 
-		if err = app.Notify(ctx, tx, userID, "营销任务已分配", version.Title, assignmentRecord.ID); err != nil {
+		if err = app.Audit(ctx, tx, actorID, auditAction, assignmentRecord.ID, "", "任务编号："+code, "分发员编号："+userID); err != nil {
+			return "", err
+		}
+
+		var cards []wxnotice.Card
+		if source == enum.SourceAssigned {
+			cards = append(cards, wxnotice.Assignment(version.Title, "运营已指派营销任务", "请在截止前提交发布链接", assignmentRecord.ID, *assignmentRecord.ExpiresAt))
+		}
+
+		if err = s.Notify(ctx, tx, userID, "营销任务已分配", version.Title, assignmentRecord.ID, cards...); err != nil {
 			return "", err
 		}
 
@@ -239,7 +248,18 @@ func (s *Service) Revoke(ctx context.Context, actorID, id, reason string) error 
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditTaskRevoke, id, reason)
+		card := wxnotice.TaskStatus("营销分发任务", "指派已撤回", reason, wxnotice.Detail(id))
+		if err = s.Notify(ctx, tx, assignmentRecord.UserID, "任务指派已撤回", reason, id, card); err != nil {
+			return false, err
+		}
+
+		codes, err := taskCodes(ctx, tx.Client(), []string{assignmentRecord.TaskID})
+		if err != nil {
+			return false, err
+		}
+
+		return true, app.Audit(ctx, tx, actorID, enum.AuditTaskRevoke, id, reason,
+			"任务编号："+codes[assignmentRecord.TaskID], "分发员编号："+assignmentRecord.UserID)
 	})
 	return err
 }

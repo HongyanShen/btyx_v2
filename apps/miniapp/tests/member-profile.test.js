@@ -1,4 +1,6 @@
 const assert = require("node:assert/strict");
+const { readFileSync } = require("node:fs");
+const { join } = require("node:path");
 const test = require("node:test");
 const { tokenKey, request } = require("../src/services/request");
 const session = require("../src/services/session");
@@ -86,6 +88,12 @@ test("home retains its network error when device information is unavailable", as
   assert.match(home.data.error, /网络连接失败/);
   assert.equal(home.data.localDemo, false);
   assert.equal(home.data.loading, false);
+});
+
+test("我的 keeps the profile entry without a WeChat avatar prompt", () => {
+  const markup = readFileSync(join(__dirname, "../src/pages/me/index.wxml"), "utf8");
+  assert.match(markup, /bindtap="openProfile"/);
+  assert.doesNotMatch(markup, /用微信头像|open-type="chooseAvatar"/);
 });
 
 test("app startup signs in once and 我的 opens the profile after login", async () => {

@@ -1,0 +1,30 @@
+{{define "review-drawer"}}
+{{$row := .Row}}{{$drawer := .}}
+<dialog class="server-dialog review-drawer" data-server-dialog aria-labelledby="review-drawer-title">
+  <header><button type="button" class="ant-drawer-close" aria-label="关闭" data-close-dialog>×</button><h3 id="review-drawer-title">{{$row.Title}}</h3></header>
+  <div class="server-dialog-body">
+    <dl class="distributor-description"><dt>分发员</dt><dd>{{$row.OwnerName}}</dd><dt>任务来源</dt><dd>{{$row.SourceText}}</dd><dt>单平台奖励</dt><dd>{{.Reward}}</dd><dt>发布截止</dt><dd>{{$row.DueDate}}</dd></dl>
+    <ol class="review-drawer-steps">{{range $row.Steps}}<li{{if .Done}} class="step-done"{{end}}>{{.Label}}</li>{{end}}</ol>
+    <p class="requirements">{{$row.Body}}</p>
+    {{range $row.PlatformsView}}
+    <section class="ant-card server-card platform-card">
+      <header><strong>{{.PlatformName}}</strong>{{if .ID}}{{template "review-submission-badge" .}}{{end}}</header>
+      <div class="ant-card-body">
+        {{if .ID}}
+          <p>{{if .Link}}<a class="server-link" href="{{.Link}}" target="_blank" rel="noreferrer">打开发布作品</a>{{else}}打开发布作品{{end}} <span class="review-note">· 第 {{.Revision}} 次提交</span></p>
+          {{if and .Screenshot $drawer.CanScreenshot}}<button type="button" class="server-button" data-playback-id="{{.Screenshot}}" data-playback-title="{{.PlatformName}}播放量截图" data-playback-note="{{$row.Title}}">查看播放量截图</button>
+          {{else if not .Screenshot}}<span class="server-tag server-tag-gold">待补播放数据</span>{{end}}
+          {{if .Reason}}<p class="server-alert server-alert-warning">{{.Reason}}</p>{{end}}
+          <div class="publish-review-actions">
+            {{if and $row.CanReview (eq .Status "pending")}}{{$url := reviewLink $drawer.Pager $row.ID "reject" (printf "%s" .Platform) $row.ID}}<a class="server-button server-button-danger" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#review-dialog-slot" data-open-server-dialog>驳回</a>{{end}}
+            {{if and $row.CanFlag (eq .Status "approved") (not .Settled)}}{{$url := reviewLink $drawer.Pager $row.ID "flag" (printf "%s" .Platform) $row.ID}}<a class="server-button publish-flag-button" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#review-dialog-slot" data-open-server-dialog>违规 / 限流</a>{{end}}
+          </div>
+        {{else}}<span class="review-note">尚未提交发布链接</span>{{end}}
+      </div>
+    </section>
+    {{end}}
+    {{if $row.CanReview}}{{$url := reviewLink .Pager $row.ID "approve" "" $row.ID}}<a class="server-button server-primary" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#review-dialog-slot" data-open-server-dialog>通过</a>{{end}}
+    {{if .CanRevoke}}{{$url := reviewLink .Pager $row.ID "revoke" "" $row.ID}}<a class="server-button" role="button" href="{{$url}}" hx-get="{{$url}}" hx-target="#review-dialog-slot" data-open-server-dialog>撤回指派</a>{{end}}
+  </div>
+</dialog>
+{{end}}

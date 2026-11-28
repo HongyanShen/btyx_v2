@@ -13,6 +13,10 @@ import (
 	"baituber.cn/yanxuan/v2/internal/platform/httpx"
 	"baituber.cn/yanxuan/v2/internal/platform/logging"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type healthDTO struct {
@@ -20,13 +24,13 @@ type healthDTO struct {
 }
 
 // NewRouter installs only the HTTP behavior shared by the API processes.
-func NewRouter(runtime *app.Runtime) *gin.Engine {
+func NewRouter(runtime *app.Runtime, platform enum.AuditPlatform) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	gin.EnableJsonDecoderDisallowUnknownFields()
 
 	router := gin.New()
 	router.HandleMethodNotAllowed = true
-	router.Use(requestMiddleware(), recoverMiddleware())
+	router.Use(requestMiddleware(platform), auditHTTPResponses(runtime), recoverMiddleware(), captureAuditRequest)
 	_ = router.SetTrustedProxies(nil)
 	router.NoRoute(func(ctx *gin.Context) {
 		httpx.Abort(ctx, http.StatusNotFound, "接口不存在")
@@ -49,8 +53,12 @@ func NewRouter(runtime *app.Runtime) *gin.Engine {
 }
 
 func Authenticate(service *identity.Service, role enum.Role) gin.HandlerFunc {
+	return AuthenticateWithToken(service, role, BearerToken)
+}
+
+func AuthenticateWithToken(service *identity.Service, role enum.Role, token func(*gin.Context) string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		principal, err := service.Authenticate(ctx.Request.Context(), BearerToken(ctx))
+		principal, err := service.Authenticate(ctx.Request.Context(), token(ctx))
 		if err != nil {
 			httpx.RespondError(ctx, err)
 			ctx.Abort()
@@ -80,35 +88,43 @@ func CurrentPrincipal(ctx *gin.Context) identity.Principal {
 	return ctx.MustGet("principal").(identity.Principal)
 }
 
-func requestMiddleware() gin.HandlerFunc {
+func requestMiddleware(platform enum.AuditPlatform) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		requestContext := logging.NewRequest(ctx.Request.Context())
+		route := ctx.FullPath()
+		name := ctx.Request.Method + " " + route
+		if route != "" {
+			requestContext = app.WithAuditOrigin(requestContext, platform, name)
+		}
+
+		requestContext, span := otel.Tracer("yanxuan/http").Start(requestContext, name, trace.WithSpanKind(trace.SpanKindServer))
+		span.SetAttributes(attribute.String("http.route", route), attribute.String("request_id", logging.RequestID(requestContext)))
+		defer func() {
+			status := ctx.Writer.Status()
+			span.SetAttributes(attribute.Int("http.response.status_code", status))
+			if status >= 500 {
+				span.SetStatus(codes.Error, "")
+			}
+
+			span.End()
+		}()
 		ctx.Request = ctx.Request.WithContext(requestContext)
 		ctx.Header("X-Request-ID", logging.RequestID(requestContext))
 		ctx.Header("X-Content-Type-Options", "nosniff")
 		started := time.Now()
-		logging.From(requestContext).Info().
+		logging.Info(requestContext).
 			Str("method", ctx.Request.Method).
 			Str("route", ctx.FullPath()).
 			Msg("http request started")
 
 		defer func() {
-			logging.From(requestContext).Info().
+			logging.Info(requestContext).
 				Str("method", ctx.Request.Method).
 				Str("route", ctx.FullPath()).
 				Int("status", ctx.Writer.Status()).
 				Str("duration", time.Since(started).String()).
 				Msg("http request completed")
 		}()
-
-		origin := ctx.GetHeader("Origin")
-		if origin == "http://127.0.0.1:5173" || origin == "http://localhost:5173" {
-			ctx.Header("Access-Control-Allow-Origin", origin)
-			ctx.Header("Vary", "Origin")
-			ctx.Header("Access-Control-Allow-Headers", "Authorization, Content-Type, Idempotency-Key")
-			ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
-			ctx.Header("Access-Control-Expose-Headers", "X-Request-ID, X-Total-Count")
-		}
 
 		if ctx.Request.Method == http.MethodOptions {
 			ctx.AbortWithStatus(http.StatusNoContent)
@@ -125,7 +141,7 @@ func recoverMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		defer func() {
 			if recovered := recover(); recovered != nil {
-				logging.From(ctx.Request.Context()).Error().
+				logging.Error(ctx.Request.Context(), nil).
 					Str("panic_type", fmt.Sprintf("%T", recovered)).
 					Str("stack", string(debug.Stack())).
 					Msg("http handler panic")

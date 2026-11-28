@@ -69,7 +69,7 @@ func ConfirmCurrentVersion(ctx context.Context, tx *ent.Tx, userID, agreementID 
 		return err
 	}
 
-	return app.Audit(ctx, tx, userID, enum.AuditAgreementConsent, agreementID, "")
+	return app.Audit(ctx, tx, userID, enum.AuditAgreementConsent, agreementID, "", "协议编号："+agreementID)
 }
 
 func HasConsent(ctx context.Context, client *ent.Client, userID, agreementID string) (bool, error) {

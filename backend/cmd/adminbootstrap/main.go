@@ -25,7 +25,7 @@ func bootstrap(ctx context.Context) bool {
 	}
 
 	if cfg.BootstrapAdminUsername == "" || cfg.BootstrapAdminPassword == "" {
-		logging.From(ctx).Error().Msg("请在本地配置填写 BOOTSTRAP_ADMIN_USERNAME 和 BOOTSTRAP_ADMIN_PASSWORD")
+		logging.Error(ctx, nil).Msg("请在本地配置填写 BOOTSTRAP_ADMIN_USERNAME 和 BOOTSTRAP_ADMIN_PASSWORD")
 		return false
 	}
 
@@ -43,6 +43,6 @@ func bootstrap(ctx context.Context) bool {
 		return false
 	}
 
-	logging.From(ctx).Info().Msg("超级管理员已初始化")
+	logging.Info(ctx).Msg("超级管理员已初始化")
 	return true
 }

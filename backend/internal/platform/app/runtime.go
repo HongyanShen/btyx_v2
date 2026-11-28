@@ -12,17 +12,21 @@ import (
 	"time"
 
 	"baituber.cn/yanxuan/v2/ent"
+	"baituber.cn/yanxuan/v2/ent/hook"
 	"baituber.cn/yanxuan/v2/internal/platform/config"
 	"baituber.cn/yanxuan/v2/internal/platform/database"
+	"github.com/riverqueue/river"
+	"github.com/riverqueue/river/riverdriver/riverdatabasesql"
 	"github.com/segmentio/ksuid"
 )
 
 type Runtime struct {
-	Client *ent.Client
-	DB     *sql.DB
-	Config config.Config
-	Now    func() time.Time
-	crypt  cipher.AEAD
+	Client      *ent.Client
+	DB          *sql.DB
+	Config      config.Config
+	Now         func() time.Time
+	crypt       cipher.AEAD
+	NoticeQueue *river.Client[*sql.Tx]
 }
 
 func Open(ctx context.Context, c config.Config) (*Runtime, error) {
@@ -44,13 +48,27 @@ func Open(ctx context.Context, c config.Config) (*Runtime, error) {
 		return nil, err
 	}
 
-	return &Runtime{
-		Client: client,
-		DB:     db,
-		Config: c,
-		Now:    time.Now,
-		crypt:  aead,
-	}, nil
+	// Keep insert notifications responsive across independent transactions.
+	// The consumer has its own fetch cooldown to coalesce concurrent wakeups.
+	queue, err := river.NewClient(riverdatabasesql.New(db), &river.Config{
+		Schema:        c.Schema,
+		FetchCooldown: river.FetchCooldownMin,
+	})
+	if err != nil {
+		client.Close()
+		return nil, err
+	}
+
+	runtime := &Runtime{
+		NoticeQueue: queue,
+		Client:      client,
+		DB:          db,
+		Config:      c,
+		Now:         time.Now,
+		crypt:       aead,
+	}
+	client.AuditEvent.Use(hook.On(runtime.encryptAuditParameters, ent.OpCreate))
+	return runtime, nil
 }
 
 func NewID() string {

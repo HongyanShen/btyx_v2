@@ -1,0 +1,53 @@
+{{define "enrollment-review-dialog"}}
+<dialog class="server-dialog enrollment-review-modal" data-server-dialog aria-labelledby="enrollment-review-title">
+  <header><h3 id="enrollment-review-title">{{.Title}}</h3><button type="button" aria-label="关闭" data-close-dialog>×</button></header>
+  <form class="server-dialog-form" action="{{.Action}}" method="post" hx-post="{{.Action}}" hx-target="#enrollment-dialog-slot" hx-sync="this:drop" hx-disabled-elt="find button[type=submit]">
+    <input name="csrf" type="hidden" value="{{.CSRF}}">
+    <input name="mode" type="hidden" value="{{.Mode}}">
+    <input name="record" type="hidden" value="{{.Row.EnrollmentID}}">
+    <input name="revision" type="hidden" value="{{.Revision}}">
+    <input name="portrait" type="hidden" value="{{if .PortraitOnly}}1{{end}}">
+    <input name="portrait_changed" type="hidden" value="{{if .PortraitChanged}}1{{end}}">
+    <input name="tags_only" type="hidden" value="{{if .TagOnly}}1{{end}}">
+    <div class="server-dialog-body">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{end}}
+      {{if not .TagOnly}}
+      <section class="enrollment-review-fields" aria-label="人工复核">
+        <div class="enrollment-review-section-head"><strong>人工复核</strong><span class="enrollment-muted">打开报名人的抖音、小红书主页看</span></div>
+        <div class="enrollment-review-links">
+          {{with .Row.DouyinLink.URL}}<a class="account-search-link" href="{{.}}" target="_blank" rel="noopener noreferrer">搜索抖音号 ↗</a>{{end}}
+          {{with .Row.XHSLink.URL}}<a class="account-search-link" href="{{.}}" target="_blank" rel="noopener noreferrer">搜索小红书号 ↗</a>{{end}}
+        </div>
+        <div class="enrollment-review-options" role="radiogroup" aria-labelledby="review-recent">
+          <span id="review-recent">① 近 30 天发过作品：</span>
+          <label><input type="radio" name="recent_post" value="true"{{if eq .RecentPost "true"}} checked{{end}}>有</label>
+          <label><input type="radio" name="recent_post" value="false"{{if eq .RecentPost "false"}} checked{{end}}>没有</label>
+        </div>
+        <div class="enrollment-review-options" role="radiogroup" aria-labelledby="review-new">
+          <span id="review-new">② 是不是新号：</span>
+          <label><input type="radio" name="new_account" value="false"{{if eq .NewAccount "false"}} checked{{end}}>不是</label>
+          <label><input type="radio" name="new_account" value="true"{{if eq .NewAccount "true"}} checked{{end}}>是新号</label>
+        </div>
+        <div class="enrollment-review-options" role="radiogroup" aria-labelledby="review-age">
+          <span id="review-age">③ 年龄层：</span>
+          {{range .Ages}}<label><input type="radio" name="age_group" value="{{.Key}}"{{if .Selected}} checked{{end}}>{{.Label}}</label>{{end}}
+        </div>
+      </section>
+      {{end}}
+      <section class="enrollment-review-tags" aria-label="画像标签">
+        <div class="enrollment-review-section-head"><strong>{{if .TagOnly}}标签{{else}}④ 标签{{end}}</strong><span class="enrollment-muted">按这个号的画像选（可以多选）。上传营销视频时也选标签，系统优先把视频派给标签对得上的分发员。</span></div>
+        <div class="enrollment-review-options" data-enrollment-tag-options>
+          {{range .TagChoices}}<label data-tag-name="{{.Label}}"><input type="checkbox" name="tags" value="{{.Key}}"{{if .Selected}} checked{{end}}> #{{.Label}}</label>{{else}}<p class="enrollment-muted" data-tag-empty>暂无可选标签</p>{{end}}
+        </div>
+        {{if .CanCreateTag}}<div class="enrollment-review-inline"><input aria-label="新建画像标签" placeholder="没有合适的？自己加一个，例：#健身" maxlength="25" data-enrollment-tag-input><button type="button" class="server-button" data-enrollment-tag-add>＋ 加到标签库</button></div>{{end}}
+      </section>
+      {{if not (or .TagOnly .PortraitOnly)}}<div class="enrollment-review-inline enrollment-review-reject">
+        <input name="reason" aria-label="驳回原因" maxlength="500" placeholder="不通过的话填原因，分发员会看到" value="{{.Reason}}">
+        <button type="submit" class="server-button server-button-danger" name="decision" value="reject">拒绝</button>
+      </div>{{end}}
+    </div>
+    <footer><button type="button" class="server-button" data-close-dialog>取消</button><button type="submit" class="server-button server-primary" name="decision" value="approve">{{if .TagOnly}}保存标签{{else if .PortraitOnly}}保存{{else}}复核通过并保存标签{{end}}</button></footer>
+  </form>
+</dialog>
+{{end}}

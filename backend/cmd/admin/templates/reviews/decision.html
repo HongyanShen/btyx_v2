@@ -1,0 +1,30 @@
+{{define "review-dialog"}}
+{{$approve := eq .Action "approve"}}{{$reject := eq .Action "reject"}}{{$flag := eq .Action "flag"}}{{$single := eq (len .Choices) 1}}
+<dialog class="server-dialog publish-review-modal" data-server-dialog aria-labelledby="review-dialog-title">
+  <header><h3 id="review-dialog-title">{{.Title}}</h3></header>
+  <form class="server-dialog-form" action="{{.FormURL}}" method="post" hx-post="{{.FormURL}}" hx-target="#review-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="server-dialog-body publish-review-form">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if ne .Action "revoke"}}<p class="publish-review-context">{{with .Row.TaskCode}}{{.}} · {{end}}{{.Row.Title}} · {{.Row.OwnerName}}</p>{{end}}
+      {{if $approve}}
+        <div>确认通过全部待审核平台（{{.Names}}）的发布链接？</div>{{range .Choices}}<input type="hidden" name="platforms" value="{{.RevisionKey}}">{{end}}
+      {{else if $reject}}
+        <div class="publish-review-platform" role="group" aria-label="发布平台"><span>发布平台</span><div class="publish-review-platform-options">
+          {{range .Choices}}<label><input type="checkbox" name="platforms" value="{{.RevisionKey}}"{{if .Selected}} checked{{end}}{{if $single}} disabled{{end}}> {{.PlatformName}}</label>{{if $single}}<input type="hidden" name="platforms" value="{{.RevisionKey}}">{{end}}{{end}}
+        </div></div><input name="reason" aria-label="驳回原因" placeholder="驳回原因，分发员会在小程序里看到" value="{{.Reason}}"{{if $single}} autofocus{{end}}>
+      {{else if $flag}}
+        <div class="publish-review-platform"><label for="review-flag-platform">发布平台</label><select class="server-field" id="review-flag-platform" name="platforms"{{if $single}} disabled{{end}}><option value="">请选择平台</option>{{range .Choices}}<option value="{{.RevisionKey}}"{{if .Selected}} selected{{end}}>{{.PlatformName}}</option>{{end}}</select></div>
+        {{if $single}}{{range .Choices}}<input type="hidden" name="platforms" value="{{.RevisionKey}}">{{end}}{{end}}
+        <div role="group" aria-label="处理方式"><label><input name="keep_pay" type="radio" value="0"{{if not .KeepPay}} checked{{end}}> 重新派发</label> <label><input name="keep_pay" type="radio" value="1"{{if .KeepPay}} checked{{end}}> 素材问题，照常结算</label></div>
+        <div class="review-note">{{if .KeepPay}}记录素材问题，所选平台照常结算。{{else}}所选平台停止结算，新任务采用派发时的版本和价格。{{end}}</div>
+        <input name="reason" aria-label="原因或备注" placeholder="填写处理原因" value="{{.Reason}}">
+      {{else}}
+        <textarea name="reason" aria-label="撤回原因" placeholder="撤回原因（必填）" rows="4" required autofocus>{{.Reason}}</textarea>
+      {{end}}
+      {{if .Error}}<div class="publish-review-error" role="alert">{{.Error}}</div>{{end}}
+    </div>
+    <footer><button class="server-button" type="button" data-close-dialog>取消</button><button class="server-button {{if $reject}}server-button-danger{{else}}server-primary{{end}}" type="submit">{{.Confirm}}</button></footer>
+  </form>
+</dialog>
+{{end}}

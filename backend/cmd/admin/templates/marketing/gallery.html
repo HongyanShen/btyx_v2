@@ -1,0 +1,25 @@
+{{define "marketing-gallery-cover"}}
+<div class="attachment-previews"><div class="attachment-preview-item{{if gt (len .) 1}} attachment-preview-stack{{end}}">
+  <button class="attachment-thumbnail" type="button" aria-label="预览附件 1" data-gallery-cover data-gallery-asset="{{index . 0}}"><span data-gallery-placeholder>预览</span>{{if gt (len .) 1}}<span class="attachment-preview-count" aria-hidden="true">{{len .}}</span>{{end}}
+    {{range .}}<span data-gallery-id="{{.}}" hidden></span>{{end}}
+  </button>
+</div></div>
+{{end}}
+{{define "marketing-gallery-dialog"}}
+<dialog class="server-dialog attachment-preview-dialog marketing-gallery" id="marketing-gallery-dialog" aria-labelledby="marketing-gallery-title" data-allow-local="{{.CanReadLocal}}">
+  <header><h3 id="marketing-gallery-title">附件预览</h3></header>
+  <div class="server-dialog-body">
+    <p class="attachment-preview-name" data-gallery-name></p>
+    <div class="attachment-preview-stage" data-gallery-stage>
+      <p role="status" data-gallery-message>正在加载</p>
+      <div class="attachment-video-preview" data-gallery-media hidden>
+        <img class="attachment-preview-media" data-gallery-image alt="" referrerpolicy="no-referrer" hidden>
+        <video class="attachment-preview-media" data-gallery-video controls playsinline controlslist="nofullscreen" preload="metadata" hidden></video>
+        {{$username := .Username}}<span class="operator-watermark" aria-hidden="true">{{range watermarkTiles}}<span>管理员 · {{$username}}</span>{{end}}</span>
+      </div>
+    </div>
+    <div class="attachment-preview-strip" data-gallery-strip></div>
+  </div>
+  <footer><button class="server-button" type="button" data-gallery-fullscreen hidden>全屏播放</button><button class="server-button" type="button" data-gallery-download hidden>下载当前附件</button><button class="server-button" type="button" data-close-dialog>关闭</button></footer>
+</dialog>
+{{end}}

@@ -5,15 +5,22 @@ const { upload } = require("./file-upload");
 
 function chooseImage() {
   return new Promise((resolve, reject) => {
-    wx.chooseMedia({
+    const cancel = () => reject(new Error("未选择图片"));
+    const selected = (path) => (path ? resolve(path) : cancel());
+    if (typeof wx.chooseMedia === "function") {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ["image"],
+        success: (result) => selected(result.tempFiles?.[0]?.tempFilePath),
+        fail: cancel,
+      });
+      return;
+    }
+
+    wx.chooseImage({
       count: 1,
-      mediaType: ["image"],
-      success(result) {
-        resolve(result.tempFiles[0].tempFilePath);
-      },
-      fail() {
-        reject(new Error("未选择图片"));
-      },
+      success: (result) => selected(result.tempFilePaths?.[0]),
+      fail: cancel,
     });
   });
 }

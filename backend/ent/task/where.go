@@ -79,6 +79,11 @@ func Deleted(v bool) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldDeleted, v))
 }
 
+// DisplayNumber applies equality check predicate on the "display_number" field. It's identical to DisplayNumberEQ.
+func DisplayNumber(v int64) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldDisplayNumber, v))
+}
+
 // CurrentVersionID applies equality check predicate on the "current_version_id" field. It's identical to CurrentVersionIDEQ.
 func CurrentVersionID(v string) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldCurrentVersionID, v))
@@ -182,6 +187,46 @@ func DeletedEQ(v bool) predicate.Task {
 // DeletedNEQ applies the NEQ predicate on the "deleted" field.
 func DeletedNEQ(v bool) predicate.Task {
 	return predicate.Task(sql.FieldNEQ(FieldDeleted, v))
+}
+
+// DisplayNumberEQ applies the EQ predicate on the "display_number" field.
+func DisplayNumberEQ(v int64) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldDisplayNumber, v))
+}
+
+// DisplayNumberNEQ applies the NEQ predicate on the "display_number" field.
+func DisplayNumberNEQ(v int64) predicate.Task {
+	return predicate.Task(sql.FieldNEQ(FieldDisplayNumber, v))
+}
+
+// DisplayNumberIn applies the In predicate on the "display_number" field.
+func DisplayNumberIn(vs ...int64) predicate.Task {
+	return predicate.Task(sql.FieldIn(FieldDisplayNumber, vs...))
+}
+
+// DisplayNumberNotIn applies the NotIn predicate on the "display_number" field.
+func DisplayNumberNotIn(vs ...int64) predicate.Task {
+	return predicate.Task(sql.FieldNotIn(FieldDisplayNumber, vs...))
+}
+
+// DisplayNumberGT applies the GT predicate on the "display_number" field.
+func DisplayNumberGT(v int64) predicate.Task {
+	return predicate.Task(sql.FieldGT(FieldDisplayNumber, v))
+}
+
+// DisplayNumberGTE applies the GTE predicate on the "display_number" field.
+func DisplayNumberGTE(v int64) predicate.Task {
+	return predicate.Task(sql.FieldGTE(FieldDisplayNumber, v))
+}
+
+// DisplayNumberLT applies the LT predicate on the "display_number" field.
+func DisplayNumberLT(v int64) predicate.Task {
+	return predicate.Task(sql.FieldLT(FieldDisplayNumber, v))
+}
+
+// DisplayNumberLTE applies the LTE predicate on the "display_number" field.
+func DisplayNumberLTE(v int64) predicate.Task {
+	return predicate.Task(sql.FieldLTE(FieldDisplayNumber, v))
 }
 
 // CurrentVersionIDEQ applies the EQ predicate on the "current_version_id" field.

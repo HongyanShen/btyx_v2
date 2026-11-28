@@ -93,6 +93,48 @@ func (_c *MarketingSettingsCreate) SetNillableOnline(v *bool) *MarketingSettings
 	return _c
 }
 
+// SetDailyLimit sets the "daily_limit" field.
+func (_c *MarketingSettingsCreate) SetDailyLimit(v int) *MarketingSettingsCreate {
+	_c.mutation.SetDailyLimit(v)
+	return _c
+}
+
+// SetNillableDailyLimit sets the "daily_limit" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillableDailyLimit(v *int) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetDailyLimit(*v)
+	}
+	return _c
+}
+
+// SetCreativeLimit sets the "creative_limit" field.
+func (_c *MarketingSettingsCreate) SetCreativeLimit(v int) *MarketingSettingsCreate {
+	_c.mutation.SetCreativeLimit(v)
+	return _c
+}
+
+// SetNillableCreativeLimit sets the "creative_limit" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillableCreativeLimit(v *int) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetCreativeLimit(*v)
+	}
+	return _c
+}
+
+// SetCreativeOnline sets the "creative_online" field.
+func (_c *MarketingSettingsCreate) SetCreativeOnline(v bool) *MarketingSettingsCreate {
+	_c.mutation.SetCreativeOnline(v)
+	return _c
+}
+
+// SetNillableCreativeOnline sets the "creative_online" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillableCreativeOnline(v *bool) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetCreativeOnline(*v)
+	}
+	return _c
+}
+
 // SetExpiryMode sets the "expiry_mode" field.
 func (_c *MarketingSettingsCreate) SetExpiryMode(v enum.MarketingExpiryMode) *MarketingSettingsCreate {
 	_c.mutation.SetExpiryMode(v)
@@ -117,6 +159,118 @@ func (_c *MarketingSettingsCreate) SetExpiryMinutes(v int) *MarketingSettingsCre
 func (_c *MarketingSettingsCreate) SetNillableExpiryMinutes(v *int) *MarketingSettingsCreate {
 	if v != nil {
 		_c.SetExpiryMinutes(*v)
+	}
+	return _c
+}
+
+// SetSettlementFrequency sets the "settlement_frequency" field.
+func (_c *MarketingSettingsCreate) SetSettlementFrequency(v enum.SettlementFrequency) *MarketingSettingsCreate {
+	_c.mutation.SetSettlementFrequency(v)
+	return _c
+}
+
+// SetNillableSettlementFrequency sets the "settlement_frequency" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillableSettlementFrequency(v *enum.SettlementFrequency) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetSettlementFrequency(*v)
+	}
+	return _c
+}
+
+// SetSettlementWeekday sets the "settlement_weekday" field.
+func (_c *MarketingSettingsCreate) SetSettlementWeekday(v int) *MarketingSettingsCreate {
+	_c.mutation.SetSettlementWeekday(v)
+	return _c
+}
+
+// SetNillableSettlementWeekday sets the "settlement_weekday" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillableSettlementWeekday(v *int) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetSettlementWeekday(*v)
+	}
+	return _c
+}
+
+// SetSettlementMonthDay sets the "settlement_month_day" field.
+func (_c *MarketingSettingsCreate) SetSettlementMonthDay(v int) *MarketingSettingsCreate {
+	_c.mutation.SetSettlementMonthDay(v)
+	return _c
+}
+
+// SetNillableSettlementMonthDay sets the "settlement_month_day" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillableSettlementMonthDay(v *int) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetSettlementMonthDay(*v)
+	}
+	return _c
+}
+
+// SetSettlementClock sets the "settlement_clock" field.
+func (_c *MarketingSettingsCreate) SetSettlementClock(v string) *MarketingSettingsCreate {
+	_c.mutation.SetSettlementClock(v)
+	return _c
+}
+
+// SetNillableSettlementClock sets the "settlement_clock" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillableSettlementClock(v *string) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetSettlementClock(*v)
+	}
+	return _c
+}
+
+// SetSettlementDelayMinutes sets the "settlement_delay_minutes" field.
+func (_c *MarketingSettingsCreate) SetSettlementDelayMinutes(v int) *MarketingSettingsCreate {
+	_c.mutation.SetSettlementDelayMinutes(v)
+	return _c
+}
+
+// SetNillableSettlementDelayMinutes sets the "settlement_delay_minutes" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillableSettlementDelayMinutes(v *int) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetSettlementDelayMinutes(*v)
+	}
+	return _c
+}
+
+// SetPlaybackCutoffClock sets the "playback_cutoff_clock" field.
+func (_c *MarketingSettingsCreate) SetPlaybackCutoffClock(v string) *MarketingSettingsCreate {
+	_c.mutation.SetPlaybackCutoffClock(v)
+	return _c
+}
+
+// SetNillablePlaybackCutoffClock sets the "playback_cutoff_clock" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillablePlaybackCutoffClock(v *string) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetPlaybackCutoffClock(*v)
+	}
+	return _c
+}
+
+// SetPlaybackCutoffMinutes sets the "playback_cutoff_minutes" field.
+func (_c *MarketingSettingsCreate) SetPlaybackCutoffMinutes(v int) *MarketingSettingsCreate {
+	_c.mutation.SetPlaybackCutoffMinutes(v)
+	return _c
+}
+
+// SetNillablePlaybackCutoffMinutes sets the "playback_cutoff_minutes" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillablePlaybackCutoffMinutes(v *int) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetPlaybackCutoffMinutes(*v)
+	}
+	return _c
+}
+
+// SetPlaybackDeferralPeriods sets the "playback_deferral_periods" field.
+func (_c *MarketingSettingsCreate) SetPlaybackDeferralPeriods(v int) *MarketingSettingsCreate {
+	_c.mutation.SetPlaybackDeferralPeriods(v)
+	return _c
+}
+
+// SetNillablePlaybackDeferralPeriods sets the "playback_deferral_periods" field if the given value is not nil.
+func (_c *MarketingSettingsCreate) SetNillablePlaybackDeferralPeriods(v *int) *MarketingSettingsCreate {
+	if v != nil {
+		_c.SetPlaybackDeferralPeriods(*v)
 	}
 	return _c
 }
@@ -186,6 +340,18 @@ func (_c *MarketingSettingsCreate) defaults() {
 		v := marketingsettings.DefaultOnline
 		_c.mutation.SetOnline(v)
 	}
+	if _, ok := _c.mutation.DailyLimit(); !ok {
+		v := marketingsettings.DefaultDailyLimit
+		_c.mutation.SetDailyLimit(v)
+	}
+	if _, ok := _c.mutation.CreativeLimit(); !ok {
+		v := marketingsettings.DefaultCreativeLimit
+		_c.mutation.SetCreativeLimit(v)
+	}
+	if _, ok := _c.mutation.CreativeOnline(); !ok {
+		v := marketingsettings.DefaultCreativeOnline
+		_c.mutation.SetCreativeOnline(v)
+	}
 	if _, ok := _c.mutation.ExpiryMode(); !ok {
 		v := marketingsettings.DefaultExpiryMode
 		_c.mutation.SetExpiryMode(v)
@@ -193,6 +359,38 @@ func (_c *MarketingSettingsCreate) defaults() {
 	if _, ok := _c.mutation.ExpiryMinutes(); !ok {
 		v := marketingsettings.DefaultExpiryMinutes
 		_c.mutation.SetExpiryMinutes(v)
+	}
+	if _, ok := _c.mutation.SettlementFrequency(); !ok {
+		v := marketingsettings.DefaultSettlementFrequency
+		_c.mutation.SetSettlementFrequency(v)
+	}
+	if _, ok := _c.mutation.SettlementWeekday(); !ok {
+		v := marketingsettings.DefaultSettlementWeekday
+		_c.mutation.SetSettlementWeekday(v)
+	}
+	if _, ok := _c.mutation.SettlementMonthDay(); !ok {
+		v := marketingsettings.DefaultSettlementMonthDay
+		_c.mutation.SetSettlementMonthDay(v)
+	}
+	if _, ok := _c.mutation.SettlementClock(); !ok {
+		v := marketingsettings.DefaultSettlementClock
+		_c.mutation.SetSettlementClock(v)
+	}
+	if _, ok := _c.mutation.SettlementDelayMinutes(); !ok {
+		v := marketingsettings.DefaultSettlementDelayMinutes
+		_c.mutation.SetSettlementDelayMinutes(v)
+	}
+	if _, ok := _c.mutation.PlaybackCutoffClock(); !ok {
+		v := marketingsettings.DefaultPlaybackCutoffClock
+		_c.mutation.SetPlaybackCutoffClock(v)
+	}
+	if _, ok := _c.mutation.PlaybackCutoffMinutes(); !ok {
+		v := marketingsettings.DefaultPlaybackCutoffMinutes
+		_c.mutation.SetPlaybackCutoffMinutes(v)
+	}
+	if _, ok := _c.mutation.PlaybackDeferralPeriods(); !ok {
+		v := marketingsettings.DefaultPlaybackDeferralPeriods
+		_c.mutation.SetPlaybackDeferralPeriods(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := marketingsettings.DefaultID()
@@ -220,6 +418,25 @@ func (_c *MarketingSettingsCreate) check() error {
 	if _, ok := _c.mutation.Online(); !ok {
 		return &ValidationError{Name: "online", err: errors.New(`ent: missing required field "MarketingSettings.online"`)}
 	}
+	if _, ok := _c.mutation.DailyLimit(); !ok {
+		return &ValidationError{Name: "daily_limit", err: errors.New(`ent: missing required field "MarketingSettings.daily_limit"`)}
+	}
+	if v, ok := _c.mutation.DailyLimit(); ok {
+		if err := marketingsettings.DailyLimitValidator(v); err != nil {
+			return &ValidationError{Name: "daily_limit", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.daily_limit": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreativeLimit(); !ok {
+		return &ValidationError{Name: "creative_limit", err: errors.New(`ent: missing required field "MarketingSettings.creative_limit"`)}
+	}
+	if v, ok := _c.mutation.CreativeLimit(); ok {
+		if err := marketingsettings.CreativeLimitValidator(v); err != nil {
+			return &ValidationError{Name: "creative_limit", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.creative_limit": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreativeOnline(); !ok {
+		return &ValidationError{Name: "creative_online", err: errors.New(`ent: missing required field "MarketingSettings.creative_online"`)}
+	}
 	if _, ok := _c.mutation.ExpiryMode(); !ok {
 		return &ValidationError{Name: "expiry_mode", err: errors.New(`ent: missing required field "MarketingSettings.expiry_mode"`)}
 	}
@@ -230,6 +447,35 @@ func (_c *MarketingSettingsCreate) check() error {
 	}
 	if _, ok := _c.mutation.ExpiryMinutes(); !ok {
 		return &ValidationError{Name: "expiry_minutes", err: errors.New(`ent: missing required field "MarketingSettings.expiry_minutes"`)}
+	}
+	if _, ok := _c.mutation.SettlementFrequency(); !ok {
+		return &ValidationError{Name: "settlement_frequency", err: errors.New(`ent: missing required field "MarketingSettings.settlement_frequency"`)}
+	}
+	if v, ok := _c.mutation.SettlementFrequency(); ok {
+		if err := marketingsettings.SettlementFrequencyValidator(v); err != nil {
+			return &ValidationError{Name: "settlement_frequency", err: fmt.Errorf(`ent: validator failed for field "MarketingSettings.settlement_frequency": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.SettlementWeekday(); !ok {
+		return &ValidationError{Name: "settlement_weekday", err: errors.New(`ent: missing required field "MarketingSettings.settlement_weekday"`)}
+	}
+	if _, ok := _c.mutation.SettlementMonthDay(); !ok {
+		return &ValidationError{Name: "settlement_month_day", err: errors.New(`ent: missing required field "MarketingSettings.settlement_month_day"`)}
+	}
+	if _, ok := _c.mutation.SettlementClock(); !ok {
+		return &ValidationError{Name: "settlement_clock", err: errors.New(`ent: missing required field "MarketingSettings.settlement_clock"`)}
+	}
+	if _, ok := _c.mutation.SettlementDelayMinutes(); !ok {
+		return &ValidationError{Name: "settlement_delay_minutes", err: errors.New(`ent: missing required field "MarketingSettings.settlement_delay_minutes"`)}
+	}
+	if _, ok := _c.mutation.PlaybackCutoffClock(); !ok {
+		return &ValidationError{Name: "playback_cutoff_clock", err: errors.New(`ent: missing required field "MarketingSettings.playback_cutoff_clock"`)}
+	}
+	if _, ok := _c.mutation.PlaybackCutoffMinutes(); !ok {
+		return &ValidationError{Name: "playback_cutoff_minutes", err: errors.New(`ent: missing required field "MarketingSettings.playback_cutoff_minutes"`)}
+	}
+	if _, ok := _c.mutation.PlaybackDeferralPeriods(); !ok {
+		return &ValidationError{Name: "playback_deferral_periods", err: errors.New(`ent: missing required field "MarketingSettings.playback_deferral_periods"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := marketingsettings.IDValidator(v); err != nil {
@@ -296,6 +542,18 @@ func (_c *MarketingSettingsCreate) createSpec() (*MarketingSettings, *sqlgraph.C
 		_spec.SetField(marketingsettings.FieldOnline, field.TypeBool, value)
 		_node.Online = value
 	}
+	if value, ok := _c.mutation.DailyLimit(); ok {
+		_spec.SetField(marketingsettings.FieldDailyLimit, field.TypeInt, value)
+		_node.DailyLimit = value
+	}
+	if value, ok := _c.mutation.CreativeLimit(); ok {
+		_spec.SetField(marketingsettings.FieldCreativeLimit, field.TypeInt, value)
+		_node.CreativeLimit = value
+	}
+	if value, ok := _c.mutation.CreativeOnline(); ok {
+		_spec.SetField(marketingsettings.FieldCreativeOnline, field.TypeBool, value)
+		_node.CreativeOnline = value
+	}
 	if value, ok := _c.mutation.ExpiryMode(); ok {
 		_spec.SetField(marketingsettings.FieldExpiryMode, field.TypeEnum, value)
 		_node.ExpiryMode = value
@@ -303,6 +561,38 @@ func (_c *MarketingSettingsCreate) createSpec() (*MarketingSettings, *sqlgraph.C
 	if value, ok := _c.mutation.ExpiryMinutes(); ok {
 		_spec.SetField(marketingsettings.FieldExpiryMinutes, field.TypeInt, value)
 		_node.ExpiryMinutes = value
+	}
+	if value, ok := _c.mutation.SettlementFrequency(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementFrequency, field.TypeEnum, value)
+		_node.SettlementFrequency = value
+	}
+	if value, ok := _c.mutation.SettlementWeekday(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementWeekday, field.TypeInt, value)
+		_node.SettlementWeekday = value
+	}
+	if value, ok := _c.mutation.SettlementMonthDay(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementMonthDay, field.TypeInt, value)
+		_node.SettlementMonthDay = value
+	}
+	if value, ok := _c.mutation.SettlementClock(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementClock, field.TypeString, value)
+		_node.SettlementClock = value
+	}
+	if value, ok := _c.mutation.SettlementDelayMinutes(); ok {
+		_spec.SetField(marketingsettings.FieldSettlementDelayMinutes, field.TypeInt, value)
+		_node.SettlementDelayMinutes = value
+	}
+	if value, ok := _c.mutation.PlaybackCutoffClock(); ok {
+		_spec.SetField(marketingsettings.FieldPlaybackCutoffClock, field.TypeString, value)
+		_node.PlaybackCutoffClock = value
+	}
+	if value, ok := _c.mutation.PlaybackCutoffMinutes(); ok {
+		_spec.SetField(marketingsettings.FieldPlaybackCutoffMinutes, field.TypeInt, value)
+		_node.PlaybackCutoffMinutes = value
+	}
+	if value, ok := _c.mutation.PlaybackDeferralPeriods(); ok {
+		_spec.SetField(marketingsettings.FieldPlaybackDeferralPeriods, field.TypeInt, value)
+		_node.PlaybackDeferralPeriods = value
 	}
 	return _node, _spec
 }
@@ -404,6 +694,54 @@ func (u *MarketingSettingsUpsert) UpdateOnline() *MarketingSettingsUpsert {
 	return u
 }
 
+// SetDailyLimit sets the "daily_limit" field.
+func (u *MarketingSettingsUpsert) SetDailyLimit(v int) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldDailyLimit, v)
+	return u
+}
+
+// UpdateDailyLimit sets the "daily_limit" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdateDailyLimit() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldDailyLimit)
+	return u
+}
+
+// AddDailyLimit adds v to the "daily_limit" field.
+func (u *MarketingSettingsUpsert) AddDailyLimit(v int) *MarketingSettingsUpsert {
+	u.Add(marketingsettings.FieldDailyLimit, v)
+	return u
+}
+
+// SetCreativeLimit sets the "creative_limit" field.
+func (u *MarketingSettingsUpsert) SetCreativeLimit(v int) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldCreativeLimit, v)
+	return u
+}
+
+// UpdateCreativeLimit sets the "creative_limit" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdateCreativeLimit() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldCreativeLimit)
+	return u
+}
+
+// AddCreativeLimit adds v to the "creative_limit" field.
+func (u *MarketingSettingsUpsert) AddCreativeLimit(v int) *MarketingSettingsUpsert {
+	u.Add(marketingsettings.FieldCreativeLimit, v)
+	return u
+}
+
+// SetCreativeOnline sets the "creative_online" field.
+func (u *MarketingSettingsUpsert) SetCreativeOnline(v bool) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldCreativeOnline, v)
+	return u
+}
+
+// UpdateCreativeOnline sets the "creative_online" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdateCreativeOnline() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldCreativeOnline)
+	return u
+}
+
 // SetExpiryMode sets the "expiry_mode" field.
 func (u *MarketingSettingsUpsert) SetExpiryMode(v enum.MarketingExpiryMode) *MarketingSettingsUpsert {
 	u.Set(marketingsettings.FieldExpiryMode, v)
@@ -431,6 +769,132 @@ func (u *MarketingSettingsUpsert) UpdateExpiryMinutes() *MarketingSettingsUpsert
 // AddExpiryMinutes adds v to the "expiry_minutes" field.
 func (u *MarketingSettingsUpsert) AddExpiryMinutes(v int) *MarketingSettingsUpsert {
 	u.Add(marketingsettings.FieldExpiryMinutes, v)
+	return u
+}
+
+// SetSettlementFrequency sets the "settlement_frequency" field.
+func (u *MarketingSettingsUpsert) SetSettlementFrequency(v enum.SettlementFrequency) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldSettlementFrequency, v)
+	return u
+}
+
+// UpdateSettlementFrequency sets the "settlement_frequency" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdateSettlementFrequency() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldSettlementFrequency)
+	return u
+}
+
+// SetSettlementWeekday sets the "settlement_weekday" field.
+func (u *MarketingSettingsUpsert) SetSettlementWeekday(v int) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldSettlementWeekday, v)
+	return u
+}
+
+// UpdateSettlementWeekday sets the "settlement_weekday" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdateSettlementWeekday() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldSettlementWeekday)
+	return u
+}
+
+// AddSettlementWeekday adds v to the "settlement_weekday" field.
+func (u *MarketingSettingsUpsert) AddSettlementWeekday(v int) *MarketingSettingsUpsert {
+	u.Add(marketingsettings.FieldSettlementWeekday, v)
+	return u
+}
+
+// SetSettlementMonthDay sets the "settlement_month_day" field.
+func (u *MarketingSettingsUpsert) SetSettlementMonthDay(v int) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldSettlementMonthDay, v)
+	return u
+}
+
+// UpdateSettlementMonthDay sets the "settlement_month_day" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdateSettlementMonthDay() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldSettlementMonthDay)
+	return u
+}
+
+// AddSettlementMonthDay adds v to the "settlement_month_day" field.
+func (u *MarketingSettingsUpsert) AddSettlementMonthDay(v int) *MarketingSettingsUpsert {
+	u.Add(marketingsettings.FieldSettlementMonthDay, v)
+	return u
+}
+
+// SetSettlementClock sets the "settlement_clock" field.
+func (u *MarketingSettingsUpsert) SetSettlementClock(v string) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldSettlementClock, v)
+	return u
+}
+
+// UpdateSettlementClock sets the "settlement_clock" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdateSettlementClock() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldSettlementClock)
+	return u
+}
+
+// SetSettlementDelayMinutes sets the "settlement_delay_minutes" field.
+func (u *MarketingSettingsUpsert) SetSettlementDelayMinutes(v int) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldSettlementDelayMinutes, v)
+	return u
+}
+
+// UpdateSettlementDelayMinutes sets the "settlement_delay_minutes" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdateSettlementDelayMinutes() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldSettlementDelayMinutes)
+	return u
+}
+
+// AddSettlementDelayMinutes adds v to the "settlement_delay_minutes" field.
+func (u *MarketingSettingsUpsert) AddSettlementDelayMinutes(v int) *MarketingSettingsUpsert {
+	u.Add(marketingsettings.FieldSettlementDelayMinutes, v)
+	return u
+}
+
+// SetPlaybackCutoffClock sets the "playback_cutoff_clock" field.
+func (u *MarketingSettingsUpsert) SetPlaybackCutoffClock(v string) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldPlaybackCutoffClock, v)
+	return u
+}
+
+// UpdatePlaybackCutoffClock sets the "playback_cutoff_clock" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdatePlaybackCutoffClock() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldPlaybackCutoffClock)
+	return u
+}
+
+// SetPlaybackCutoffMinutes sets the "playback_cutoff_minutes" field.
+func (u *MarketingSettingsUpsert) SetPlaybackCutoffMinutes(v int) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldPlaybackCutoffMinutes, v)
+	return u
+}
+
+// UpdatePlaybackCutoffMinutes sets the "playback_cutoff_minutes" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdatePlaybackCutoffMinutes() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldPlaybackCutoffMinutes)
+	return u
+}
+
+// AddPlaybackCutoffMinutes adds v to the "playback_cutoff_minutes" field.
+func (u *MarketingSettingsUpsert) AddPlaybackCutoffMinutes(v int) *MarketingSettingsUpsert {
+	u.Add(marketingsettings.FieldPlaybackCutoffMinutes, v)
+	return u
+}
+
+// SetPlaybackDeferralPeriods sets the "playback_deferral_periods" field.
+func (u *MarketingSettingsUpsert) SetPlaybackDeferralPeriods(v int) *MarketingSettingsUpsert {
+	u.Set(marketingsettings.FieldPlaybackDeferralPeriods, v)
+	return u
+}
+
+// UpdatePlaybackDeferralPeriods sets the "playback_deferral_periods" field to the value that was provided on create.
+func (u *MarketingSettingsUpsert) UpdatePlaybackDeferralPeriods() *MarketingSettingsUpsert {
+	u.SetExcluded(marketingsettings.FieldPlaybackDeferralPeriods)
+	return u
+}
+
+// AddPlaybackDeferralPeriods adds v to the "playback_deferral_periods" field.
+func (u *MarketingSettingsUpsert) AddPlaybackDeferralPeriods(v int) *MarketingSettingsUpsert {
+	u.Add(marketingsettings.FieldPlaybackDeferralPeriods, v)
 	return u
 }
 
@@ -544,6 +1008,62 @@ func (u *MarketingSettingsUpsertOne) UpdateOnline() *MarketingSettingsUpsertOne 
 	})
 }
 
+// SetDailyLimit sets the "daily_limit" field.
+func (u *MarketingSettingsUpsertOne) SetDailyLimit(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetDailyLimit(v)
+	})
+}
+
+// AddDailyLimit adds v to the "daily_limit" field.
+func (u *MarketingSettingsUpsertOne) AddDailyLimit(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddDailyLimit(v)
+	})
+}
+
+// UpdateDailyLimit sets the "daily_limit" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdateDailyLimit() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateDailyLimit()
+	})
+}
+
+// SetCreativeLimit sets the "creative_limit" field.
+func (u *MarketingSettingsUpsertOne) SetCreativeLimit(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetCreativeLimit(v)
+	})
+}
+
+// AddCreativeLimit adds v to the "creative_limit" field.
+func (u *MarketingSettingsUpsertOne) AddCreativeLimit(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddCreativeLimit(v)
+	})
+}
+
+// UpdateCreativeLimit sets the "creative_limit" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdateCreativeLimit() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateCreativeLimit()
+	})
+}
+
+// SetCreativeOnline sets the "creative_online" field.
+func (u *MarketingSettingsUpsertOne) SetCreativeOnline(v bool) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetCreativeOnline(v)
+	})
+}
+
+// UpdateCreativeOnline sets the "creative_online" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdateCreativeOnline() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateCreativeOnline()
+	})
+}
+
 // SetExpiryMode sets the "expiry_mode" field.
 func (u *MarketingSettingsUpsertOne) SetExpiryMode(v enum.MarketingExpiryMode) *MarketingSettingsUpsertOne {
 	return u.Update(func(s *MarketingSettingsUpsert) {
@@ -576,6 +1096,153 @@ func (u *MarketingSettingsUpsertOne) AddExpiryMinutes(v int) *MarketingSettingsU
 func (u *MarketingSettingsUpsertOne) UpdateExpiryMinutes() *MarketingSettingsUpsertOne {
 	return u.Update(func(s *MarketingSettingsUpsert) {
 		s.UpdateExpiryMinutes()
+	})
+}
+
+// SetSettlementFrequency sets the "settlement_frequency" field.
+func (u *MarketingSettingsUpsertOne) SetSettlementFrequency(v enum.SettlementFrequency) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementFrequency(v)
+	})
+}
+
+// UpdateSettlementFrequency sets the "settlement_frequency" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdateSettlementFrequency() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementFrequency()
+	})
+}
+
+// SetSettlementWeekday sets the "settlement_weekday" field.
+func (u *MarketingSettingsUpsertOne) SetSettlementWeekday(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementWeekday(v)
+	})
+}
+
+// AddSettlementWeekday adds v to the "settlement_weekday" field.
+func (u *MarketingSettingsUpsertOne) AddSettlementWeekday(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddSettlementWeekday(v)
+	})
+}
+
+// UpdateSettlementWeekday sets the "settlement_weekday" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdateSettlementWeekday() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementWeekday()
+	})
+}
+
+// SetSettlementMonthDay sets the "settlement_month_day" field.
+func (u *MarketingSettingsUpsertOne) SetSettlementMonthDay(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementMonthDay(v)
+	})
+}
+
+// AddSettlementMonthDay adds v to the "settlement_month_day" field.
+func (u *MarketingSettingsUpsertOne) AddSettlementMonthDay(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddSettlementMonthDay(v)
+	})
+}
+
+// UpdateSettlementMonthDay sets the "settlement_month_day" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdateSettlementMonthDay() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementMonthDay()
+	})
+}
+
+// SetSettlementClock sets the "settlement_clock" field.
+func (u *MarketingSettingsUpsertOne) SetSettlementClock(v string) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementClock(v)
+	})
+}
+
+// UpdateSettlementClock sets the "settlement_clock" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdateSettlementClock() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementClock()
+	})
+}
+
+// SetSettlementDelayMinutes sets the "settlement_delay_minutes" field.
+func (u *MarketingSettingsUpsertOne) SetSettlementDelayMinutes(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementDelayMinutes(v)
+	})
+}
+
+// AddSettlementDelayMinutes adds v to the "settlement_delay_minutes" field.
+func (u *MarketingSettingsUpsertOne) AddSettlementDelayMinutes(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddSettlementDelayMinutes(v)
+	})
+}
+
+// UpdateSettlementDelayMinutes sets the "settlement_delay_minutes" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdateSettlementDelayMinutes() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementDelayMinutes()
+	})
+}
+
+// SetPlaybackCutoffClock sets the "playback_cutoff_clock" field.
+func (u *MarketingSettingsUpsertOne) SetPlaybackCutoffClock(v string) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetPlaybackCutoffClock(v)
+	})
+}
+
+// UpdatePlaybackCutoffClock sets the "playback_cutoff_clock" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdatePlaybackCutoffClock() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdatePlaybackCutoffClock()
+	})
+}
+
+// SetPlaybackCutoffMinutes sets the "playback_cutoff_minutes" field.
+func (u *MarketingSettingsUpsertOne) SetPlaybackCutoffMinutes(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetPlaybackCutoffMinutes(v)
+	})
+}
+
+// AddPlaybackCutoffMinutes adds v to the "playback_cutoff_minutes" field.
+func (u *MarketingSettingsUpsertOne) AddPlaybackCutoffMinutes(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddPlaybackCutoffMinutes(v)
+	})
+}
+
+// UpdatePlaybackCutoffMinutes sets the "playback_cutoff_minutes" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdatePlaybackCutoffMinutes() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdatePlaybackCutoffMinutes()
+	})
+}
+
+// SetPlaybackDeferralPeriods sets the "playback_deferral_periods" field.
+func (u *MarketingSettingsUpsertOne) SetPlaybackDeferralPeriods(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetPlaybackDeferralPeriods(v)
+	})
+}
+
+// AddPlaybackDeferralPeriods adds v to the "playback_deferral_periods" field.
+func (u *MarketingSettingsUpsertOne) AddPlaybackDeferralPeriods(v int) *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddPlaybackDeferralPeriods(v)
+	})
+}
+
+// UpdatePlaybackDeferralPeriods sets the "playback_deferral_periods" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertOne) UpdatePlaybackDeferralPeriods() *MarketingSettingsUpsertOne {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdatePlaybackDeferralPeriods()
 	})
 }
 
@@ -856,6 +1523,62 @@ func (u *MarketingSettingsUpsertBulk) UpdateOnline() *MarketingSettingsUpsertBul
 	})
 }
 
+// SetDailyLimit sets the "daily_limit" field.
+func (u *MarketingSettingsUpsertBulk) SetDailyLimit(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetDailyLimit(v)
+	})
+}
+
+// AddDailyLimit adds v to the "daily_limit" field.
+func (u *MarketingSettingsUpsertBulk) AddDailyLimit(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddDailyLimit(v)
+	})
+}
+
+// UpdateDailyLimit sets the "daily_limit" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdateDailyLimit() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateDailyLimit()
+	})
+}
+
+// SetCreativeLimit sets the "creative_limit" field.
+func (u *MarketingSettingsUpsertBulk) SetCreativeLimit(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetCreativeLimit(v)
+	})
+}
+
+// AddCreativeLimit adds v to the "creative_limit" field.
+func (u *MarketingSettingsUpsertBulk) AddCreativeLimit(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddCreativeLimit(v)
+	})
+}
+
+// UpdateCreativeLimit sets the "creative_limit" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdateCreativeLimit() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateCreativeLimit()
+	})
+}
+
+// SetCreativeOnline sets the "creative_online" field.
+func (u *MarketingSettingsUpsertBulk) SetCreativeOnline(v bool) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetCreativeOnline(v)
+	})
+}
+
+// UpdateCreativeOnline sets the "creative_online" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdateCreativeOnline() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateCreativeOnline()
+	})
+}
+
 // SetExpiryMode sets the "expiry_mode" field.
 func (u *MarketingSettingsUpsertBulk) SetExpiryMode(v enum.MarketingExpiryMode) *MarketingSettingsUpsertBulk {
 	return u.Update(func(s *MarketingSettingsUpsert) {
@@ -888,6 +1611,153 @@ func (u *MarketingSettingsUpsertBulk) AddExpiryMinutes(v int) *MarketingSettings
 func (u *MarketingSettingsUpsertBulk) UpdateExpiryMinutes() *MarketingSettingsUpsertBulk {
 	return u.Update(func(s *MarketingSettingsUpsert) {
 		s.UpdateExpiryMinutes()
+	})
+}
+
+// SetSettlementFrequency sets the "settlement_frequency" field.
+func (u *MarketingSettingsUpsertBulk) SetSettlementFrequency(v enum.SettlementFrequency) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementFrequency(v)
+	})
+}
+
+// UpdateSettlementFrequency sets the "settlement_frequency" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdateSettlementFrequency() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementFrequency()
+	})
+}
+
+// SetSettlementWeekday sets the "settlement_weekday" field.
+func (u *MarketingSettingsUpsertBulk) SetSettlementWeekday(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementWeekday(v)
+	})
+}
+
+// AddSettlementWeekday adds v to the "settlement_weekday" field.
+func (u *MarketingSettingsUpsertBulk) AddSettlementWeekday(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddSettlementWeekday(v)
+	})
+}
+
+// UpdateSettlementWeekday sets the "settlement_weekday" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdateSettlementWeekday() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementWeekday()
+	})
+}
+
+// SetSettlementMonthDay sets the "settlement_month_day" field.
+func (u *MarketingSettingsUpsertBulk) SetSettlementMonthDay(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementMonthDay(v)
+	})
+}
+
+// AddSettlementMonthDay adds v to the "settlement_month_day" field.
+func (u *MarketingSettingsUpsertBulk) AddSettlementMonthDay(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddSettlementMonthDay(v)
+	})
+}
+
+// UpdateSettlementMonthDay sets the "settlement_month_day" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdateSettlementMonthDay() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementMonthDay()
+	})
+}
+
+// SetSettlementClock sets the "settlement_clock" field.
+func (u *MarketingSettingsUpsertBulk) SetSettlementClock(v string) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementClock(v)
+	})
+}
+
+// UpdateSettlementClock sets the "settlement_clock" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdateSettlementClock() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementClock()
+	})
+}
+
+// SetSettlementDelayMinutes sets the "settlement_delay_minutes" field.
+func (u *MarketingSettingsUpsertBulk) SetSettlementDelayMinutes(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetSettlementDelayMinutes(v)
+	})
+}
+
+// AddSettlementDelayMinutes adds v to the "settlement_delay_minutes" field.
+func (u *MarketingSettingsUpsertBulk) AddSettlementDelayMinutes(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddSettlementDelayMinutes(v)
+	})
+}
+
+// UpdateSettlementDelayMinutes sets the "settlement_delay_minutes" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdateSettlementDelayMinutes() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdateSettlementDelayMinutes()
+	})
+}
+
+// SetPlaybackCutoffClock sets the "playback_cutoff_clock" field.
+func (u *MarketingSettingsUpsertBulk) SetPlaybackCutoffClock(v string) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetPlaybackCutoffClock(v)
+	})
+}
+
+// UpdatePlaybackCutoffClock sets the "playback_cutoff_clock" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdatePlaybackCutoffClock() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdatePlaybackCutoffClock()
+	})
+}
+
+// SetPlaybackCutoffMinutes sets the "playback_cutoff_minutes" field.
+func (u *MarketingSettingsUpsertBulk) SetPlaybackCutoffMinutes(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetPlaybackCutoffMinutes(v)
+	})
+}
+
+// AddPlaybackCutoffMinutes adds v to the "playback_cutoff_minutes" field.
+func (u *MarketingSettingsUpsertBulk) AddPlaybackCutoffMinutes(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddPlaybackCutoffMinutes(v)
+	})
+}
+
+// UpdatePlaybackCutoffMinutes sets the "playback_cutoff_minutes" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdatePlaybackCutoffMinutes() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdatePlaybackCutoffMinutes()
+	})
+}
+
+// SetPlaybackDeferralPeriods sets the "playback_deferral_periods" field.
+func (u *MarketingSettingsUpsertBulk) SetPlaybackDeferralPeriods(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.SetPlaybackDeferralPeriods(v)
+	})
+}
+
+// AddPlaybackDeferralPeriods adds v to the "playback_deferral_periods" field.
+func (u *MarketingSettingsUpsertBulk) AddPlaybackDeferralPeriods(v int) *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.AddPlaybackDeferralPeriods(v)
+	})
+}
+
+// UpdatePlaybackDeferralPeriods sets the "playback_deferral_periods" field to the value that was provided on create.
+func (u *MarketingSettingsUpsertBulk) UpdatePlaybackDeferralPeriods() *MarketingSettingsUpsertBulk {
+	return u.Update(func(s *MarketingSettingsUpsert) {
+		s.UpdatePlaybackDeferralPeriods()
 	})
 }
 

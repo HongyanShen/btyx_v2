@@ -150,7 +150,7 @@ func (s *Service) VerifyIdentity(ctx context.Context, userID string, input Verif
 		}
 
 		if contactsChanged {
-			return true, app.Audit(ctx, tx, userID, enum.AuditUserProfileUpdate, userID, "")
+			return true, app.Audit(ctx, tx, userID, enum.AuditUserProfileUpdate, userID, "", "变更字段：联系方式")
 		}
 
 		return false, nil

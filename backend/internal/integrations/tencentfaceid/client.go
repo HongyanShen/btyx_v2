@@ -8,6 +8,7 @@ import (
 
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	tcerrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
@@ -30,6 +31,7 @@ func New(secretID, secretKey string) (*Client, error) {
 		return nil, errors.New("初始化实名信息核验失败")
 	}
 
+	client.WithHttpTransport(telemetry.Transport("tencent.faceid"))
 	return &Client{api: client}, nil
 }
 

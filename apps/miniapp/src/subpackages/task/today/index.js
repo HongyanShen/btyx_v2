@@ -7,10 +7,19 @@ const {
 } = require("../../../services/marketing-tasks");
 const { doubleFen, formatFen } = require("../../../services/money");
 const { newKey, post } = require("../../../services/request");
-const { isCurrentSession, openLogin, tokenKey } = require("../../../services/session");
+const {
+  isCurrentSession,
+  openLogin,
+  tokenKey,
+} = require("../../../services/session");
 
-function claimAction(user, ready, today, hasContent) {
-  if (today) {
+function claimAction(user, ready, today, hasContent, dailyLimit, used) {
+  const more = used < dailyLimit;
+  if (dailyLimit > 1 && !more) {
+    return { action: "", actionLabel: "今天 " + dailyLimit + " 条已领满" };
+  }
+
+  if (today && !(ready && !user?.blocked && hasContent && more)) {
     return { action: "open", actionLabel: "查看今日任务" };
   }
 
@@ -36,7 +45,7 @@ function claimAction(user, ready, today, hasContent) {
   }
 
   return hasContent
-    ? { action: "claim", actionLabel: "领取今日任务" }
+    ? { action: "claim", actionLabel: today ? "再领一条" : "领取今日任务" }
     : { action: "", actionLabel: "暂无可领取任务" };
 }
 
@@ -46,6 +55,8 @@ function displayPrices(priceFen) {
     twoPlatformPrice: formatFen(doubleFen(priceFen)),
   };
 }
+
+const { subscribe } = require("../../../services/subscriptions");
 
 Page({
   data: {
@@ -91,22 +102,41 @@ Page({
     try {
       const overview = this.initialOverview || loadMarketingTasks();
       this.initialOverview = null;
-      const { user, today, hasContent, priceFen } = await overview;
+      const {
+        user,
+        today,
+        hasContent,
+        priceFen,
+        settlementLabel,
+        dailyLimit = 1,
+        used = today ? 1 : 0,
+        creativeOnline,
+        creativeLimit,
+      } = await overview;
       if (this.unloaded) {
         return;
       }
 
       const ready =
-        user?.status === EnrollmentStatus.EnrollmentApproved && !!user.consented;
-      const offerPrice = today?.price_fen || priceFen || config.marketingReferencePriceFen;
+        user?.status === EnrollmentStatus.EnrollmentApproved &&
+        !!user.consented;
+      const offerPrice =
+        (used >= dailyLimit && today?.price_fen) ||
+        priceFen ||
+        config.marketingReferencePriceFen;
 
       this.setData({
         ...displayPrices(offerPrice),
-        ...claimAction(user, ready, today, hasContent),
+        ...claimAction(user, ready, today, hasContent, dailyLimit, used),
+        dailyLimit,
+        used,
+        creativeOnline,
+        creativeLimit,
         signedIn: !!user,
         ready,
         today,
         blocked: !!user?.blocked,
+        settlementLabel: settlementLabel || "按任务安排",
       });
     } catch (error) {
       if (!this.unloaded) {
@@ -153,6 +183,7 @@ Page({
 
     try {
       const token = wx.getStorageSync(tokenKey);
+      if (wx.requestSubscribeMessage) await subscribe("claim");
       const assignment = await post("/tasks/claim", {}, this.claimAttempt.key);
       if (this.unloaded) {
         return;
@@ -182,6 +213,10 @@ Page({
         this.setData({ claiming: false });
       }
     }
+  },
+
+  openCurrent() {
+    if (this.data.today) this.openAssignment(this.data.today.id);
   },
 
   openAssignment(id) {

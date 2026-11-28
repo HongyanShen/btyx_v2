@@ -34,6 +34,12 @@ func (Operator) Fields() []ent.Field {
 		field.Bool("disabled").
 			Default(false),
 
+		field.Bool("all_pages").
+			Default(false),
+
+		field.Bool("all_endpoints").
+			Default(false),
+
 		field.JSON("pages", []string{}).
 			Default([]string{}),
 

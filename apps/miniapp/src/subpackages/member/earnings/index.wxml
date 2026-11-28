@@ -1,0 +1,23 @@
+<import src="/templates/loading.wxml" />
+<view class="wallet-page">
+  <view class="earnings-tabs">
+    <button class="earnings-tab {{tab === 'commission' ? 'earnings-selected' : ''}}" data-tab="commission" bindtap="selectTab">佣金明细</button>
+    <button class="earnings-tab {{tab === 'flow' ? 'earnings-selected' : ''}}" data-tab="flow" bindtap="selectTab">收支明细</button>
+  </view>
+  <view wx:if="{{tab === 'commission'}}" class="wallet-caption earnings-empty">带货佣金即将上线</view>
+  <block wx:else>
+    <template wx:if="{{state === 'loading'}}" is="loading-card" />
+    <button wx:if="{{state === 'error'}}" class="error wallet-retry" bindtap="load">{{error}} · 点击重试</button>
+    <view wx:if="{{state === 'empty'}}" class="wallet-caption earnings-empty">暂无记录</view>
+    <view wx:if="{{state === 'ready'}}" class="earnings-records">
+      <view wx:for="{{ledger}}" wx:key="id" class="wallet-record">
+        <view class="row">
+          <text class="wallet-record-title grow">{{item.label}}</text>
+          <text class="wallet-number {{item.incoming ? 'earnings-credit' : ''}}">{{item.signedAmount}}</text>
+        </view>
+        <view class="wallet-caption wallet-record-meta">{{item.time}}</view>
+        <view wx:if="{{item.reason}}" class="wallet-caption">{{item.reason}}</view>
+      </view>
+    </view>
+  </block>
+</view>

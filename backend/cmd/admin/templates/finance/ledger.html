@@ -1,0 +1,47 @@
+{{define "ledger"}}
+<section class="page server-page workspace-page">
+  <div class="page-heading"><div><h2>余额流水</h2><span class="ant-typography-secondary">记录每笔结算、冻结、到账和退回。历史流水保留原貌，纠错通过关联调整完成。</span></div></div>
+  <div class="ant-card server-card"><div class="ant-card-body">
+    <div class="server-table-scroll" role="region" aria-label="余额流水表格" tabindex="0">
+      <table class="server-table ledger-table">
+        <thead><tr><th scope="col">分发员编号</th><th scope="col">流水类型</th><th scope="col">可用余额变动</th><th scope="col">说明</th><th scope="col">时间</th><th scope="col">操作</th></tr></thead>
+        <tbody>
+          {{$page := .}}
+          {{range .Rows}}
+          <tr>
+            <td class="server-ellipsis" title="{{.UserID}}">{{.UserID}}</td>
+            <td><span class="server-tag">{{.Kind}}</span></td>
+            <td><strong{{if .Positive}} class="money"{{end}}>{{.Amount}}</strong></td>
+            <td>{{.Reason}}</td><td>{{.Date}}</td>
+            <td>{{if $page.CanAdjust}}
+              <a class="server-link" role="button" href="/ledger?page={{$page.Pager.Current}}&amp;adjust={{.ID}}" hx-get="/ledger?page={{$page.Pager.Current}}&amp;adjust={{.ID}}" hx-target="#ledger-dialog-slot" data-open-server-dialog>关联调整</a>
+            {{end}}</td>
+          </tr>
+          {{else}}<tr><td colspan="6" class="server-empty">{{template "empty-table" "暂无数据"}}</td></tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+    {{template "pagination" .Pager}}
+  </div></div>
+  <div id="ledger-dialog-slot">{{with .Dialog}}{{template "ledger-dialog" .}}{{end}}</div>
+</section>
+{{end}}
+{{define "ledger-dialog"}}
+<dialog class="server-dialog" data-server-dialog aria-labelledby="ledger-dialog-title">
+  <header><h3 id="ledger-dialog-title">创建关联调整</h3><button type="button" data-close-dialog aria-label="关闭">×</button></header>
+  <form class="server-dialog-form" method="post" action="/ledger/{{.ID}}/adjust?page={{.Page}}" hx-post="/ledger/{{.ID}}/adjust?page={{.Page}}" hx-target="#ledger-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <input type="hidden" name="key" value="{{.Key}}" data-idempotency-key>
+    <div class="server-dialog-body">
+      <div class="server-alert server-alert-warning">调整会影响可提现余额，请核对金额和原因。原流水不会被修改。</div>
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{end}}
+      <label for="ledger-yuan">调整金额（元，增加填正数，扣减填负数）</label>
+      <input id="ledger-yuan" name="delta_yuan" type="text" inputmode="decimal" placeholder="例如：7.50 或 -7.50" value="{{.Amount}}" required autofocus>
+      <label for="ledger-reason">调整原因</label>
+      <textarea id="ledger-reason" name="reason" rows="4" required>{{.Reason}}</textarea>
+    </div>
+    <footer><button class="server-button" data-close-dialog type="button">取消</button><button class="server-button server-primary" type="submit">确定</button></footer>
+  </form>
+</dialog>
+{{end}}

@@ -64,6 +64,20 @@ func (_c *JobCreate) SetReferenceID(v string) *JobCreate {
 	return _c
 }
 
+// SetTraceParent sets the "trace_parent" field.
+func (_c *JobCreate) SetTraceParent(v string) *JobCreate {
+	_c.mutation.SetTraceParent(v)
+	return _c
+}
+
+// SetNillableTraceParent sets the "trace_parent" field if the given value is not nil.
+func (_c *JobCreate) SetNillableTraceParent(v *string) *JobCreate {
+	if v != nil {
+		_c.SetTraceParent(*v)
+	}
+	return _c
+}
+
 // SetRequestID sets the "request_id" field.
 func (_c *JobCreate) SetRequestID(v string) *JobCreate {
 	_c.mutation.SetRequestID(v)
@@ -191,6 +205,10 @@ func (_c *JobCreate) defaults() {
 		v := job.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.TraceParent(); !ok {
+		v := job.DefaultTraceParent
+		_c.mutation.SetTraceParent(v)
+	}
 	if _, ok := _c.mutation.RequestID(); !ok {
 		v := job.DefaultRequestID
 		_c.mutation.SetRequestID(v)
@@ -235,6 +253,14 @@ func (_c *JobCreate) check() error {
 	}
 	if _, ok := _c.mutation.ReferenceID(); !ok {
 		return &ValidationError{Name: "reference_id", err: errors.New(`ent: missing required field "Job.reference_id"`)}
+	}
+	if _, ok := _c.mutation.TraceParent(); !ok {
+		return &ValidationError{Name: "trace_parent", err: errors.New(`ent: missing required field "Job.trace_parent"`)}
+	}
+	if v, ok := _c.mutation.TraceParent(); ok {
+		if err := job.TraceParentValidator(v); err != nil {
+			return &ValidationError{Name: "trace_parent", err: fmt.Errorf(`ent: validator failed for field "Job.trace_parent": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.RequestID(); !ok {
 		return &ValidationError{Name: "request_id", err: errors.New(`ent: missing required field "Job.request_id"`)}
@@ -317,6 +343,10 @@ func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ReferenceID(); ok {
 		_spec.SetField(job.FieldReferenceID, field.TypeString, value)
 		_node.ReferenceID = value
+	}
+	if value, ok := _c.mutation.TraceParent(); ok {
+		_spec.SetField(job.FieldTraceParent, field.TypeString, value)
+		_node.TraceParent = value
 	}
 	if value, ok := _c.mutation.RequestID(); ok {
 		_spec.SetField(job.FieldRequestID, field.TypeString, value)
@@ -499,6 +529,9 @@ func (u *JobUpsertOne) UpdateNewValues() *JobUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(job.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.TraceParent(); exists {
+			s.SetIgnore(job.FieldTraceParent)
 		}
 		if _, exists := u.create.mutation.RequestID(); exists {
 			s.SetIgnore(job.FieldRequestID)
@@ -824,6 +857,9 @@ func (u *JobUpsertBulk) UpdateNewValues() *JobUpsertBulk {
 			}
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(job.FieldCreatedAt)
+			}
+			if _, exists := b.mutation.TraceParent(); exists {
+				s.SetIgnore(job.FieldTraceParent)
 			}
 			if _, exists := b.mutation.RequestID(); exists {
 				s.SetIgnore(job.FieldRequestID)

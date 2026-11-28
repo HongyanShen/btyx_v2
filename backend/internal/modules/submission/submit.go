@@ -14,32 +14,6 @@ import (
 	"baituber.cn/yanxuan/v2/internal/platform/app"
 )
 
-func (s *Service) eligibleDate(assignmentRecord *ent.Assignment) string {
-	z := time.FixedZone("CST", 8*3600)
-	d, _ := time.ParseInLocation("2006-01-02", assignmentRecord.BusinessDate, z)
-	days := (8 - int(d.Weekday())) % 7
-	if days == 0 {
-		days = 7
-	}
-
-	due := d.AddDate(0, 0, days).
-		Add(12 * time.Hour)
-	if !s.Now().
-		Before(due) {
-		now := s.Now().
-			In(z)
-		days = (8 - int(now.Weekday())) % 7
-		if days == 0 {
-			days = 7
-		}
-
-		return now.AddDate(0, 0, days).
-			Format("2006-01-02")
-	}
-
-	return due.Format("2006-01-02")
-}
-
 func (s *Service) Submit(ctx context.Context, userID, id string, input SubmitInput) error {
 	workID, err := workKey(input.Platform, input.URL)
 	if err != nil {
@@ -63,6 +37,19 @@ func (s *Service) Submit(ctx context.Context, userID, id string, input SubmitInp
 			return false, app.Invalid("此任务不要求该平台")
 		}
 
+		policy, err := tasks.LoadMarketingPolicy(ctx, tx.Client())
+		if err != nil {
+			return false, err
+		}
+
+		now := s.Now()
+		var screenshotAt time.Time
+		if input.Screenshot != "" {
+			screenshotAt = now
+		}
+
+		eligibleAt := policy.Schedule.EligibleAt(assignmentRecord.CreatedAt, screenshotAt)
+		eligibleDate := eligibleAt.Format(time.DateOnly)
 		old, err := tx.Submission.Query().
 			Where(submission.AssignmentIDEQ(id), submission.PlatformEQ(input.Platform)).
 			Only(ctx)
@@ -86,7 +73,8 @@ func (s *Service) Submit(ctx context.Context, userID, id string, input SubmitInp
 
 				_, err = tx.Submission.UpdateOneID(old.ID).
 					SetScreenshot(input.Screenshot).
-					SetEligibleDate(s.eligibleDate(assignmentRecord)).
+					SetEligibleDate(eligibleDate).
+					SetSettlementEligibleAt(eligibleAt).
 					Save(ctx)
 				if err != nil {
 					return false, err
@@ -106,10 +94,11 @@ func (s *Service) Submit(ctx context.Context, userID, id string, input SubmitInp
 				SetStatus(enum.SubmissionPending).
 				SetReason("").
 				SetRevision(old.Revision + 1).
-				SetEligibleDate(s.eligibleDate(assignmentRecord)).
+				SetEligibleDate(eligibleDate).
+				SetSettlementEligibleAt(eligibleAt).
 				Save(ctx)
 		} else if ent.IsNotFound(err) {
-			if assignmentRecord.ExpiresAt != nil && !s.Now().Before(*assignmentRecord.ExpiresAt) {
+			if assignmentRecord.ExpiresAt != nil && !now.Before(*assignmentRecord.ExpiresAt) {
 				hasLink, err := tx.Submission.Query().
 					Where(submission.AssignmentIDEQ(id)).
 					Exist(ctx)
@@ -122,7 +111,7 @@ func (s *Service) Submit(ctx context.Context, userID, id string, input SubmitInp
 				}
 			}
 
-			if assignmentRecord.ExpiresAt == nil && s.Day() > assignmentRecord.DueDate {
+			if assignmentRecord.ExpiresAt == nil && app.BusinessDay(now) > assignmentRecord.DueDate {
 				return false, app.Conflict("已过当天发布期限，请联系运营")
 			}
 
@@ -132,7 +121,8 @@ func (s *Service) Submit(ctx context.Context, userID, id string, input SubmitInp
 				SetURL(input.URL).
 				SetWorkKey(workID).
 				SetScreenshot(input.Screenshot).
-				SetEligibleDate(s.eligibleDate(assignmentRecord)).
+				SetEligibleDate(eligibleDate).
+				SetSettlementEligibleAt(eligibleAt).
 				Save(ctx)
 		}
 
@@ -140,7 +130,8 @@ func (s *Service) Submit(ctx context.Context, userID, id string, input SubmitInp
 			return false, err
 		}
 
-		if err = app.Audit(ctx, tx, userID, enum.AuditSubmissionSubmit, id, string(input.Platform)); err != nil {
+		if err = app.Audit(ctx, tx, userID, enum.AuditSubmissionSubmit, id, string(input.Platform),
+			"平台："+string(input.Platform), app.AuditFlag("含截图", input.Screenshot != "")); err != nil {
 			return false, err
 		}
 

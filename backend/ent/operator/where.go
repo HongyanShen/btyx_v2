@@ -94,6 +94,16 @@ func Disabled(v bool) predicate.Operator {
 	return predicate.Operator(sql.FieldEQ(FieldDisabled, v))
 }
 
+// AllPages applies equality check predicate on the "all_pages" field. It's identical to AllPagesEQ.
+func AllPages(v bool) predicate.Operator {
+	return predicate.Operator(sql.FieldEQ(FieldAllPages, v))
+}
+
+// AllEndpoints applies equality check predicate on the "all_endpoints" field. It's identical to AllEndpointsEQ.
+func AllEndpoints(v bool) predicate.Operator {
+	return predicate.Operator(sql.FieldEQ(FieldAllEndpoints, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Operator {
 	return predicate.Operator(sql.FieldEQ(FieldCreatedAt, v))
@@ -322,6 +332,26 @@ func DisabledEQ(v bool) predicate.Operator {
 // DisabledNEQ applies the NEQ predicate on the "disabled" field.
 func DisabledNEQ(v bool) predicate.Operator {
 	return predicate.Operator(sql.FieldNEQ(FieldDisabled, v))
+}
+
+// AllPagesEQ applies the EQ predicate on the "all_pages" field.
+func AllPagesEQ(v bool) predicate.Operator {
+	return predicate.Operator(sql.FieldEQ(FieldAllPages, v))
+}
+
+// AllPagesNEQ applies the NEQ predicate on the "all_pages" field.
+func AllPagesNEQ(v bool) predicate.Operator {
+	return predicate.Operator(sql.FieldNEQ(FieldAllPages, v))
+}
+
+// AllEndpointsEQ applies the EQ predicate on the "all_endpoints" field.
+func AllEndpointsEQ(v bool) predicate.Operator {
+	return predicate.Operator(sql.FieldEQ(FieldAllEndpoints, v))
+}
+
+// AllEndpointsNEQ applies the NEQ predicate on the "all_endpoints" field.
+func AllEndpointsNEQ(v bool) predicate.Operator {
+	return predicate.Operator(sql.FieldNEQ(FieldAllEndpoints, v))
 }
 
 // And groups predicates with the AND operator between them.

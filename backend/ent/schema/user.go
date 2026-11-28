@@ -3,8 +3,10 @@ package schema
 import (
 	"baituber.cn/yanxuan/v2/ent/schema/mixin"
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 type User struct{ ent.Schema }
@@ -37,5 +39,12 @@ func (User) Edges() []ent.Edge {
 		edge.To("platform_profile", UserPlatformProfile.Type).
 			Unique(),
 		edge.To("enrollment", UserEnrollment.Type),
+	}
+}
+
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("nickname").
+			Annotations(entsql.IndexWhere("NOT deleted")),
 	}
 }

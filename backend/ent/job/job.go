@@ -23,6 +23,8 @@ const (
 	FieldKind = "kind"
 	// FieldReferenceID holds the string denoting the reference_id field in the database.
 	FieldReferenceID = "reference_id"
+	// FieldTraceParent holds the string denoting the trace_parent field in the database.
+	FieldTraceParent = "trace_parent"
 	// FieldRequestID holds the string denoting the request_id field in the database.
 	FieldRequestID = "request_id"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldKind,
 	FieldReferenceID,
+	FieldTraceParent,
 	FieldRequestID,
 	FieldStatus,
 	FieldAttempts,
@@ -68,6 +71,10 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultTraceParent holds the default value on creation for the "trace_parent" field.
+	DefaultTraceParent string
+	// TraceParentValidator is a validator for the "trace_parent" field. It is called by the builders before save.
+	TraceParentValidator func(string) error
 	// DefaultRequestID holds the default value on creation for the "request_id" field.
 	DefaultRequestID string
 	// RequestIDValidator is a validator for the "request_id" field. It is called by the builders before save.
@@ -132,6 +139,11 @@ func ByKind(opts ...sql.OrderTermOption) OrderOption {
 // ByReferenceID orders the results by the reference_id field.
 func ByReferenceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldReferenceID, opts...).ToFunc()
+}
+
+// ByTraceParent orders the results by the trace_parent field.
+func ByTraceParent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTraceParent, opts...).ToFunc()
 }
 
 // ByRequestID orders the results by the request_id field.

@@ -2,8 +2,10 @@ package feedback
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"baituber.cn/yanxuan/v2/ent"
 	"baituber.cn/yanxuan/v2/ent/feedback"
@@ -77,11 +79,11 @@ func (s *Service) ReplyFeedback(ctx context.Context, actorID, id, reply string) 
 			return false, app.WrapMissing(err)
 		}
 
-		if err := app.Notify(ctx, tx, record.UserID, "反馈已回复", reply, id); err != nil {
+		if err := s.Notify(ctx, tx, record.UserID, "反馈已回复", reply, id); err != nil {
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditFeedbackReply, id, "")
+		return true, app.Audit(ctx, tx, actorID, enum.AuditFeedbackReply, id, "", fmt.Sprintf("回复字数：%d", utf8.RuneCountInString(reply)))
 	})
 
 	return err

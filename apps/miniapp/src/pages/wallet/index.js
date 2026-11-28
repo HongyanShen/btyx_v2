@@ -4,51 +4,76 @@ const {
   openLogin,
   pendingSession,
 } = require("../../services/session");
-const { formatFen } = require("../../services/money");
-const { LedgerKind } = require("../../services/generated/enums");
-
-const ledgerLabels = {
-  [LedgerKind.LedgerSettlementCredit]: "周结算入账",
-  [LedgerKind.LedgerWithdrawalFreeze]: "提现冻结",
-  [LedgerKind.LedgerWithdrawalSuccess]: "提现到账",
-  [LedgerKind.LedgerWithdrawalRefund]: "提现退回",
-  [LedgerKind.LedgerAdjustment]: "余额调整",
-};
+const { presentWallet } = require("../../services/wallet-view");
+const {
+  activePlaybackRows,
+  playbackWeeks,
+} = require("../../services/work-view");
 
 Page({
-  data: { loading: true, signedIn: false, error: "", wallet: null, ledger: [] },
+  data: {
+    loading: true,
+    signedIn: false,
+    error: "",
+    wallet: null,
+    playback: null,
+  },
 
   onShow() {
-    this.load();
+    return this.load();
+  },
+
+  onPullDownRefresh() {
+    return this.load().finally(() => wx.stopPullDownRefresh());
   },
 
   async load() {
-    this.setData({ loading: true, error: "", wallet: null, ledger: [] });
+    if (this.refreshing) return this.refreshing;
+    this.refreshing = this.loadRecords().finally(() => {
+      this.refreshing = null;
+    });
+    return this.refreshing;
+  },
 
-    await pendingSession();
-    const signedIn = hasSession();
-    this.setData({ loading: signedIn, signedIn });
-    if (!signedIn) return;
-
+  async loadRecords() {
+    this.setData({ loading: true, error: "", wallet: null, playback: null });
     try {
-      const [wallet, ledger] = await Promise.all([
+      await pendingSession();
+      const signedIn = hasSession();
+      this.setData({ signedIn });
+      if (!signedIn) return;
+
+      const [wallet, assignments] = await Promise.all([
         request("/wallet"),
-        request("/ledger"),
+        request("/assignments"),
       ]);
+      const rows = activePlaybackRows(playbackWeeks(assignments));
+      const pending = rows.filter(({ pending }) => pending);
+      const next = pending
+        .filter(({ deadline, late }) => deadline && !late)
+        .sort((a, b) => Date.parse(a.deadline) - Date.parse(b.deadline))[0];
+      const scheduled = rows
+        .flatMap(({ platforms }) => platforms)
+        .filter(
+          ({ screenshot, settled, settlementLabel }) =>
+            screenshot && !settled && settlementLabel,
+        )
+        .map(({ settlementLabel }) => settlementLabel)
+        .sort()[0];
+
       this.setData({
-        wallet: {
-          available: formatFen(wallet.available_fen),
-          frozen: formatFen(wallet.frozen_fen),
-          withdrawn: formatFen(wallet.withdrawn_fen),
-        },
-        ledger: ledger.map((entry) => ({
-          ...entry,
-          amount: formatFen(entry.amount_fen),
-          label: ledgerLabels[entry.kind],
-          time: new Date(entry.created_at).toLocaleString("zh-CN", {
-            timeZone: "Asia/Shanghai",
-          }),
-        })),
+        wallet: presentWallet(wallet),
+        playback: pending.length
+          ? {
+              pending: true,
+              message: `还有 ${pending.length} 条待交播放数据${next ? `，最近截止 ${next.deadlineLabel}` : ""}`,
+            }
+          : scheduled
+            ? {
+                pending: false,
+                message: `播放数据已提交，最近一笔 ${scheduled} 起可结算`,
+              }
+            : null,
       });
     } catch (error) {
       this.setData({ signedIn: hasSession(), error: error.message });
@@ -60,6 +85,41 @@ Page({
   openLogin,
 
   openWithdrawals() {
-    wx.navigateTo({ url: "/subpackages/member/withdrawal/index" });
+    this.navigate("/subpackages/member/withdrawal/index");
+  },
+
+  openWithdrawalRecords() {
+    this.navigate("/subpackages/member/withdrawal-records/index");
+  },
+
+  openDetails() {
+    this.navigate("/subpackages/member/earnings/index");
+  },
+
+  openPlayback() {
+    this.navigate("/subpackages/task/playback/index");
+  },
+
+  openUpcoming(event) {
+    this.navigate(
+      "/subpackages/member/wallet-upcoming/index?type=" +
+        event.currentTarget.dataset.type,
+    );
+  },
+
+  openTasks() {
+    this.navigate("/subpackages/task/today/index");
+  },
+
+  navigate(url) {
+    if (this.navigating) return;
+    this.navigating = true;
+    wx.navigateTo({
+      url,
+      fail: () => wx.showToast({ title: "页面打开失败，请重试", icon: "none" }),
+      complete: () => {
+        this.navigating = false;
+      },
+    });
   },
 });

@@ -2,6 +2,7 @@
   <view wx:if="{{error}}" class="offer-feedback" aria-role="alert">{{error}}</view>
   <view wx:elif="{{!loading && blocked && !today}}" class="offer-feedback">你的账号已暂停领取营销任务。已发布的任务可在工作台查看。</view>
 
+  <view wx:if="{{creativeOnline}}" class="creative-tabs"><text class="active">分发任务</text><navigator url="/subpackages/task/creative/index">创作任务</navigator></view>
   <view class="offer-summary">
     <view class="offer-heading">
       <view class="offer-icon">
@@ -19,7 +20,7 @@
         </view>
         <view>
           <view>每天</view>
-          <text class="offer-stat-value">1 条</text>
+          <text class="offer-stat-value">{{dailyLimit || 1}} 条</text>
         </view>
       </view>
     </view>
@@ -48,7 +49,7 @@
     </block>
     <view class="offer-subheading offer-subheading-spaced">怎么结算</view>
     <view class="offer-bullet">
-      <text><text class="offer-strong">每周一</text>结算，结算后进入你的余额，可自己提现到微信零钱。</text>
+      <text><text class="offer-strong">{{settlementLabel || '按任务安排'}}</text>可结算，入账后可提现到微信零钱。</text>
     </view>
     <view class="offer-bullet">
       <text>结算前会检查提交的链接。视频须能正常播放，图文须公开可见，发布账号须未被封禁，符合条件才结算。</text>
@@ -66,7 +67,7 @@
         <text>{{item}}</text>
       </view>
     </view>
-    <view class="offer-data-note">播放数据：每周一 12:00 前，把上周所有任务的播放量截图一起交（在「工作台」交）</view>
+    <view class="offer-data-note">到「工作台」查看播放数据截图截止时间并提交。</view>
   </view>
 
   <view class="offer-section">
@@ -101,7 +102,7 @@
       </view>
       <view class="offer-check">
         <text class="offer-check-mark {{!today ? 'offer-check-passed' : ''}}">{{!today ? '✓' : '!'}}</text>
-        <text>{{today ? '今天已获得任务' : '今天还没领过'}}</text>
+        <text>{{dailyLimit > 1 ? '今天已领 ' + used + ' / ' + dailyLimit + ' 条' : today ? '今天已获得任务' : '今天还没领过'}}</text>
       </view>
     </block>
   </view>
@@ -110,7 +111,8 @@
 
 <view class="offer-footer">
   <view class="offer-footer-rate">
-    <view>每个平台</view>
+    <button wx:if="{{today && dailyLimit > 1}}" bindtap="openCurrent">继续已领任务</button>
+    <view wx:else>每个平台</view>
     <view wx:if="{{loading}}" class="skeleton-value" aria-label="正在加载单价"></view>
     <text wx:else class="offer-footer-price">¥{{price}}</text>
   </view>

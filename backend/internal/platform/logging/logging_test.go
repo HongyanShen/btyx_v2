@@ -10,7 +10,39 @@ import (
 	"testing"
 
 	"github.com/segmentio/ksuid"
+	"go.opentelemetry.io/otel/trace"
 )
+
+func TestLevelHelpersKeepSpanAndStructuredFields(t *testing.T) {
+	var output bytes.Buffer
+	span := trace.NewSpanContext(trace.SpanContextConfig{
+		TraceID: trace.TraceID{1},
+		SpanID:  trace.SpanID{2},
+	})
+	ctx := trace.ContextWithSpanContext(WithLogger(context.Background(), New(&output, "worker")), span)
+	Info(ctx).Int("attempt", 1).Msg("started")
+	Warn(ctx).Int("attempt", 2).Msg("retry")
+	Error(ctx, nil).Int("attempt", 3).Msg("failed")
+
+	decoder := json.NewDecoder(&output)
+	for i, level := range []string{"info", "warn", "error"} {
+		var entry struct {
+			Level     string  `json:"level"`
+			Attempt   int     `json:"attempt"`
+			RequestID string  `json:"request_id"`
+			TraceID   string  `json:"trace_id"`
+			SpanID    string  `json:"span_id"`
+			ErrorType *string `json:"error_type"`
+		}
+		if err := decoder.Decode(&entry); err != nil {
+			t.Fatal(err)
+		}
+
+		if entry.Level != level || entry.Attempt != i+1 || entry.RequestID != RequestID(ctx) || entry.TraceID != span.TraceID().String() || entry.SpanID != span.SpanID().String() || entry.ErrorType != nil {
+			t.Fatalf("incorrect %s event: %+v", level, entry)
+		}
+	}
+}
 
 func TestRequestContextKeepsCorrelationAcrossDerivedContexts(t *testing.T) {
 	var output bytes.Buffer
@@ -19,10 +51,10 @@ func TestRequestContextKeepsCorrelationAcrossDerivedContexts(t *testing.T) {
 	child, cancel := context.WithCancel(request)
 	defer cancel()
 
-	From(request).Info().Msg("business action")
-	From(child).Warn().Msg("nested business action")
+	Info(request).Msg("business action")
+	Warn(child).Msg("nested business action")
 	other := NewRequest(root)
-	From(other).Info().Msg("other request")
+	Info(other).Msg("other request")
 	lines := strings.Split(strings.TrimSpace(output.String()), "\n")
 	if len(lines) != 3 || RequestID(request) == RequestID(other) {
 		t.Fatalf("request isolation failed: %s", output.String())
@@ -76,8 +108,8 @@ func TestConcurrentRequestLogsKeepSeparateIDs(t *testing.T) {
 		go func() {
 			defer wait.Done()
 			ctx := NewRequest(root)
-			From(ctx).Info().Msg("first action")
-			From(ctx).Info().Msg("second action")
+			Info(ctx).Msg("first action")
+			Info(ctx).Msg("second action")
 		}()
 	}
 

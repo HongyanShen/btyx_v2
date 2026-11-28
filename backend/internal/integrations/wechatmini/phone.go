@@ -12,6 +12,7 @@ import (
 
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 )
 
 const apiBase = "https://api.weixin.qq.com"
@@ -27,7 +28,8 @@ func NewPhoneClient(appID, appSecret string) *PhoneClient {
 		appID:     appID,
 		appSecret: appSecret,
 		client: &http.Client{
-			Timeout: 8 * time.Second,
+			Timeout:   8 * time.Second,
+			Transport: telemetry.Transport("wechat"),
 			CheckRedirect: func(*http.Request, []*http.Request) error {
 				return http.ErrUseLastResponse
 			},
@@ -40,22 +42,8 @@ func (c *PhoneClient) Number(ctx context.Context, code string) (string, error) {
 		return "", unavailable("微信手机号验证尚未配置")
 	}
 
-	tokenInput := struct {
-		GrantType string `json:"grant_type"`
-		AppID     string `json:"appid"`
-		Secret    string `json:"secret"`
-	}{
-		GrantType: "client_credential",
-		AppID:     c.appID,
-		Secret:    c.appSecret,
-	}
-	var token struct {
-		AccessToken string `json:"access_token"`
-		ErrCode     int    `json:"errcode"`
-	}
-
-	// The stable-token API reuses the current token when force_refresh is omitted.
-	if err := c.post(ctx, "/cgi-bin/stable_token", tokenInput, &token); err != nil || token.ErrCode != 0 || token.AccessToken == "" {
+	token, err := c.accessToken(ctx)
+	if err != nil {
 		return "", unavailable("微信手机号验证暂时不可用，请稍后重试")
 	}
 
@@ -72,7 +60,7 @@ func (c *PhoneClient) Number(ctx context.Context, code string) (string, error) {
 		} `json:"phone_info"`
 	}
 
-	endpoint := "/wxa/business/getuserphonenumber?access_token=" + url.QueryEscape(token.AccessToken)
+	endpoint := "/wxa/business/getuserphonenumber?access_token=" + url.QueryEscape(token)
 	if err := c.post(ctx, endpoint, phoneInput, &result); err != nil {
 		return "", unavailable("微信手机号验证暂时不可用，请稍后重试")
 	}
@@ -115,4 +103,27 @@ func unavailable(message string) error {
 		Code:    enum.ErrorUnavailable,
 		Message: message,
 	}
+}
+
+func (c *PhoneClient) accessToken(ctx context.Context) (string, error) {
+	tokenInput := struct {
+		GrantType string `json:"grant_type"`
+		AppID     string `json:"appid"`
+		Secret    string `json:"secret"`
+	}{
+		GrantType: "client_credential",
+		AppID:     c.appID,
+		Secret:    c.appSecret,
+	}
+	var token struct {
+		AccessToken string `json:"access_token"`
+		ErrCode     int    `json:"errcode"`
+	}
+
+	// The stable-token API reuses the current token when force_refresh is omitted.
+	if err := c.post(ctx, "/cgi-bin/stable_token", tokenInput, &token); err != nil || token.ErrCode != 0 || token.AccessToken == "" {
+		return "", errors.New("微信访问凭证暂时不可用")
+	}
+
+	return token.AccessToken, nil
 }

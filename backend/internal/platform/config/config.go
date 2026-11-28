@@ -22,7 +22,8 @@ type Config struct {
 	BootstrapAdminPassword string
 	EncryptionKey          string
 	MiniAddr               string
-	AdminAddr              string
+	AdminWebAddr           string
+	AdminWebSecureCookie   bool
 	UploadDir              string
 	WechatAppID            string
 	WechatAppSecret        string
@@ -32,6 +33,8 @@ type Config struct {
 	Payment                Payment
 	Storage                ObjectStorage
 	Logging                Logging
+	TraceEndpoint          string
+	TraceSampleRatio       float64
 }
 
 var SchemaName = regexp.MustCompile(`^btyx_[a-z0-9_]+$`)
@@ -41,7 +44,10 @@ func Load(path string) (Config, error) {
 	v.SetConfigFile(path)
 	v.SetConfigType("env")
 	v.AutomaticEnv()
+	v.SetDefault("ADMIN_WEB_ADDR", "127.0.0.1:8083")
+	v.SetDefault("ADMIN_WEB_SECURE_COOKIE", false)
 	v.SetDefault("TOS_OBJECT_PREFIX", "btyx-v2/dev/")
+	v.SetDefault("TRACE_SAMPLE_RATIO", 1.0)
 	v.SetDefault("LOG_DIR", "artifacts/logs")
 	v.SetDefault("LOG_MAX_SIZE_MB", 20)
 	v.SetDefault("LOG_MAX_BACKUPS", 7)
@@ -52,6 +58,8 @@ func Load(path string) (Config, error) {
 	}
 
 	c := Config{
+		TraceEndpoint:          v.GetString("TRACE_OTLP_ENDPOINT"),
+		TraceSampleRatio:       v.GetFloat64("TRACE_SAMPLE_RATIO"),
 		Host:                   v.GetString("PGHOST"),
 		Port:                   v.GetString("PGPORT"),
 		Database:               v.GetString("PGDATABASE"),
@@ -63,13 +71,18 @@ func Load(path string) (Config, error) {
 		EncryptionKey:          v.GetString("ENCRYPTION_KEY"),
 		Demo:                   v.GetBool("DEMO_ENABLED"),
 		MiniAddr:               v.GetString("MINI_ADDR"),
-		AdminAddr:              v.GetString("ADMIN_ADDR"),
+		AdminWebAddr:           v.GetString("ADMIN_WEB_ADDR"),
+		AdminWebSecureCookie:   v.GetBool("ADMIN_WEB_SECURE_COOKIE"),
 		UploadDir:              v.GetString("UPLOAD_DIR"),
 		WechatAppID:            v.GetString("WECHAT_APP_ID"),
 		WechatAppSecret:        v.GetString("WECHAT_APP_SECRET"),
 		IdentityOCRSecretID:    v.GetString("TENCENT_OCR_SECRET_ID"),
 		IdentityOCRSecretKey:   v.GetString("TENCENT_OCR_SECRET_KEY"),
 	}
+	if !(c.TraceSampleRatio >= 0 && c.TraceSampleRatio <= 1) {
+		return c, fmt.Errorf("TRACE_SAMPLE_RATIO 应在 0 至 1 之间")
+	}
+
 	if !SchemaName.MatchString(c.Schema) {
 		return c, fmt.Errorf("数据库 schema 必须使用 btyx_ 前缀及安全字符")
 	}

@@ -1,0 +1,45 @@
+{{define "login-document"}}<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>运营后台登录 · 白兔严选</title>
+  {{template "assets"}}
+</head>
+<body>
+  <main class="login-screen server-login" hx-history="false">
+    <section class="login-brand">
+      <div class="brand-mark">兔</div>
+      <span class="eyebrow">BAITU SELECT</span>
+      <h1>让好内容<br>找到合适的人。</h1>
+      <p>营销分发 · 内容协作 · 清晰结算</p>
+      <div class="login-note">白兔严选 / 运营工作空间</div>
+    </section>
+    <section class="login-form">
+      <div>
+        <span class="eyebrow">运营后台</span>
+        <h2>欢迎回来</h2>
+        {{if .PasswordChanged}}<p role="status">密码已更新，请使用新密码登录。</p>{{end}}
+        <p class="server-secondary">登录后管理内容、审核发布与核对结算。</p>
+        <div class="server-alert" data-request-error role="alert" hidden></div>
+        {{template "login-form" .}}
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+{{end}}
+{{define "login-form"}}
+<form id="login-form" class="ant-form" method="post" action="/login" hx-post="/login" hx-target="this" hx-swap="outerHTML" hx-disabled-elt="find button[type=submit]">
+  <input type="hidden" name="next" value="{{.Next}}">
+  {{if .Error}}<div class="server-alert server-alert-error" role="alert">{{.Error}}</div>{{end}}
+  <label for="username">用户名</label>
+  <input id="username" name="username" value="{{.Username}}" autocomplete="username" maxlength="64" required>
+  <label for="password">密码</label>
+  <div class="server-password">
+    <input id="password" name="password" type="password" autocomplete="current-password" maxlength="72" required>
+    <button type="button" class="server-password-toggle" aria-label="显示密码" aria-pressed="false">显示</button>
+  </div>
+  <button type="submit" class="ant-btn server-button server-primary">进入运营后台<span class="htmx-indicator" aria-hidden="true"> · 登录中</span></button>
+</form>
+{{end}}

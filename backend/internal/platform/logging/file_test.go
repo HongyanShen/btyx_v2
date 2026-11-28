@@ -39,7 +39,7 @@ func TestFileLoggingAutomaticallyRotatesCompressesAndCleansOldFiles(t *testing.T
 
 	ctx := WithLogger(context.Background(), logger)
 	for index := 0; index < 5; index++ {
-		From(ctx).Info().Str("payload", strings.Repeat("x", 300*1024)).Msg("rotation test")
+		Info(ctx).Str("payload", strings.Repeat("x", 300*1024)).Msg("rotation test")
 	}
 
 	if err := closer.Close(); err != nil {

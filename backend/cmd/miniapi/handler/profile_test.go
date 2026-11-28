@@ -47,7 +47,7 @@ func TestEntUpgradePreservesExistingMember(t *testing.T) {
 			ADD COLUMN reason text NOT NULL DEFAULT '',
 			ADD COLUMN tags jsonb;
 		ALTER TABLE audit_events
-			DROP CONSTRAINT audit_action_enum_v6,
+			DROP CONSTRAINT audit_action_enum_v7,
 			ADD CONSTRAINT audit_action_enum CHECK (action IN ('enrollment.apply', 'operator.create'));
 	`); err != nil {
 		t.Fatal(err)
@@ -262,13 +262,20 @@ func TestMemberProfileAndLogout(t *testing.T) {
 	request(http.MethodPut, "/me", other.Token, body, http.StatusBadRequest)
 	request(http.MethodPut, "/me", member.Token, body, http.StatusOK)
 	request(http.MethodPut, "/me", member.Token, body, http.StatusOK)
-	request(http.MethodPut, "/me", member.Token, `{"nickname":"`+nickname+"兔"+`"}`, http.StatusBadRequest)
 
 	count, err := services.Client.AuditEvent.Query().
 		Where(auditevent.ActorIDEQ(member.UserID)).
 		Count(ctx)
 	if err != nil || count != 1 {
 		t.Fatalf("identical profile update should audit once: count=%d, err=%v", count, err)
+	}
+
+	request(http.MethodPut, "/me", member.Token, `{"nickname":"`+nickname+"兔"+`"}`, http.StatusBadRequest)
+	rejected, err := services.Client.AuditEvent.Query().
+		Where(auditevent.ActorIDEQ(member.UserID), auditevent.ActionEQ(enum.AuditRequestFailed)).
+		Only(ctx)
+	if err != nil || rejected.Endpoint != "PUT /api/v1/me" {
+		t.Fatalf("invalid profile update should have a separate HTTP failure audit: %v", err)
 	}
 
 	services.WechatPhone = wechatmini.NewPhoneClient("", "")

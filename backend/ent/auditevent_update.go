@@ -150,6 +150,12 @@ func (_u *AuditEventUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.Reason(); ok {
 		_spec.SetField(auditevent.FieldReason, field.TypeString, value)
 	}
+	if _u.mutation.RequestIDCleared() {
+		_spec.ClearField(auditevent.FieldRequestID, field.TypeString)
+	}
+	if _u.mutation.PlatformCleared() {
+		_spec.ClearField(auditevent.FieldPlatform, field.TypeEnum)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{auditevent.Label}
@@ -321,6 +327,12 @@ func (_u *AuditEventUpdateOne) sqlSave(ctx context.Context) (_node *AuditEvent, 
 	}
 	if value, ok := _u.mutation.Reason(); ok {
 		_spec.SetField(auditevent.FieldReason, field.TypeString, value)
+	}
+	if _u.mutation.RequestIDCleared() {
+		_spec.ClearField(auditevent.FieldRequestID, field.TypeString)
+	}
+	if _u.mutation.PlatformCleared() {
+		_spec.ClearField(auditevent.FieldPlatform, field.TypeEnum)
 	}
 	_node = &AuditEvent{config: _u.config}
 	_spec.Assign = _node.assignValues

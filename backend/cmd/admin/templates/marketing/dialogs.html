@@ -1,0 +1,82 @@
+{{define "marketing-dialog"}}
+  {{if eq .Mode "detail"}}{{template "marketing-detail" .}}{{else if eq .Mode "assign"}}{{template "marketing-assignment" .}}{{else if or (eq .Mode "price") (eq .Mode "visibility")}}{{template "marketing-settings-confirm" .}}{{else}}{{template "marketing-editor" .}}{{end}}
+{{end}}
+{{define "marketing-editor"}}
+{{$new := eq .Mode "new"}}
+<dialog class="server-dialog marketing-upload-modal" data-server-dialog data-close-guard aria-labelledby="marketing-editor-title">
+  <header><div><h3 id="marketing-editor-title">{{if $new}}新建任务 · 营销分发{{else}}修改营销内容{{end}}</h3><div class="marketing-upload-intro">{{if $new}}上传后，内容进入分配队列。分发员通过统一入口领取今日任务。{{else}}保存后，新领取和指派的任务使用这一版。已分配的任务继续按领取或指派时的版本执行。{{end}}</div></div><button type="button" data-close-dialog aria-label="关闭">×</button></header>
+  <form class="server-dialog-form marketing-upload-form" action="{{.Action}}" method="post" hx-post="{{.Action}}" hx-target="#marketing-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop" data-marketing-editor>
+    <input name="csrf" type="hidden" value="{{.CSRF}}"><input name="version_id" type="hidden" value="{{.Row.ID}}">
+    <input name="kind" type="hidden" value="{{.MediaKind}}">
+    <div class="server-dialog-body">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{end}}
+      <div class="marketing-form-row"><span>内容类型</span><div role="group" aria-label="内容类型"><label><input type="radio" name="media_choice" value="video"{{if eq .MediaKind "video"}} checked{{end}}{{if .Attachments}} disabled{{end}} data-marketing-kind> 视频</label> <label><input type="radio" name="media_choice" value="images"{{if eq .MediaKind "images"}} checked{{end}}{{if .Attachments}} disabled{{end}} data-marketing-kind> 图文</label></div></div>
+      <div class="marketing-form-row"><label for="marketing-title">标题</label><input id="marketing-title" name="title" aria-label="任务标题" class="marketing-upload-title" maxlength="100" value="{{.Row.Title}}" required></div>
+      <div class="marketing-form-row" data-file-widget data-marketing-files data-media="{{.MediaKind}}" data-can-download="{{.CanPreview}}">
+        <span data-media-field-label>{{if eq .MediaKind "images"}}图片{{else}}视频文件{{end}}</span>
+        <div>{{if .CanUpload}}<label class="server-button marketing-upload-attachment" for="marketing-file" data-media-picker-label{{if and .Attachments (eq .MediaKind "video")}} hidden{{end}}>{{if eq .MediaKind "images"}}＋ 上传图片（最多 9 张）{{else}}＋ 上传视频{{end}}</label><input type="file" id="marketing-file" data-file-picker class="visually-hidden" {{if eq .MediaKind "images"}}multiple accept="image/jpeg,image/png,image/gif,image/webp"{{else}}accept="video/mp4"{{end}}{{if and .Attachments (eq .MediaKind "video")}} disabled{{end}}>{{end}}
+        <p data-file-status role="status" hidden></p><div data-file-list>{{range .Attachments}}<div data-file-item><input name="files" type="hidden" value="{{.ID}}">{{if $.CanPreview}}<button type="button" class="server-plain-button" data-gallery-single="{{.ID}}" aria-label="预览附件 {{.Number}}">预览附件 {{.Number}}</button>{{else}}<span>附件 {{.Number}}</span>{{end}} <button class="server-plain-button" type="button" data-file-remove>移除</button></div>{{end}}</div></div>
+      </div>
+      <div class="marketing-form-row"><label for="marketing-project">项目（艺人）</label><div><input id="marketing-project" name="project" list="marketing-projects" class="marketing-upload-project" placeholder="选择或填写项目名称" value="{{.Row.Project}}"><datalist id="marketing-projects">{{range .Projects}}<option value="{{.}}"></option>{{end}}</datalist><small>可选已有项目，也可以直接填新名字。项目名仅在后台显示。</small></div></div>
+      <div class="marketing-form-row"><span>发布平台</span><div role="group" aria-label="发布平台">
+        <label><input name="platform" type="radio" value="both"{{if eq .Platform "both"}} checked{{end}}> 抖音 + 小红书</label> <label><input name="platform" type="radio" value="douyin"{{if eq .Platform "douyin"}} checked{{end}}> 只发抖音</label> <label><input name="platform" type="radio" value="xhs"{{if eq .Platform "xhs"}} checked{{end}}> 只发小红书</label><small>分发员只会看到选中的平台。</small>
+      </div></div>
+      <div class="marketing-form-row"><label for="marketing-copy">分发语</label><div><textarea id="marketing-copy" name="body" rows="2" class="marketing-upload-copy" required>{{if .Row.Copy.Text}}{{.Row.Copy.Text}}{{else}}{{.Row.Body}}{{end}}</textarea><small>分发员复制后发布。</small></div></div>
+      <div class="marketing-form-row"><label for="marketing-topics">TAG</label><div><input id="marketing-topics" name="topics" placeholder="#指定话题A #指定话题B" class="marketing-upload-title" value="{{.Row.Copy.Tags}}"><small>指定要带的话题，多个话题用空格分隔。</small></div></div>
+      <div class="marketing-form-row"><label for="marketing-mention">@账号（选填）</label><div><input id="marketing-mention" name="mention" class="marketing-upload-mention" placeholder="例：@艺人官方号" value="{{.Row.Copy.Mention}}"><small>填写带 @ 的账号。</small></div></div>
+      <div class="marketing-form-row"><span>标签</span><div><div class="enrollment-native-tags" data-enrollment-tag-options>{{range .Choices}}<label data-tag-name="{{.Label}}"><input type="checkbox" name="tags" value="{{.Key}}"{{if .Selected}} checked{{end}}> #{{.Label}}</label> {{else}}<span class="marketing-note" data-tag-empty>暂无可选标签</span>{{end}}</div>
+        {{if .CanCreateTag}}<div class="enrollment-review-inline"><input aria-label="新建画像标签" maxlength="25" data-enrollment-tag-input placeholder="填写新标签"><button type="button" class="server-button" data-enrollment-tag-add>＋ 添加标签</button></div>{{end}}<small>领取时优先匹配带有相同标签的分发员。</small></div></div>
+      <div class="marketing-form-row"><label for="marketing-minimum">话题至少带满</label><div><input id="marketing-minimum" name="minimum_topics" class="marketing-upload-topics" type="number" min="0" step="1" value="{{.Row.Copy.Minimum}}"><small>个，包含 TAG 中的话题。</small></div></div>
+      <div class="marketing-form-row"><span>单价</span><span class="marketing-note">{{with .Settings}}每个平台 ¥{{.Price}}（两个平台 ¥{{.DoublePrice}}），可在「营销设置」修改。{{else}}按营销分发当前单价计算。{{end}}</span></div>
+    </div>
+    <footer class="ant-modal-footer"><button type="button" class="server-button" data-close-dialog>取消</button><button type="submit" class="server-button server-primary">{{if $new}}上传到内容池{{else}}保存修改{{end}}</button></footer>
+  </form>
+</dialog>
+{{end}}
+{{define "marketing-assignment"}}
+<dialog class="server-dialog" data-server-dialog aria-labelledby="marketing-assignment-title">
+  <header><h3 id="marketing-assignment-title">手动指派 · {{.Row.Title}}</h3><button type="button" data-close-dialog aria-label="关闭">×</button></header>
+  <form class="server-dialog-form" action="{{.Action}}" method="post" hx-post="{{.Action}}" hx-target="#marketing-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop">
+    <input name="csrf" type="hidden" value="{{.CSRF}}"><input name="key" type="hidden" value="{{.Key}}" data-idempotency-key>
+    <div class="server-dialog-body"><p class="server-alert server-alert-info">任务将直接进入分发员的工作台，占用其当天的一条名额。提交链接前可在发布链接审核中撤回。</p>
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{end}}
+      <select class="server-field" name="user_id" aria-label="选择已通过报名并同意协议的分发员" required><option value="">{{if .Editors}}选择已通过报名并同意协议的分发员{{else}}暂无可选择的分发员{{end}}</option>{{range .Editors}}<option value="{{.Key}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select>
+    </div>
+    <footer><button type="button" class="server-button" data-close-dialog>取消</button><button type="submit" class="server-button server-primary"{{if not .Editors}} disabled{{end}}>确认指派</button></footer>
+  </form>
+</dialog>
+{{end}}
+{{define "marketing-detail"}}
+{{$row := .Row}}
+<dialog class="server-dialog marketing-detail-dialog" data-server-dialog aria-labelledby="marketing-detail-title">
+  <header><h3 id="marketing-detail-title">{{$row.TaskCode}} · {{$row.Title}}</h3></header>
+  <div class="server-dialog-body"><dl class="marketing-detail">
+    <div><dt>艺人</dt><dd>{{$row.Artist}}</dd></div><div><dt>类型 / 平台</dt><dd>{{$row.Media}} · {{$row.PlatformText}}</dd></div><div><dt>上传</dt><dd>{{$row.UploadDate}}</dd></div>
+    <div><dt>分发语</dt><dd><span class="marketing-detail-copy">{{if $row.Copy.Text}}{{$row.Copy.Text}}{{else}}—{{end}}</span></dd></div>
+    <div><dt>TAG</dt><dd>{{if $row.Copy.Tags}}{{$row.Copy.Tags}}{{else}}—{{end}}{{if $row.Copy.MinText}} <span class="marketing-note">· {{$row.Copy.MinText}}</span>{{end}}</dd></div>
+    <div><dt>@账号</dt><dd>{{if $row.Copy.Mention}}{{$row.Copy.Mention}}{{else}}—{{end}}</dd></div>
+    <div><dt>标签</dt><dd>{{range $row.TagLabels}}<span class="server-tag ant-tag platform-tag">#{{.}}</span> {{else}}—{{end}}</dd></div>
+    <div><dt>派单</dt><dd>{{if $row.Allocation}}已分给 <strong>{{$row.Recipient}}</strong>{{if $row.RecipientNote}} · {{$row.RecipientNote}}{{end}} · {{$row.State}}{{template "marketing-progress" $row}}{{if $row.Expiry}}<div class="marketing-note">提交截止 {{$row.Expiry}}</div>{{end}}
+      {{else}}<div>领取时优先匹配这些分发员</div>{{range .Matches}}<div>{{.}}</div>{{else}}<span class="marketing-note">无标签匹配时按队列领取</span>{{end}}{{end}}</dd></div>
+    {{if $row.LastExpired}}<div><dt>失效记录</dt><dd>{{$row.LastExpired}}</dd></div>{{end}}{{if $row.Deadline}}<div><dt>可领取截止</dt><dd>{{$row.Deadline}}</dd></div>{{end}}
+    {{if and .CanPreview $row.Files}}<div><dt>素材</dt><dd>{{template "marketing-gallery-cover" $row.Files}}</dd></div>{{end}}
+  </dl></div><footer><button class="server-button" type="button" data-close-dialog>关闭</button></footer>
+</dialog>
+{{end}}
+{{define "marketing-settings-confirm"}}
+{{$price := eq .Mode "price"}}
+<dialog class="server-dialog" data-server-dialog aria-labelledby="marketing-setting-title">
+  <header><h3 id="marketing-setting-title">{{if $price}}修改营销单价{{else if .NextOnline}}上架营销分发？{{else}}下架营销分发？{{end}}</h3><button type="button" data-close-dialog aria-label="关闭">×</button></header>
+  <form class="server-dialog-form" action="{{.Action}}" method="post" hx-post="{{.Action}}" hx-target="#marketing-dialog-slot" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop">
+    <input name="csrf" type="hidden" value="{{.CSRF}}"><input name="mode" type="hidden" value="{{.Mode}}"><input name="price" type="hidden" value="{{.Price}}"><input name="online" type="hidden" value="{{.NextOnline}}">
+    <div class="server-dialog-body">
+      {{if .Error}}<div class="server-alert" role="alert">{{.Error}}</div>{{end}}
+      {{if $price}}<p>每个平台从 ¥{{.Settings.Price}} 改为 ¥{{.Price}}。</p><p>新单价用于之后领取或指派的任务，已分配任务按原价执行。</p>
+      {{else if .NextOnline}}<p>分发员可以领取符合条件的内容，运营也可以指派。</p>{{else}}<p>下架后暂停新领取和手动指派，已经分配的任务仍可提交。</p>{{end}}
+    </div>
+    <footer><button type="button" class="server-button" data-close-dialog>取消</button><button type="submit" class="server-button server-primary">{{if $price}}确认修改{{else}}确定{{end}}</button></footer>
+  </form>
+</dialog>
+{{end}}

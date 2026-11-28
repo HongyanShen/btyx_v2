@@ -70,6 +70,62 @@ func (_c *AuditEventCreate) SetNillableReason(v *string) *AuditEventCreate {
 	return _c
 }
 
+// SetEndpoint sets the "endpoint" field.
+func (_c *AuditEventCreate) SetEndpoint(v string) *AuditEventCreate {
+	_c.mutation.SetEndpoint(v)
+	return _c
+}
+
+// SetNillableEndpoint sets the "endpoint" field if the given value is not nil.
+func (_c *AuditEventCreate) SetNillableEndpoint(v *string) *AuditEventCreate {
+	if v != nil {
+		_c.SetEndpoint(*v)
+	}
+	return _c
+}
+
+// SetRequestID sets the "request_id" field.
+func (_c *AuditEventCreate) SetRequestID(v string) *AuditEventCreate {
+	_c.mutation.SetRequestID(v)
+	return _c
+}
+
+// SetNillableRequestID sets the "request_id" field if the given value is not nil.
+func (_c *AuditEventCreate) SetNillableRequestID(v *string) *AuditEventCreate {
+	if v != nil {
+		_c.SetRequestID(*v)
+	}
+	return _c
+}
+
+// SetPlatform sets the "platform" field.
+func (_c *AuditEventCreate) SetPlatform(v enum.AuditPlatform) *AuditEventCreate {
+	_c.mutation.SetPlatform(v)
+	return _c
+}
+
+// SetNillablePlatform sets the "platform" field if the given value is not nil.
+func (_c *AuditEventCreate) SetNillablePlatform(v *enum.AuditPlatform) *AuditEventCreate {
+	if v != nil {
+		_c.SetPlatform(*v)
+	}
+	return _c
+}
+
+// SetParameters sets the "parameters" field.
+func (_c *AuditEventCreate) SetParameters(v string) *AuditEventCreate {
+	_c.mutation.SetParameters(v)
+	return _c
+}
+
+// SetNillableParameters sets the "parameters" field if the given value is not nil.
+func (_c *AuditEventCreate) SetNillableParameters(v *string) *AuditEventCreate {
+	if v != nil {
+		_c.SetParameters(*v)
+	}
+	return _c
+}
+
 // SetSubmittedPhone sets the "submitted_phone" field.
 func (_c *AuditEventCreate) SetSubmittedPhone(v string) *AuditEventCreate {
 	_c.mutation.SetSubmittedPhone(v)
@@ -211,6 +267,14 @@ func (_c *AuditEventCreate) defaults() {
 		v := auditevent.DefaultReason
 		_c.mutation.SetReason(v)
 	}
+	if _, ok := _c.mutation.Endpoint(); !ok {
+		v := auditevent.DefaultEndpoint
+		_c.mutation.SetEndpoint(v)
+	}
+	if _, ok := _c.mutation.Parameters(); !ok {
+		v := auditevent.DefaultParameters
+		_c.mutation.SetParameters(v)
+	}
 	if _, ok := _c.mutation.SubmittedPhone(); !ok {
 		v := auditevent.DefaultSubmittedPhone
 		_c.mutation.SetSubmittedPhone(v)
@@ -262,6 +326,22 @@ func (_c *AuditEventCreate) check() error {
 	}
 	if _, ok := _c.mutation.Reason(); !ok {
 		return &ValidationError{Name: "reason", err: errors.New(`ent: missing required field "AuditEvent.reason"`)}
+	}
+	if _, ok := _c.mutation.Endpoint(); !ok {
+		return &ValidationError{Name: "endpoint", err: errors.New(`ent: missing required field "AuditEvent.endpoint"`)}
+	}
+	if v, ok := _c.mutation.RequestID(); ok {
+		if err := auditevent.RequestIDValidator(v); err != nil {
+			return &ValidationError{Name: "request_id", err: fmt.Errorf(`ent: validator failed for field "AuditEvent.request_id": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Platform(); ok {
+		if err := auditevent.PlatformValidator(v); err != nil {
+			return &ValidationError{Name: "platform", err: fmt.Errorf(`ent: validator failed for field "AuditEvent.platform": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Parameters(); !ok {
+		return &ValidationError{Name: "parameters", err: errors.New(`ent: missing required field "AuditEvent.parameters"`)}
 	}
 	if _, ok := _c.mutation.SubmittedPhone(); !ok {
 		return &ValidationError{Name: "submitted_phone", err: errors.New(`ent: missing required field "AuditEvent.submitted_phone"`)}
@@ -341,6 +421,22 @@ func (_c *AuditEventCreate) createSpec() (*AuditEvent, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Reason(); ok {
 		_spec.SetField(auditevent.FieldReason, field.TypeString, value)
 		_node.Reason = value
+	}
+	if value, ok := _c.mutation.Endpoint(); ok {
+		_spec.SetField(auditevent.FieldEndpoint, field.TypeString, value)
+		_node.Endpoint = value
+	}
+	if value, ok := _c.mutation.RequestID(); ok {
+		_spec.SetField(auditevent.FieldRequestID, field.TypeString, value)
+		_node.RequestID = value
+	}
+	if value, ok := _c.mutation.Platform(); ok {
+		_spec.SetField(auditevent.FieldPlatform, field.TypeEnum, value)
+		_node.Platform = value
+	}
+	if value, ok := _c.mutation.Parameters(); ok {
+		_spec.SetField(auditevent.FieldParameters, field.TypeString, value)
+		_node.Parameters = value
 	}
 	if value, ok := _c.mutation.SubmittedPhone(); ok {
 		_spec.SetField(auditevent.FieldSubmittedPhone, field.TypeString, value)
@@ -485,6 +581,18 @@ func (u *AuditEventUpsertOne) UpdateNewValues() *AuditEventUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(auditevent.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.Endpoint(); exists {
+			s.SetIgnore(auditevent.FieldEndpoint)
+		}
+		if _, exists := u.create.mutation.RequestID(); exists {
+			s.SetIgnore(auditevent.FieldRequestID)
+		}
+		if _, exists := u.create.mutation.Platform(); exists {
+			s.SetIgnore(auditevent.FieldPlatform)
+		}
+		if _, exists := u.create.mutation.Parameters(); exists {
+			s.SetIgnore(auditevent.FieldParameters)
 		}
 		if _, exists := u.create.mutation.SubmittedPhone(); exists {
 			s.SetIgnore(auditevent.FieldSubmittedPhone)
@@ -776,6 +884,18 @@ func (u *AuditEventUpsertBulk) UpdateNewValues() *AuditEventUpsertBulk {
 			}
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(auditevent.FieldCreatedAt)
+			}
+			if _, exists := b.mutation.Endpoint(); exists {
+				s.SetIgnore(auditevent.FieldEndpoint)
+			}
+			if _, exists := b.mutation.RequestID(); exists {
+				s.SetIgnore(auditevent.FieldRequestID)
+			}
+			if _, exists := b.mutation.Platform(); exists {
+				s.SetIgnore(auditevent.FieldPlatform)
+			}
+			if _, exists := b.mutation.Parameters(); exists {
+				s.SetIgnore(auditevent.FieldParameters)
 			}
 			if _, exists := b.mutation.SubmittedPhone(); exists {
 				s.SetIgnore(auditevent.FieldSubmittedPhone)

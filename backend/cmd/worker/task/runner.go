@@ -12,6 +12,7 @@ import (
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
 	"baituber.cn/yanxuan/v2/internal/platform/logging"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 	"baituber.cn/yanxuan/v2/internal/platform/transfer"
 )
 
@@ -39,6 +40,7 @@ func (runner *Runner) Tick(ctx context.Context) error {
 
 	jobs, err := runner.services.Client.Job.Query().
 		Where(
+			job.KindEQ(enum.JobTransfer),
 			eligible,
 			job.NextAtLTE(runner.services.Now()),
 		).
@@ -50,34 +52,44 @@ func (runner *Runner) Tick(ctx context.Context) error {
 	}
 
 	for _, candidate := range jobs {
-		requestID := candidate.RequestID
-		if requestID == "" {
-			requestID = candidate.ID
-		}
-
-		jobContext := logging.WithRequestID(ctx, requestID)
-		claimed, err := runner.claim(jobContext, candidate.ID)
-		if err != nil {
-			logging.Error(jobContext, err).Str("job_id", candidate.ID).Msg("background job claim failed")
-
+		if err := runner.runCandidate(ctx, candidate); err != nil {
 			return err
 		}
+	}
 
-		if claimed == nil {
-			continue
-		}
+	return nil
+}
 
-		logging.From(jobContext).Info().
-			Str("job_id", claimed.ID).
-			Str("job_kind", string(claimed.Kind)).
-			Int64("attempt", claimed.Attempts).
-			Msg("background job started")
+func (runner *Runner) runCandidate(ctx context.Context, candidate *ent.Job) (err error) {
+	requestID := candidate.RequestID
+	if requestID == "" {
+		requestID = candidate.ID
+	}
 
-		if err := runner.process(jobContext, claimed); err != nil {
-			logging.Error(jobContext, err).Str("job_id", claimed.ID).Msg("background job failed")
+	jobContext, span := telemetry.StartJob(ctx, candidate.TraceParent, "wechat.transfer", int(candidate.Attempts+1))
+	defer func() { telemetry.Finish(span, err) }()
+	jobContext = logging.WithRequestID(jobContext, requestID)
+	claimed, err := runner.claim(jobContext, candidate.ID)
+	if err != nil {
+		logging.Error(jobContext, err).Str("job_id", candidate.ID).Msg("background job claim failed")
 
-			return err
-		}
+		return err
+	}
+
+	if claimed == nil {
+		return nil
+	}
+
+	logging.Info(jobContext).
+		Str("job_id", claimed.ID).
+		Str("job_kind", string(claimed.Kind)).
+		Int64("attempt", claimed.Attempts).
+		Msg("background job started")
+
+	if err := runner.process(jobContext, claimed); err != nil {
+		logging.Error(jobContext, err).Str("job_id", claimed.ID).Msg("background job failed")
+
+		return err
 	}
 
 	return nil
@@ -118,15 +130,13 @@ func (runner *Runner) canClaim(record *ent.Job) bool {
 }
 
 func (runner *Runner) process(ctx context.Context, record *ent.Job) error {
-	if record.Kind != enum.JobTransfer {
-		return runner.finishJob(ctx, record.ID, enum.JobBlockedConfig, "站内通知已保存；外部通知通道尚未配置", 0)
-	}
 
 	withdrawal, err := runner.services.Client.Withdrawal.Get(ctx, record.ReferenceID)
 	if err != nil {
 		return err
 	}
 
+	telemetry.SetUser(ctx, withdrawal.UserID, enum.RoleUser)
 	if terminal(withdrawal.Status) {
 		return runner.finishJob(ctx, record.ID, enum.JobDone, "", 0)
 	}
@@ -170,6 +180,10 @@ func (runner *Runner) process(ctx context.Context, record *ent.Job) error {
 		return runner.finishJob(ctx, record.ID, enum.JobRetry, "转账金额或收款身份不匹配，需要核对", 30*time.Second)
 	}
 
+	if withdrawal.ProviderID != "" && withdrawal.ProviderID != result.ProviderID {
+		return runner.finishJob(ctx, record.ID, enum.JobRetry, "微信转账单号不匹配，需要核对", 30*time.Second)
+	}
+
 	if terminal(result.Status) {
 		if err := runner.services.ApplyTransferResult(ctx, withdrawal.ID, result.Status, result.ProviderID); err != nil {
 			return err
@@ -178,11 +192,15 @@ func (runner *Runner) process(ctx context.Context, record *ent.Job) error {
 		return runner.finishJob(ctx, record.ID, enum.JobDone, "", 0)
 	}
 
-	_, err = runner.pendingUpdate(withdrawal.ID).
+	update := runner.pendingUpdate(withdrawal.ID).
 		SetStatus(result.Status).
-		SetProviderID(result.ProviderID).
-		SetPackageInfo(result.PackageInfo).
-		Save(ctx)
+		SetReason("").
+		SetProviderID(result.ProviderID)
+	if result.PackageInfo != "" {
+		update.SetPackageInfo(result.PackageInfo)
+	}
+
+	_, err = update.Save(ctx)
 	if err != nil {
 		return err
 	}
@@ -198,6 +216,10 @@ func (runner *Runner) pendingUpdate(id string) *ent.WithdrawalUpdate {
 }
 
 func (runner *Runner) callGateway(ctx context.Context, record *ent.Job, withdrawal *ent.Withdrawal) (transfer.Result, error) {
+	if withdrawal.ProviderID != "" {
+		return runner.gateway.Query(ctx, withdrawal.ID)
+	}
+
 	if record.Attempts > 1 && withdrawal.Status != enum.WithdrawalBlockedConfig {
 		result, err := runner.gateway.Query(ctx, withdrawal.ID)
 		if !errors.Is(err, transfer.ErrNotFound) {
@@ -213,6 +235,7 @@ func (runner *Runner) callGateway(ctx context.Context, record *ent.Job, withdraw
 
 	_, err := runner.pendingUpdate(withdrawal.ID).
 		SetStatus(enum.WithdrawalSubmitting).
+		SetReason("").
 		Save(ctx)
 	if err != nil {
 		return transfer.Result{}, err
@@ -237,7 +260,7 @@ func (runner *Runner) finishJob(ctx context.Context, id string, status enum.JobS
 		SetNextAt(runner.services.Now().Add(delay)).
 		Save(ctx)
 	if err == nil {
-		logging.From(ctx).Info().
+		logging.Info(ctx).
 			Str("job_id", id).
 			Str("job_status", string(status)).
 			Str("retry_after", delay.String()).

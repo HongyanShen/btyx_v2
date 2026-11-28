@@ -2,6 +2,7 @@ package business
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"baituber.cn/yanxuan/v2/ent/auditevent"
@@ -44,7 +45,7 @@ func TestEnrollmentReviewPreservesRejectedAttempt(t *testing.T) {
 
 	recentPost, newAccount := false, true
 	input := enrollment.ReviewInput{
-		Reason:     "主页没有近期作品",
+		Reason:     strings.Repeat("近期作品", 5) + "，请补充最新的主页信息",
 		Tags:       []string{"摄影"},
 		UpdatedAt:  &record.UpdatedAt,
 		RecentPost: &recentPost,
@@ -151,9 +152,33 @@ func TestEnrollmentReviewPreservesRejectedAttempt(t *testing.T) {
 
 	notifications, err := service.Client.Notification.Query().
 		Where(notification.UserIDEQ(member.UserID), notification.TitleEQ("报名审核结果")).
-		Count(ctx)
-	if err != nil || notifications != 2 {
-		t.Fatalf("expected one notification per decision, got %d: %v", notifications, err)
+		All(ctx)
+	if err != nil || len(notifications) != 2 {
+		t.Fatalf("expected one notification per decision, got %d: %v", len(notifications), err)
+	}
+
+	for _, notice := range notifications {
+		card := notice.Card
+		if notice.DeliveryState != enum.DeliveryPending || card.TemplateID != "lRpXa_GcSSdTfsMcNX1vl4fC9jCsvAiQSr_fjp66nls" || card.Data["thing7"].Value != "营销分发员报名" {
+			t.Fatal("报名审核结果应使用报名专用模板进入投递队列")
+		}
+
+		switch notice.ReferenceID {
+		case rejected.EnrollmentID:
+			if card.Data["phrase1"].Value != "未通过" || card.Data["thing5"].Value != strings.Repeat("近期作品", 5) || card.Page != "subpackages/member/enrollment/index" {
+				t.Fatal("驳回通知须对应原报名并展示该次原因")
+			}
+
+			if notice.Body != rejected.Reason || notice.Body != updated.Reason || notice.Body == card.Data["thing5"].Value {
+				t.Fatal("报名详情和站内消息须保留完整原因")
+			}
+		case current.ID:
+			if card.Data["phrase1"].Value != "已通过" || card.Page != "subpackages/task/today/index" || card.Data["thing5"].Value != "可前往查看今日任务" {
+				t.Fatal("通过通知须对应重新报名并引导查看任务")
+			}
+		default:
+			t.Fatal("通知未关联本次报名记录")
+		}
 	}
 
 	edits, err := service.Client.AuditEvent.Query().

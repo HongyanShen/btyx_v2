@@ -10,6 +10,7 @@ import (
 	"baituber.cn/yanxuan/v2/internal/modules/agreement"
 	"baituber.cn/yanxuan/v2/internal/modules/audit"
 	"baituber.cn/yanxuan/v2/internal/modules/content"
+	"baituber.cn/yanxuan/v2/internal/modules/creative"
 	"baituber.cn/yanxuan/v2/internal/modules/enrollment"
 	"baituber.cn/yanxuan/v2/internal/modules/feedback"
 	"baituber.cn/yanxuan/v2/internal/modules/files"
@@ -80,6 +81,7 @@ type LedgerDTO = wallet.LedgerDTO
 
 // Service composes modules for process bootstrap and cross-module integration tests.
 type Service struct {
+	Creative *creative.Service
 	*app.Runtime
 	*IdentityService
 	*EnrollmentService
@@ -143,48 +145,37 @@ func New(ctx context.Context, cfg config.Config) (*Service, error) {
 		Runtime: runtime,
 	}
 	return &Service{
-		Runtime: runtime,
-
-		IdentityService: identityService,
-
+		Creative:          &creative.Service{Runtime: runtime},
+		Runtime:           runtime,
+		IdentityService:   identityService,
 		EnrollmentService: enrollmentService,
-
 		AgreementService: &agreement.Service{
 			Runtime: runtime,
 		},
-
 		TaskService: taskService,
-
 		SubmissionService: &submission.Service{
 			Runtime:     runtime,
 			TaskQueries: taskService,
 		},
-
 		SettlementService: &settlement.Service{
 			Runtime: runtime,
 		},
-
 		WalletService: &wallet.Service{
 			Runtime: runtime,
 		},
-
 		ContentService: &content.Service{
 			Runtime: runtime,
 		},
-
 		FeedbackService: &feedback.Service{
 			Runtime: runtime,
 		},
-
 		FilesService: &files.Service{
 			Runtime: runtime,
 			Store:   fileStorage,
 		},
-
 		NotificationService: &notification.Service{
 			Runtime: runtime,
 		},
-
 		AuditService: &audit.Service{
 			Runtime: runtime,
 			Store:   fileStorage,

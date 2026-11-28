@@ -1,0 +1,76 @@
+{{define "identity-records"}}
+<section class="page server-page workspace-page">
+  <div class="page-heading">
+    <div>
+      <h2>报名审核 · 实名认证记录</h2>
+      <span class="ant-typography-secondary">{{if .CanViewDetails}}查看每次核验留存的脱敏证件资料、照片及当次提交的联系方式。缺失字段显示「—」。{{else}}查看自动核验结果及失败原因。查看实名资料和照片需单独授权。{{end}}</span>
+    </div>
+    <a class="server-button" role="button" href="/admin/realname" hx-get="/admin/realname" hx-target="#admin-workspace" hx-push-url="true" hx-indicator="#admin-loading" hx-sync="#admin-workspace:replace">刷新</a>
+  </div>
+  {{if .PhotosUnavailable}}<div class="server-alert server-alert-warning" role="status">部分证件照片暂时无法预览，请稍后刷新。</div>{{end}}
+  <div class="server-table-frame">
+  <div class="server-table-scroll" tabindex="0" role="region" aria-label="实名认证记录表格">
+    <table class="server-table identity-records-table">
+      <colgroup><col style="width:10%"><col style="width:6%"><col style="width:12%"><col style="width:8.5%"><col style="width:11%"><col style="width:15%"><col style="width:8%"><col style="width:13%"><col style="width:5.5%"><col style="width:11%"></colgroup>
+      <thead>
+        <tr>
+          <th scope="col">用户</th>
+          <th scope="col">姓名</th>
+          <th scope="col">身份证号</th>
+          <th scope="col">手机号</th>
+          <th scope="col">微信号</th>
+          <th scope="col">身份证照片</th>
+          <th scope="col">来源</th>
+          <th scope="col">提交</th>
+          <th scope="col">状态</th>
+          <th scope="col">失败原因</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Rows}}
+        <tr>
+          <td>{{.Nickname}}</td>
+          <td>{{.Name}}</td>
+          <td class="identity-record-value">{{.Identity}}</td>
+          <td class="identity-record-value">{{.Phone}}</td>
+          <td>{{.Wechat}}</td>
+          <td>{{if .Photos}}
+            <div class="identity-photo-thumbnails">
+              {{range .Photos}}
+                {{if .URL}}
+                <button class="identity-photo-thumbnail" type="button" data-identity-side="{{.Side}}" aria-label="查看身份证{{.Side}}大图" aria-haspopup="dialog">
+                  <img src="{{.URL}}" alt="" loading="lazy" referrerpolicy="no-referrer">
+                  {{.Side}}
+                </button>
+                {{else}}<span class="identity-photo-missing">{{.Side}} —</span>{{end}}
+              {{end}}
+            </div>
+          {{else}}—{{end}}</td>
+          <td>{{.Source}}</td>
+          <td class="identity-record-value">{{.Date}}</td>
+          <td>{{if .Success}}<span class="server-tag ant-tag identity-result-success">成功</span>{{else}}<span class="server-tag ant-tag identity-result-failure">失败</span>{{end}}</td>
+          <td>{{.Reason}}</td>
+        </tr>
+        {{else}}<tr><td colspan="10" class="server-empty">暂无数据</td></tr>{{end}}
+      </tbody>
+    </table>
+  </div></div>
+  {{template "pagination" .Pager}}
+  {{if .CanViewDetails}}
+  <dialog class="server-dialog identity-preview-dialog" id="identity-preview-dialog" aria-labelledby="identity-preview-title">
+    <header>
+      <h3 id="identity-preview-title">身份证照片</h3>
+      <button type="button" aria-label="关闭" data-close-dialog>×</button>
+    </header>
+    <div class="server-dialog-body">
+      <div class="server-alert" data-request-error role="alert" hidden></div>
+      <img class="identity-photo-preview" alt="" referrerpolicy="no-referrer" hidden>
+      <div class="server-alert server-alert-warning identity-preview-error" role="alert" hidden>
+        照片加载失败，请重新获取预览。
+        <a class="server-link" href="{{.CurrentURL}}" hx-get="{{.CurrentURL}}" hx-target="#admin-workspace" hx-indicator="#admin-loading" hx-sync="#admin-workspace:replace">重新获取</a>
+      </div>
+    </div>
+  </dialog>
+  {{end}}
+</section>
+{{end}}

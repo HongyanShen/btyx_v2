@@ -54,6 +54,11 @@ func (Submission) Fields() []ent.Field {
 		field.String("eligible_date").
 			Default(""),
 
+		field.Time("settlement_eligible_at").
+			SchemaType(map[string]string{dialect.Postgres: "timestamptz"}).
+			Optional().
+			Nillable(),
+
 		field.Enum("visibility").
 			GoType(enum.Visibility("")).
 			Default(string(enum.VisibilityUnchecked)),
@@ -63,8 +68,6 @@ func (Submission) Fields() []ent.Field {
 func (Submission) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("assignment_id", "platform").
-			Unique(),
-		index.Fields("platform", "work_key").
 			Unique(),
 	}
 }

@@ -65,6 +65,10 @@ func (s *Service) Users(ctx context.Context) ([]UserDTO, error) {
 		Limit(200), true)
 }
 
+func (s *Service) UsersByIDs(ctx context.Context, ids []string) ([]UserDTO, error) {
+	return s.userProfiles(ctx, s.Client.User.Query().Where(user.IDIn(ids...)), true)
+}
+
 func (s *Service) EnrollmentUsers(ctx context.Context, before string) ([]UserDTO, error) {
 	query := s.enrollmentQuery()
 	if before != "" {
@@ -278,7 +282,7 @@ func (s *Service) userProfile(member *ent.User, enrollment *ent.UserEnrollment, 
 	nickname := member.Nickname
 	if nickname == "" {
 		var err error
-		nickname, err = defaultNickname(member.ID)
+		nickname, err = legacyDefaultNickname(member.ID)
 		if err != nil {
 			return UserDTO{}, err
 		}

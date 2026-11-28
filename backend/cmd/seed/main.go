@@ -63,7 +63,7 @@ func seed(ctx context.Context, cfg config.Config) error {
 	}
 
 	if count > 0 {
-		logging.From(ctx).Info().Msg("已有任务，保留现有内容，不重复添加示例")
+		logging.Info(ctx).Msg("已有任务，保留现有内容，不重复添加示例")
 
 		return nil
 	}
@@ -85,7 +85,7 @@ func seed(ctx context.Context, cfg config.Config) error {
 		}
 	}
 
-	logging.From(ctx).Info().Msg("已创建本地示例协议、内容及任务；没有创建余额、付款或审核结果")
+	logging.Info(ctx).Msg("已创建本地示例协议、内容及任务；没有创建余额、付款或审核结果")
 	return nil
 }
 

@@ -1,0 +1,12 @@
+@import "../../../styles/wallet.wxss";
+
+.withdrawal-records-empty {
+  padding: 48rpx 28rpx;
+  text-align: center;
+}
+
+.wallet-page .withdrawal-records-login {
+  width: auto !important;
+  margin: 22rpx auto 0;
+  padding: 0 32rpx;
+}

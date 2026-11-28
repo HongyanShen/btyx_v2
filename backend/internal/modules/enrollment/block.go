@@ -54,7 +54,7 @@ func (s *Service) Block(ctx context.Context, actorID, userID string, blocked boo
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, actorID, enum.AuditUserBlock, userID, reason)
+		return true, app.Audit(ctx, tx, actorID, enum.AuditUserBlock, userID, reason, app.AuditFlag("拉黑", blocked))
 	})
 	return err
 }

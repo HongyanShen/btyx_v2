@@ -20,6 +20,7 @@ func TestEntDeletesMarkRowsAndHonorTransaction(t *testing.T) {
 	ctx := context.Background()
 	initialUpdate := time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC)
 	task, err := service.Client.Task.Create().
+		SetDisplayNumber(1).
 		SetCreatorID("admin").
 		SetUpdatedAt(initialUpdate).
 		Save(ctx)
@@ -136,6 +137,7 @@ func TestSoftDeletedRowsAreHiddenFromEntQueries(t *testing.T) {
 	}
 
 	deletedTask, err := client.Task.Create().
+		SetDisplayNumber(1).
 		SetCreatorID("admin").
 		SetDeleted(true).
 		Save(ctx)
@@ -391,7 +393,7 @@ func TestBooleanSoftDeleteMigrationFromCompositePartialIndexes(t *testing.T) {
 	_, err := service.DB.ExecContext(ctx, `
 		ALTER TABLE users DROP COLUMN deleted, ADD COLUMN deleted_at bigint NOT NULL DEFAULT 0;
 		ALTER TABLE contents DROP COLUMN deleted, ADD COLUMN deleted_at bigint NOT NULL DEFAULT 0;
-		ALTER TABLE tasks DROP COLUMN deleted, ADD COLUMN deleted_at bigint NOT NULL DEFAULT 0;
+		ALTER TABLE tasks DROP COLUMN display_number, DROP COLUMN deleted, ADD COLUMN deleted_at bigint NOT NULL DEFAULT 0;
 		ALTER TABLE marketing_tags DROP COLUMN deleted, ADD COLUMN deleted_at bigint NOT NULL DEFAULT 0;
 
 		CREATE UNIQUE INDEX marketing_tag_active_name ON marketing_tags (name, deleted_at) WHERE deleted_at = 0;

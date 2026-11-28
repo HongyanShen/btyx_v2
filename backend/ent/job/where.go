@@ -80,6 +80,11 @@ func ReferenceID(v string) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldReferenceID, v))
 }
 
+// TraceParent applies equality check predicate on the "trace_parent" field. It's identical to TraceParentEQ.
+func TraceParent(v string) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldTraceParent, v))
+}
+
 // RequestID applies equality check predicate on the "request_id" field. It's identical to RequestIDEQ.
 func RequestID(v string) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldRequestID, v))
@@ -273,6 +278,71 @@ func ReferenceIDEqualFold(v string) predicate.Job {
 // ReferenceIDContainsFold applies the ContainsFold predicate on the "reference_id" field.
 func ReferenceIDContainsFold(v string) predicate.Job {
 	return predicate.Job(sql.FieldContainsFold(FieldReferenceID, v))
+}
+
+// TraceParentEQ applies the EQ predicate on the "trace_parent" field.
+func TraceParentEQ(v string) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldTraceParent, v))
+}
+
+// TraceParentNEQ applies the NEQ predicate on the "trace_parent" field.
+func TraceParentNEQ(v string) predicate.Job {
+	return predicate.Job(sql.FieldNEQ(FieldTraceParent, v))
+}
+
+// TraceParentIn applies the In predicate on the "trace_parent" field.
+func TraceParentIn(vs ...string) predicate.Job {
+	return predicate.Job(sql.FieldIn(FieldTraceParent, vs...))
+}
+
+// TraceParentNotIn applies the NotIn predicate on the "trace_parent" field.
+func TraceParentNotIn(vs ...string) predicate.Job {
+	return predicate.Job(sql.FieldNotIn(FieldTraceParent, vs...))
+}
+
+// TraceParentGT applies the GT predicate on the "trace_parent" field.
+func TraceParentGT(v string) predicate.Job {
+	return predicate.Job(sql.FieldGT(FieldTraceParent, v))
+}
+
+// TraceParentGTE applies the GTE predicate on the "trace_parent" field.
+func TraceParentGTE(v string) predicate.Job {
+	return predicate.Job(sql.FieldGTE(FieldTraceParent, v))
+}
+
+// TraceParentLT applies the LT predicate on the "trace_parent" field.
+func TraceParentLT(v string) predicate.Job {
+	return predicate.Job(sql.FieldLT(FieldTraceParent, v))
+}
+
+// TraceParentLTE applies the LTE predicate on the "trace_parent" field.
+func TraceParentLTE(v string) predicate.Job {
+	return predicate.Job(sql.FieldLTE(FieldTraceParent, v))
+}
+
+// TraceParentContains applies the Contains predicate on the "trace_parent" field.
+func TraceParentContains(v string) predicate.Job {
+	return predicate.Job(sql.FieldContains(FieldTraceParent, v))
+}
+
+// TraceParentHasPrefix applies the HasPrefix predicate on the "trace_parent" field.
+func TraceParentHasPrefix(v string) predicate.Job {
+	return predicate.Job(sql.FieldHasPrefix(FieldTraceParent, v))
+}
+
+// TraceParentHasSuffix applies the HasSuffix predicate on the "trace_parent" field.
+func TraceParentHasSuffix(v string) predicate.Job {
+	return predicate.Job(sql.FieldHasSuffix(FieldTraceParent, v))
+}
+
+// TraceParentEqualFold applies the EqualFold predicate on the "trace_parent" field.
+func TraceParentEqualFold(v string) predicate.Job {
+	return predicate.Job(sql.FieldEqualFold(FieldTraceParent, v))
+}
+
+// TraceParentContainsFold applies the ContainsFold predicate on the "trace_parent" field.
+func TraceParentContainsFold(v string) predicate.Job {
+	return predicate.Job(sql.FieldContainsFold(FieldTraceParent, v))
 }
 
 // RequestIDEQ applies the EQ predicate on the "request_id" field.

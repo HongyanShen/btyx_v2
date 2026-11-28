@@ -75,7 +75,8 @@ func (s *Service) UpdateProfile(ctx context.Context, userID string, input Update
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, userID, enum.AuditUserProfileUpdate, userID, "")
+		return true, app.Audit(ctx, tx, userID, enum.AuditUserProfileUpdate, userID, "",
+			app.AuditFlag("提交昵称", input.Nickname != nil), app.AuditFlag("提交头像", input.AvatarFileID != nil))
 	})
 
 	return err
@@ -152,7 +153,7 @@ func (s *Service) VerifyPhone(ctx context.Context, userID, code string, useForCo
 			return false, err
 		}
 
-		return true, app.Audit(ctx, tx, userID, enum.AuditUserPhoneVerify, userID, "")
+		return true, app.Audit(ctx, tx, userID, enum.AuditUserPhoneVerify, userID, "", app.AuditFlag("用作联系电话", useForContact))
 	})
 	if err != nil {
 		return VerifiedPhoneDTO{}, err

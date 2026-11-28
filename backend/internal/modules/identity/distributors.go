@@ -84,14 +84,12 @@ func (s *Service) Distributors(ctx context.Context, userID string, revealPhone b
 		if userID != "" {
 			profile.DistributorDetails = s.distributorDetails(member, enrollment, profile.Phone, revealPhone)
 			if event != nil {
-				operator, err := s.Client.Operator.Get(ctx, event.ActorID)
-				if err != nil && !ent.IsNotFound(err) {
+				names, err := app.LookupOperatorNames(ctx, s.Client, []string{event.ActorID})
+				if err != nil {
 					return nil, err
 				}
 
-				if operator != nil {
-					profile.BlockInfo.Operator = operator.Username
-				}
+				profile.BlockInfo.Operator = names.Label(event.ActorID)
 			}
 		}
 

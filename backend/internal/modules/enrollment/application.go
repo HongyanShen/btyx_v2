@@ -191,7 +191,7 @@ func (s *Service) Apply(ctx context.Context, userID string, input ApplyInput) er
 			}
 		}
 
-		return true, app.Audit(ctx, tx, userID, enum.AuditEnrollmentApply, userID, "")
+		return true, app.Audit(ctx, tx, userID, enum.AuditEnrollmentApply, userID, "", "协议编号："+input.AgreementID)
 	})
 	return err
 }

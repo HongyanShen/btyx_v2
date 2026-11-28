@@ -12,6 +12,7 @@ import (
 	"baituber.cn/yanxuan/v2/internal/integrations/wechatpay"
 	"baituber.cn/yanxuan/v2/internal/platform/config"
 	"baituber.cn/yanxuan/v2/internal/platform/logging"
+	"baituber.cn/yanxuan/v2/internal/platform/telemetry"
 	"baituber.cn/yanxuan/v2/internal/platform/transfer"
 )
 
@@ -31,6 +32,13 @@ func main() {
 
 	defer closer.Close()
 	ctx = logging.WithLogger(ctx, logger)
+	closeTrace, err := telemetry.Open(ctx, cfg, "worker")
+	if err != nil {
+		logging.Error(ctx, err).Msg("初始化链路追踪失败")
+		os.Exit(1)
+	}
+
+	defer closeTrace()
 
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -54,8 +62,15 @@ func main() {
 		gateway = payments
 	}
 
-	logging.From(ctx).Info().Msg("worker started")
+	notices, err := task.StartNotices(ctx, services)
+	if err != nil {
+		logging.Error(ctx, err).Msg("启动通知队列失败")
+		_ = closer.Close()
+		os.Exit(1)
+	}
 
+	logging.Info(ctx).Msg("worker started")
+	defer notices.Stop(context.Background())
 	runner := task.New(services, gateway)
 	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()

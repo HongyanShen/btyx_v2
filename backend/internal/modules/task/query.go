@@ -2,7 +2,10 @@ package task
 
 import (
 	"context"
+	"math"
 	"slices"
+	"strings"
+	"time"
 
 	"baituber.cn/yanxuan/v2/internal/domain/enum"
 
@@ -13,10 +16,25 @@ import (
 	"baituber.cn/yanxuan/v2/ent/task"
 	"baituber.cn/yanxuan/v2/ent/taskversion"
 	"baituber.cn/yanxuan/v2/internal/platform/app"
+	"baituber.cn/yanxuan/v2/internal/platform/shortcode"
 )
 
 func (s *Service) Tasks(ctx context.Context) ([]VersionDTO, error) {
-	taskRecords, err := s.Client.Task.Query().
+	return s.TasksByCode(ctx, "")
+}
+
+func (s *Service) TasksByCode(ctx context.Context, code string) ([]VersionDTO, error) {
+	query := s.Client.Task.Query()
+	if code != "" {
+		number, ok := shortcode.Number(strings.TrimPrefix(code, taskCodePrefix))
+		if !ok || number == 0 || number > math.MaxInt64 {
+			return []VersionDTO{}, nil
+		}
+
+		query.Where(task.DisplayNumberEQ(int64(number)))
+	}
+
+	taskRecords, err := query.
 		Order(ent.Desc(task.FieldCreatedAt)).
 		Limit(200).
 		All(ctx)
@@ -85,7 +103,12 @@ func (s *Service) Tasks(ctx context.Context) ([]VersionDTO, error) {
 			return nil, app.NotFound()
 		}
 
-		currentVersion := versionDTO(version)
+		code, err := DisplayCode(taskRecord.DisplayNumber)
+		if err != nil {
+			return nil, err
+		}
+
+		currentVersion := versionDTO(version, code)
 		currentVersion.Online = taskRecord.Online
 		currentVersion.UploadedAt = &taskRecord.CreatedAt
 		currentVersion.Allocation = allocations[taskRecord.ID]
@@ -219,8 +242,13 @@ func (s *Service) Versions(ctx context.Context, taskID string) ([]VersionDTO, er
 	}
 
 	out := []VersionDTO{}
+	codes, err := taskCodes(ctx, s.Client, []string{taskID})
+	if err != nil {
+		return nil, err
+	}
+
 	for _, version := range versions {
-		out = append(out, versionDTO(version))
+		out = append(out, versionDTO(version, codes[taskID]))
 	}
 
 	return out, nil
@@ -244,19 +272,49 @@ func (s *Service) assignment(ctx context.Context, userID, id string, role enum.R
 		return AssignmentDTO{}, app.NotFound()
 	}
 
+	codes, err := taskCodes(ctx, s.Client, []string{assignmentRecord.TaskID})
+	if err != nil {
+		return AssignmentDTO{}, err
+	}
+
+	detail, err := s.loadAssignmentDetail(ctx, assignmentRecord, codes[assignmentRecord.TaskID])
+	if err != nil || role == enum.RoleAdmin {
+		return detail, err
+	}
+
+	policy, err := LoadMarketingPolicy(ctx, s.Client)
+	if err != nil {
+		return AssignmentDTO{}, err
+	}
+
+	detail.setPlaybackTiming(policy.Schedule, assignmentRecord.CreatedAt, s.Now())
+	return detail, nil
+}
+
+func (s *Service) loadAssignmentDetail(ctx context.Context, assignmentRecord *ent.Assignment, code string) (AssignmentDTO, error) {
 	version, err := s.Client.TaskVersion.Get(ctx, assignmentRecord.VersionID)
 	if err != nil {
 		return AssignmentDTO{}, err
 	}
 
 	submissions, err := s.Client.Submission.Query().
-		Where(submission.AssignmentIDEQ(id)).
+		Where(submission.AssignmentIDEQ(assignmentRecord.ID)).
 		All(ctx)
 	if err != nil {
 		return AssignmentDTO{}, err
 	}
 
-	return assignmentDetail(assignmentRecord, version, submissions), nil
+	detail := assignmentDetail(assignmentRecord, version, submissions)
+	detail.TaskCode = code
+	return detail, nil
+}
+
+func (detail *AssignmentDTO) setPlaybackTiming(schedule MarketingSchedule, allocatedAt, now time.Time) {
+	deadline := schedule.PlaybackDeadline(allocatedAt)
+	settlement := schedule.EligibleAt(allocatedAt, now)
+	detail.PlaybackDeadline = &deadline
+	detail.PlaybackSettlementAt = &settlement
+	detail.SettlementFrequency = schedule.SettlementFrequency
 }
 
 func assignmentDetail(assignmentRecord *ent.Assignment, version *ent.TaskVersion, submissions []*ent.Submission) AssignmentDTO {
@@ -280,16 +338,23 @@ func assignmentDetail(assignmentRecord *ent.Assignment, version *ent.TaskVersion
 		Steps:       []StepDTO{},
 	}
 	for _, record := range submissions {
+		publishedOn := ""
+		if !record.CreatedAt.IsZero() {
+			publishedOn = app.BusinessDay(record.CreatedAt)
+		}
+
 		detail.Submissions = append(detail.Submissions, SubmissionDTO{
-			ID:         record.ID,
-			Platform:   record.Platform,
-			URL:        record.URL,
-			Screenshot: record.Screenshot,
-			Status:     record.Status,
-			Reason:     record.Reason,
-			Revision:   record.Revision,
-			Settled:    record.SettlementID != "",
-			Visibility: record.Visibility,
+			ID:                   record.ID,
+			Platform:             record.Platform,
+			URL:                  record.URL,
+			Screenshot:           record.Screenshot,
+			Status:               record.Status,
+			Reason:               record.Reason,
+			Revision:             record.Revision,
+			Settled:              record.SettlementID != "",
+			Visibility:           record.Visibility,
+			PublishedOn:          publishedOn,
+			SettlementEligibleAt: record.SettlementEligibleAt,
 		})
 	}
 
@@ -340,10 +405,37 @@ func (s *Service) Assignments(ctx context.Context, userID string, role enum.Role
 	}
 
 	out := []AssignmentDTO{}
-	for _, record := range rows {
-		detail, err := s.assignment(ctx, userID, record.ID, role)
+	if len(rows) == 0 {
+		return out, nil
+	}
+
+	ids := make([]string, 0, len(rows))
+	for _, row := range rows {
+		ids = append(ids, row.TaskID)
+	}
+
+	codes, err := taskCodes(ctx, s.Client, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	var policy MarketingPolicy
+	if role != enum.RoleAdmin {
+		policy, err = LoadMarketingPolicy(ctx, s.Client)
 		if err != nil {
 			return nil, err
+		}
+	}
+
+	now := s.Now()
+	for _, record := range rows {
+		detail, err := s.loadAssignmentDetail(ctx, record, codes[record.TaskID])
+		if err != nil {
+			return nil, err
+		}
+
+		if role != enum.RoleAdmin {
+			detail.setPlaybackTiming(policy.Schedule, record.CreatedAt, now)
 		}
 
 		out = append(out, detail)

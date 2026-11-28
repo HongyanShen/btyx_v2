@@ -2,6 +2,7 @@ package audit
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"baituber.cn/yanxuan/v2/ent"
@@ -27,15 +28,31 @@ type IdentityRecordsDTO struct {
 	PhotosUnavailable bool                `json:"photos_unavailable"`
 }
 
+type IdentityRecordPage struct {
+	IdentityRecordsDTO
+	PreviousAfter string
+	Number        int
+}
+
 func (s *Service) IdentityRecords(ctx context.Context, before string) (IdentityRecordsDTO, error) {
-	return s.identityRecords(ctx, before, false)
+	page, err := s.identityRecords(ctx, before, "", 0, false)
+	return page.IdentityRecordsDTO, err
 }
 
 func (s *Service) IdentityRecordsWithDocuments(ctx context.Context, before string) (IdentityRecordsDTO, error) {
-	return s.identityRecords(ctx, before, true)
+	page, err := s.identityRecords(ctx, before, "", 0, true)
+	return page.IdentityRecordsDTO, err
 }
 
-func (s *Service) identityRecords(ctx context.Context, before string, includeDetails bool) (IdentityRecordsDTO, error) {
+func (s *Service) IdentityRecordsPage(ctx context.Context, before, after string, page int, includeDetails bool) (IdentityRecordPage, error) {
+	return s.identityRecords(ctx, before, after, max(page, 1), includeDetails)
+}
+
+func (s *Service) identityRecords(ctx context.Context, before, after string, page int, includeDetails bool) (IdentityRecordPage, error) {
+	if before != "" && after != "" {
+		return IdentityRecordPage{}, app.Invalid("认证记录分页位置无效")
+	}
+
 	const pageSize = 50
 	query := s.Client.AuditEvent.Query().
 		Where(auditevent.ActionIn(
@@ -44,41 +61,90 @@ func (s *Service) identityRecords(ctx context.Context, before string, includeDet
 			enum.AuditEnrollmentIdentityVerify,
 			enum.AuditEnrollmentIdentityFailed,
 		))
-	if before != "" {
-		cursor, err := query.Clone().Where(auditevent.IDEQ(before)).Only(ctx)
+	allRecords := query.Clone()
+	cursorID := before
+	if after != "" {
+		cursorID = after
+	}
+
+	if cursorID == "" && page > 1 {
+		count, err := allRecords.Clone().Count(ctx)
+		if err != nil {
+			return IdentityRecordPage{}, err
+		}
+
+		page = min(page, max(1, (count+pageSize-1)/pageSize))
+		query.Offset((page - 1) * pageSize)
+	}
+
+	if cursorID != "" {
+		cursor, err := query.Clone().Where(auditevent.IDEQ(cursorID)).Only(ctx)
 		if ent.IsNotFound(err) {
-			return IdentityRecordsDTO{}, app.Invalid("认证记录分页位置无效")
+			return IdentityRecordPage{}, app.Invalid("认证记录分页位置无效")
 		}
 
 		if err != nil {
-			return IdentityRecordsDTO{}, err
+			return IdentityRecordPage{}, err
 		}
 
-		query.Where(auditevent.Or(
-			auditevent.CreatedAtLT(cursor.CreatedAt),
-			auditevent.And(
-				auditevent.CreatedAtEQ(cursor.CreatedAt),
-				auditevent.IDLT(cursor.ID),
-			),
-		))
+		if after != "" {
+			query.Where(auditevent.Or(
+				auditevent.CreatedAtGT(cursor.CreatedAt),
+				auditevent.And(auditevent.CreatedAtEQ(cursor.CreatedAt), auditevent.IDGT(cursor.ID)),
+			))
+		} else {
+			query.Where(auditevent.Or(
+				auditevent.CreatedAtLT(cursor.CreatedAt),
+				auditevent.And(auditevent.CreatedAtEQ(cursor.CreatedAt), auditevent.IDLT(cursor.ID)),
+			))
+		}
 	}
 
-	events, err := query.
-		Order(ent.Desc(auditevent.FieldCreatedAt, auditevent.FieldID)).
-		Limit(pageSize + 1).
-		All(ctx)
+	if after != "" {
+		query.Order(ent.Asc(auditevent.FieldCreatedAt, auditevent.FieldID))
+	} else {
+		query.Order(ent.Desc(auditevent.FieldCreatedAt, auditevent.FieldID))
+	}
+
+	events, err := query.Limit(pageSize + 1).All(ctx)
 	if err != nil {
-		return IdentityRecordsDTO{}, err
+		return IdentityRecordPage{}, err
 	}
 
-	result := IdentityRecordsDTO{Records: make([]IdentityRecordDTO, 0, len(events))}
+	result := IdentityRecordPage{Number: page}
+	result.Records = make([]IdentityRecordDTO, 0, len(events))
 	if len(events) == 0 {
 		return result, nil
 	}
 
-	if len(events) > pageSize {
+	hasMore := len(events) > pageSize
+	if hasMore {
 		events = events[:pageSize]
-		result.NextBefore = events[pageSize-1].ID
+	}
+
+	if after != "" {
+		slices.Reverse(events)
+	}
+
+	if before != "" || (after != "" && hasMore) {
+		result.PreviousAfter = events[0].ID
+	}
+
+	if after != "" || hasMore {
+		result.NextBefore = events[len(events)-1].ID
+	}
+
+	if page > 0 && cursorID != "" {
+		first := events[0]
+		newer, err := allRecords.Where(auditevent.Or(
+			auditevent.CreatedAtGT(first.CreatedAt),
+			auditevent.And(auditevent.CreatedAtEQ(first.CreatedAt), auditevent.IDGT(first.ID)),
+		)).Count(ctx)
+		if err != nil {
+			return IdentityRecordPage{}, err
+		}
+
+		result.Number = newer/pageSize + 1
 	}
 
 	userIDs := make([]string, 0, len(events))
@@ -91,7 +157,7 @@ func (s *Service) identityRecords(ctx context.Context, before string, includeDet
 		Select(user.FieldID, user.FieldNickname).
 		All(ctx)
 	if err != nil {
-		return IdentityRecordsDTO{}, err
+		return IdentityRecordPage{}, err
 	}
 
 	nicknames := make(map[string]string, len(members))
@@ -115,7 +181,7 @@ func (s *Service) identityRecords(ctx context.Context, before string, includeDet
 		// A historical snapshot may still reference a photo retired from the current profile.
 		photos, err = s.loadIdentityPhotos(ctx, photoIDs)
 		if err != nil {
-			return IdentityRecordsDTO{}, err
+			return IdentityRecordPage{}, err
 		}
 	}
 

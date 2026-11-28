@@ -1,41 +1,61 @@
 <import src="/templates/loading.wxml" />
-<view class="page">
-  <view wx:if="{{!signedIn && !loading}}" class="card">
-    <view class="muted">登录后查看营销收益</view>
-    <button class="primary spaced" bindtap="openLogin">登录</button>
+<view class="wallet-hero">
+  <view class="wallet-hero-label">累计收益（元）</view>
+  <view class="wallet-total wallet-number">{{wallet ? wallet.earned : '—'}}</view>
+  <view class="wallet-stats">
+    <view>待结算<text class="wallet-number">{{wallet ? wallet.pending : '—'}}</text></view>
+    <view>本月<text class="wallet-number">{{wallet ? wallet.monthEarned : '—'}}</text></view>
+    <view>营销奖励<text class="wallet-number">{{wallet ? wallet.earned : '—'}}</text></view>
   </view>
+</view>
+<view class="wallet-content">
+  <template wx:if="{{loading}}" is="loading-card" />
+  <view wx:elif="{{!signedIn}}" class="wallet-card wallet-empty">
+    <view class="wallet-empty-title">登录后查看营销收益</view>
+    <button class="wallet-action wallet-small" bindtap="openLogin">登录</button>
+  </view>
+  <button wx:elif="{{error}}" class="error wallet-retry" bindtap="load">{{error}} · 点击重试</button>
   <block wx:else>
-    <view class="hero">
-      <view class="muted">营销奖励余额（可提现）</view>
-      <view class="row">
-        <view class="amount-large">¥{{wallet ? wallet.available : '—'}}</view>
-        <button class="withdraw-link small-button" bindtap="openWithdrawals">提现</button>
-      </view>
-      <view class="row">
-        <text>提现处理中 ¥{{wallet ? wallet.frozen : '—'}}</text>
-        <text>已提现 ¥{{wallet ? wallet.withdrawn : '—'}}</text>
-      </view>
+    <view class="wallet-note">营销奖励按任务约定结算，入账后进入下面的余额，可提现到微信零钱。</view>
+    <view wx:if="{{playback}}" class="wallet-banner {{playback.pending ? '' : 'wallet-banner-success'}}">
+      <text>{{playback.message}}</text>
+      <button wx:if="{{playback.pending}}" class="wallet-inline" bindtap="openPlayback">去交 ›</button>
     </view>
-    <view class="notice">营销奖励每周一结算上周的任务。审核通过后进入待结算，入账后可从余额提现到微信零钱。</view>
-    <view wx:if="{{error}}" class="error" bindtap="load">{{error}} · 点击刷新</view>
-    <view class="card">
-      <view class="link-row" bindtap="openWithdrawals">
-        <text>提现记录</text>
-        <text class="muted">查看 ›</text>
+    <view class="wallet-card wallet-balance">
+      <view class="grow">
+        <view class="wallet-balance-label">营销奖励余额（可提现）</view>
+        <view class="wallet-balance-value wallet-number">¥{{wallet.available}}</view>
+        <view class="wallet-caption">提现到微信零钱</view>
+        <view wx:if="{{wallet.hasFrozen}}" class="wallet-caption wallet-frozen">提现冻结中 ¥{{wallet.frozen}}</view>
       </view>
+      <button class="wallet-action wallet-withdraw" bindtap="openWithdrawals">提现</button>
     </view>
-    <view class="section-title">收益明细</view>
-    <template wx:if="{{loading}}" is="loading-card" />
-    <view wx:elif="{{!error && !ledger.length}}" class="empty">暂无余额变动</view>
-    <block wx:if="{{!loading && !error}}">
-      <view wx:for="{{ledger}}" wx:key="id" class="card">
-        <view class="row">
-          <text>{{item.label}}</text>
-          <text>¥{{item.amount}}</text>
-        </view>
-        <view class="muted">{{item.time}}</view>
-        <view wx:if="{{item.reason}}" class="muted">{{item.reason}}</view>
-      </view>
-    </block>
+    <view wx:if="{{!wallet.hasEarnings}}" class="wallet-card wallet-empty">
+      <view class="wallet-empty-title">还没有收益</view>
+      <view class="wallet-caption">领一个营销任务，发完交链接，审核通过就记一笔奖励</view>
+      <button class="wallet-action wallet-small" bindtap="openTasks">去领任务</button>
+    </view>
+    <view class="wallet-sources">
+      <view class="wallet-source wallet-future"><text>带货佣金</text><text class="wallet-caption">即将上线</text></view>
+      <view class="wallet-source"><text>营销奖励</text><text class="wallet-source-value wallet-number">¥{{wallet.earned}}</text><text class="wallet-caption">结算后进余额</text></view>
+      <button class="wallet-source wallet-future wallet-points" bindtap="openUpcoming" data-type="points">
+        <text>点数</text><text class="wallet-caption">即将上线 ›</text>
+      </button>
+    </view>
+    <button class="wallet-row wallet-orders" bindtap="openUpcoming" data-type="orders">
+      <image src="/assets/me/order.png" mode="aspectFit" />
+      <text class="grow">订单明细</text>
+      <text class="wallet-caption">即将上线</text><text class="wallet-chevron">›</text>
+    </button>
+    <button class="wallet-row wallet-details" bindtap="openDetails">
+      <image src="/assets/me/record.png" mode="aspectFit" />
+      <text class="grow">收益明细</text>
+      <text class="wallet-caption">每笔佣金、奖励的记录</text><text class="wallet-chevron">›</text>
+    </button>
+    <button class="wallet-row wallet-withdrawal-records" bindtap="openWithdrawalRecords">
+      <image src="/assets/tab-wallet-active.png" mode="aspectFit" />
+      <text class="grow">提现记录</text>
+      <text class="wallet-caption">查看提现状态</text><text class="wallet-chevron">›</text>
+    </button>
   </block>
 </view>

@@ -9,6 +9,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/segmentio/ksuid"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type contextKey struct{}
@@ -51,12 +52,32 @@ func RequestID(ctx context.Context) string {
 }
 
 func From(ctx context.Context) *zerolog.Logger {
-	return &current(ctx).logger
+	logger := &current(ctx).logger
+	span := trace.SpanContextFromContext(ctx)
+	if span.IsValid() {
+		scoped := logger.With().Str("trace_id", span.TraceID().String()).Str("span_id", span.SpanID().String()).Logger()
+		return &scoped
+	}
+
+	return logger
 }
 
-// Error records safe diagnostic categories, excluding arbitrary provider/error payloads.
+func Info(ctx context.Context) *zerolog.Event {
+	return From(ctx).Info()
+}
+
+func Warn(ctx context.Context) *zerolog.Event {
+	return From(ctx).Warn()
+}
+
+// Error adds safe diagnostic fields when an underlying error is available.
 func Error(ctx context.Context, err error) *zerolog.Event {
-	event := From(ctx).Error().Str("error_type", fmt.Sprintf("%T", err))
+	event := From(ctx).Error()
+	if err == nil {
+		return event
+	}
+
+	event.Str("error_type", fmt.Sprintf("%T", err))
 	var databaseError interface {
 		SQLState() string
 	}

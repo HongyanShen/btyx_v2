@@ -8,8 +8,14 @@ import (
 	"baituber.cn/yanxuan/v2/ent/agreement"
 	"baituber.cn/yanxuan/v2/ent/assignment"
 	"baituber.cn/yanxuan/v2/ent/auditevent"
+	"baituber.cn/yanxuan/v2/ent/audithttpresponse"
 	"baituber.cn/yanxuan/v2/ent/consent"
 	"baituber.cn/yanxuan/v2/ent/content"
+	"baituber.cn/yanxuan/v2/ent/creativeearning"
+	"baituber.cn/yanxuan/v2/ent/creativelink"
+	"baituber.cn/yanxuan/v2/ent/creativetask"
+	"baituber.cn/yanxuan/v2/ent/creativetier"
+	"baituber.cn/yanxuan/v2/ent/creativework"
 	"baituber.cn/yanxuan/v2/ent/feedback"
 	"baituber.cn/yanxuan/v2/ent/fileobject"
 	"baituber.cn/yanxuan/v2/ent/job"
@@ -24,7 +30,9 @@ import (
 	"baituber.cn/yanxuan/v2/ent/settlementbatch"
 	"baituber.cn/yanxuan/v2/ent/settlementline"
 	"baituber.cn/yanxuan/v2/ent/submission"
+	"baituber.cn/yanxuan/v2/ent/subscriptionchoice"
 	"baituber.cn/yanxuan/v2/ent/task"
+	"baituber.cn/yanxuan/v2/ent/tasknumbercounter"
 	"baituber.cn/yanxuan/v2/ent/taskversion"
 	"baituber.cn/yanxuan/v2/ent/user"
 	"baituber.cn/yanxuan/v2/ent/userenrollment"
@@ -98,28 +106,40 @@ func init() {
 	auditeventDescReason := auditeventFields[3].Descriptor()
 	// auditevent.DefaultReason holds the default value on creation for the reason field.
 	auditevent.DefaultReason = auditeventDescReason.Default.(string)
+	// auditeventDescEndpoint is the schema descriptor for endpoint field.
+	auditeventDescEndpoint := auditeventFields[4].Descriptor()
+	// auditevent.DefaultEndpoint holds the default value on creation for the endpoint field.
+	auditevent.DefaultEndpoint = auditeventDescEndpoint.Default.(string)
+	// auditeventDescRequestID is the schema descriptor for request_id field.
+	auditeventDescRequestID := auditeventFields[5].Descriptor()
+	// auditevent.RequestIDValidator is a validator for the "request_id" field. It is called by the builders before save.
+	auditevent.RequestIDValidator = auditeventDescRequestID.Validators[0].(func(string) error)
+	// auditeventDescParameters is the schema descriptor for parameters field.
+	auditeventDescParameters := auditeventFields[7].Descriptor()
+	// auditevent.DefaultParameters holds the default value on creation for the parameters field.
+	auditevent.DefaultParameters = auditeventDescParameters.Default.(string)
 	// auditeventDescSubmittedPhone is the schema descriptor for submitted_phone field.
-	auditeventDescSubmittedPhone := auditeventFields[4].Descriptor()
+	auditeventDescSubmittedPhone := auditeventFields[8].Descriptor()
 	// auditevent.DefaultSubmittedPhone holds the default value on creation for the submitted_phone field.
 	auditevent.DefaultSubmittedPhone = auditeventDescSubmittedPhone.Default.(string)
 	// auditeventDescSubmittedWechatCipher is the schema descriptor for submitted_wechat_cipher field.
-	auditeventDescSubmittedWechatCipher := auditeventFields[5].Descriptor()
+	auditeventDescSubmittedWechatCipher := auditeventFields[9].Descriptor()
 	// auditevent.DefaultSubmittedWechatCipher holds the default value on creation for the submitted_wechat_cipher field.
 	auditevent.DefaultSubmittedWechatCipher = auditeventDescSubmittedWechatCipher.Default.(string)
 	// auditeventDescSubmittedMaskedName is the schema descriptor for submitted_masked_name field.
-	auditeventDescSubmittedMaskedName := auditeventFields[6].Descriptor()
+	auditeventDescSubmittedMaskedName := auditeventFields[10].Descriptor()
 	// auditevent.DefaultSubmittedMaskedName holds the default value on creation for the submitted_masked_name field.
 	auditevent.DefaultSubmittedMaskedName = auditeventDescSubmittedMaskedName.Default.(string)
 	// auditeventDescSubmittedMaskedIdentity is the schema descriptor for submitted_masked_identity field.
-	auditeventDescSubmittedMaskedIdentity := auditeventFields[7].Descriptor()
+	auditeventDescSubmittedMaskedIdentity := auditeventFields[11].Descriptor()
 	// auditevent.DefaultSubmittedMaskedIdentity holds the default value on creation for the submitted_masked_identity field.
 	auditevent.DefaultSubmittedMaskedIdentity = auditeventDescSubmittedMaskedIdentity.Default.(string)
 	// auditeventDescSubmittedFrontFileID is the schema descriptor for submitted_front_file_id field.
-	auditeventDescSubmittedFrontFileID := auditeventFields[8].Descriptor()
+	auditeventDescSubmittedFrontFileID := auditeventFields[12].Descriptor()
 	// auditevent.DefaultSubmittedFrontFileID holds the default value on creation for the submitted_front_file_id field.
 	auditevent.DefaultSubmittedFrontFileID = auditeventDescSubmittedFrontFileID.Default.(string)
 	// auditeventDescSubmittedBackFileID is the schema descriptor for submitted_back_file_id field.
-	auditeventDescSubmittedBackFileID := auditeventFields[9].Descriptor()
+	auditeventDescSubmittedBackFileID := auditeventFields[13].Descriptor()
 	// auditevent.DefaultSubmittedBackFileID holds the default value on creation for the submitted_back_file_id field.
 	auditevent.DefaultSubmittedBackFileID = auditeventDescSubmittedBackFileID.Default.(string)
 	// auditeventDescID is the schema descriptor for id field.
@@ -128,6 +148,29 @@ func init() {
 	auditevent.DefaultID = auditeventDescID.Default.(func() string)
 	// auditevent.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	auditevent.IDValidator = auditeventDescID.Validators[0].(func(string) error)
+	audithttpresponseMixin := schema.AuditHTTPResponse{}.Mixin()
+	audithttpresponseMixinFields0 := audithttpresponseMixin[0].Fields()
+	_ = audithttpresponseMixinFields0
+	audithttpresponseFields := schema.AuditHTTPResponse{}.Fields()
+	_ = audithttpresponseFields
+	// audithttpresponseDescCreatedAt is the schema descriptor for created_at field.
+	audithttpresponseDescCreatedAt := audithttpresponseMixinFields0[1].Descriptor()
+	// audithttpresponse.DefaultCreatedAt holds the default value on creation for the created_at field.
+	audithttpresponse.DefaultCreatedAt = audithttpresponseDescCreatedAt.Default.(func() time.Time)
+	// audithttpresponseDescStatus is the schema descriptor for status field.
+	audithttpresponseDescStatus := audithttpresponseFields[0].Descriptor()
+	// audithttpresponse.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	audithttpresponse.StatusValidator = audithttpresponseDescStatus.Validators[0].(func(int) error)
+	// audithttpresponseDescBodyCipher is the schema descriptor for body_cipher field.
+	audithttpresponseDescBodyCipher := audithttpresponseFields[3].Descriptor()
+	// audithttpresponse.DefaultBodyCipher holds the default value on creation for the body_cipher field.
+	audithttpresponse.DefaultBodyCipher = audithttpresponseDescBodyCipher.Default.(string)
+	// audithttpresponseDescID is the schema descriptor for id field.
+	audithttpresponseDescID := audithttpresponseMixinFields0[0].Descriptor()
+	// audithttpresponse.DefaultID holds the default value on creation for the id field.
+	audithttpresponse.DefaultID = audithttpresponseDescID.Default.(func() string)
+	// audithttpresponse.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	audithttpresponse.IDValidator = audithttpresponseDescID.Validators[0].(func(string) error)
 	consentMixin := schema.Consent{}.Mixin()
 	consentMixinFields0 := consentMixin[0].Fields()
 	_ = consentMixinFields0
@@ -180,6 +223,171 @@ func init() {
 	content.DefaultID = contentDescID.Default.(func() string)
 	// content.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	content.IDValidator = contentDescID.Validators[0].(func(string) error)
+	creativeearningMixin := schema.CreativeEarning{}.Mixin()
+	creativeearningMixinFields0 := creativeearningMixin[0].Fields()
+	_ = creativeearningMixinFields0
+	creativeearningMixinFields1 := creativeearningMixin[1].Fields()
+	_ = creativeearningMixinFields1
+	creativeearningFields := schema.CreativeEarning{}.Fields()
+	_ = creativeearningFields
+	// creativeearningDescCreatedAt is the schema descriptor for created_at field.
+	creativeearningDescCreatedAt := creativeearningMixinFields0[1].Descriptor()
+	// creativeearning.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creativeearning.DefaultCreatedAt = creativeearningDescCreatedAt.Default.(func() time.Time)
+	// creativeearningDescUpdatedAt is the schema descriptor for updated_at field.
+	creativeearningDescUpdatedAt := creativeearningMixinFields1[0].Descriptor()
+	// creativeearning.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	creativeearning.DefaultUpdatedAt = creativeearningDescUpdatedAt.Default.(func() time.Time)
+	// creativeearning.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	creativeearning.UpdateDefaultUpdatedAt = creativeearningDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// creativeearningDescBatchID is the schema descriptor for batch_id field.
+	creativeearningDescBatchID := creativeearningFields[5].Descriptor()
+	// creativeearning.DefaultBatchID holds the default value on creation for the batch_id field.
+	creativeearning.DefaultBatchID = creativeearningDescBatchID.Default.(string)
+	// creativeearningDescID is the schema descriptor for id field.
+	creativeearningDescID := creativeearningMixinFields0[0].Descriptor()
+	// creativeearning.DefaultID holds the default value on creation for the id field.
+	creativeearning.DefaultID = creativeearningDescID.Default.(func() string)
+	// creativeearning.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	creativeearning.IDValidator = creativeearningDescID.Validators[0].(func(string) error)
+	creativelinkMixin := schema.CreativeLink{}.Mixin()
+	creativelinkMixinFields0 := creativelinkMixin[0].Fields()
+	_ = creativelinkMixinFields0
+	creativelinkMixinFields1 := creativelinkMixin[1].Fields()
+	_ = creativelinkMixinFields1
+	creativelinkFields := schema.CreativeLink{}.Fields()
+	_ = creativelinkFields
+	// creativelinkDescCreatedAt is the schema descriptor for created_at field.
+	creativelinkDescCreatedAt := creativelinkMixinFields0[1].Descriptor()
+	// creativelink.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creativelink.DefaultCreatedAt = creativelinkDescCreatedAt.Default.(func() time.Time)
+	// creativelinkDescUpdatedAt is the schema descriptor for updated_at field.
+	creativelinkDescUpdatedAt := creativelinkMixinFields1[0].Descriptor()
+	// creativelink.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	creativelink.DefaultUpdatedAt = creativelinkDescUpdatedAt.Default.(func() time.Time)
+	// creativelink.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	creativelink.UpdateDefaultUpdatedAt = creativelinkDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// creativelinkDescScreenshot is the schema descriptor for screenshot field.
+	creativelinkDescScreenshot := creativelinkFields[3].Descriptor()
+	// creativelink.DefaultScreenshot holds the default value on creation for the screenshot field.
+	creativelink.DefaultScreenshot = creativelinkDescScreenshot.Default.(string)
+	// creativelinkDescEvidenceReason is the schema descriptor for evidence_reason field.
+	creativelinkDescEvidenceReason := creativelinkFields[4].Descriptor()
+	// creativelink.DefaultEvidenceReason holds the default value on creation for the evidence_reason field.
+	creativelink.DefaultEvidenceReason = creativelinkDescEvidenceReason.Default.(string)
+	// creativelinkDescLikes is the schema descriptor for likes field.
+	creativelinkDescLikes := creativelinkFields[5].Descriptor()
+	// creativelink.LikesValidator is a validator for the "likes" field. It is called by the builders before save.
+	creativelink.LikesValidator = creativelinkDescLikes.Validators[0].(func(int) error)
+	// creativelinkDescID is the schema descriptor for id field.
+	creativelinkDescID := creativelinkMixinFields0[0].Descriptor()
+	// creativelink.DefaultID holds the default value on creation for the id field.
+	creativelink.DefaultID = creativelinkDescID.Default.(func() string)
+	// creativelink.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	creativelink.IDValidator = creativelinkDescID.Validators[0].(func(string) error)
+	creativetaskMixin := schema.CreativeTask{}.Mixin()
+	creativetaskMixinFields0 := creativetaskMixin[0].Fields()
+	_ = creativetaskMixinFields0
+	creativetaskMixinFields1 := creativetaskMixin[1].Fields()
+	_ = creativetaskMixinFields1
+	creativetaskMixinFields2 := creativetaskMixin[2].Fields()
+	_ = creativetaskMixinFields2
+	creativetaskFields := schema.CreativeTask{}.Fields()
+	_ = creativetaskFields
+	// creativetaskDescCreatedAt is the schema descriptor for created_at field.
+	creativetaskDescCreatedAt := creativetaskMixinFields0[1].Descriptor()
+	// creativetask.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creativetask.DefaultCreatedAt = creativetaskDescCreatedAt.Default.(func() time.Time)
+	// creativetaskDescUpdatedAt is the schema descriptor for updated_at field.
+	creativetaskDescUpdatedAt := creativetaskMixinFields1[0].Descriptor()
+	// creativetask.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	creativetask.DefaultUpdatedAt = creativetaskDescUpdatedAt.Default.(func() time.Time)
+	// creativetask.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	creativetask.UpdateDefaultUpdatedAt = creativetaskDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// creativetaskDescDisplayNumber is the schema descriptor for display_number field.
+	creativetaskDescDisplayNumber := creativetaskMixinFields2[0].Descriptor()
+	// creativetask.DisplayNumberValidator is a validator for the "display_number" field. It is called by the builders before save.
+	creativetask.DisplayNumberValidator = creativetaskDescDisplayNumber.Validators[0].(func(int64) error)
+	// creativetaskDescPublishDays is the schema descriptor for publish_days field.
+	creativetaskDescPublishDays := creativetaskFields[11].Descriptor()
+	// creativetask.PublishDaysValidator is a validator for the "publish_days" field. It is called by the builders before save.
+	creativetask.PublishDaysValidator = creativetaskDescPublishDays.Validators[0].(func(int) error)
+	// creativetaskDescOnline is the schema descriptor for online field.
+	creativetaskDescOnline := creativetaskFields[15].Descriptor()
+	// creativetask.DefaultOnline holds the default value on creation for the online field.
+	creativetask.DefaultOnline = creativetaskDescOnline.Default.(bool)
+	// creativetaskDescID is the schema descriptor for id field.
+	creativetaskDescID := creativetaskMixinFields0[0].Descriptor()
+	// creativetask.DefaultID holds the default value on creation for the id field.
+	creativetask.DefaultID = creativetaskDescID.Default.(func() string)
+	// creativetask.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	creativetask.IDValidator = creativetaskDescID.Validators[0].(func(string) error)
+	creativetierMixin := schema.CreativeTier{}.Mixin()
+	creativetierMixinFields0 := creativetierMixin[0].Fields()
+	_ = creativetierMixinFields0
+	creativetierMixinFields1 := creativetierMixin[1].Fields()
+	_ = creativetierMixinFields1
+	creativetierFields := schema.CreativeTier{}.Fields()
+	_ = creativetierFields
+	// creativetierDescCreatedAt is the schema descriptor for created_at field.
+	creativetierDescCreatedAt := creativetierMixinFields0[1].Descriptor()
+	// creativetier.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creativetier.DefaultCreatedAt = creativetierDescCreatedAt.Default.(func() time.Time)
+	// creativetierDescUpdatedAt is the schema descriptor for updated_at field.
+	creativetierDescUpdatedAt := creativetierMixinFields1[0].Descriptor()
+	// creativetier.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	creativetier.DefaultUpdatedAt = creativetierDescUpdatedAt.Default.(func() time.Time)
+	// creativetier.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	creativetier.UpdateDefaultUpdatedAt = creativetierDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// creativetierDescLikes is the schema descriptor for likes field.
+	creativetierDescLikes := creativetierFields[1].Descriptor()
+	// creativetier.LikesValidator is a validator for the "likes" field. It is called by the builders before save.
+	creativetier.LikesValidator = creativetierDescLikes.Validators[0].(func(int) error)
+	// creativetierDescID is the schema descriptor for id field.
+	creativetierDescID := creativetierMixinFields0[0].Descriptor()
+	// creativetier.DefaultID holds the default value on creation for the id field.
+	creativetier.DefaultID = creativetierDescID.Default.(func() string)
+	// creativetier.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	creativetier.IDValidator = creativetierDescID.Validators[0].(func(string) error)
+	creativeworkMixin := schema.CreativeWork{}.Mixin()
+	creativeworkMixinFields0 := creativeworkMixin[0].Fields()
+	_ = creativeworkMixinFields0
+	creativeworkMixinFields1 := creativeworkMixin[1].Fields()
+	_ = creativeworkMixinFields1
+	creativeworkFields := schema.CreativeWork{}.Fields()
+	_ = creativeworkFields
+	// creativeworkDescCreatedAt is the schema descriptor for created_at field.
+	creativeworkDescCreatedAt := creativeworkMixinFields0[1].Descriptor()
+	// creativework.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creativework.DefaultCreatedAt = creativeworkDescCreatedAt.Default.(func() time.Time)
+	// creativeworkDescUpdatedAt is the schema descriptor for updated_at field.
+	creativeworkDescUpdatedAt := creativeworkMixinFields1[0].Descriptor()
+	// creativework.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	creativework.DefaultUpdatedAt = creativeworkDescUpdatedAt.Default.(func() time.Time)
+	// creativework.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	creativework.UpdateDefaultUpdatedAt = creativeworkDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// creativeworkDescRevision is the schema descriptor for revision field.
+	creativeworkDescRevision := creativeworkFields[6].Descriptor()
+	// creativework.DefaultRevision holds the default value on creation for the revision field.
+	creativework.DefaultRevision = creativeworkDescRevision.Default.(int)
+	// creativeworkDescCopyText is the schema descriptor for copy_text field.
+	creativeworkDescCopyText := creativeworkFields[7].Descriptor()
+	// creativework.DefaultCopyText holds the default value on creation for the copy_text field.
+	creativework.DefaultCopyText = creativeworkDescCopyText.Default.(string)
+	// creativeworkDescReason is the schema descriptor for reason field.
+	creativeworkDescReason := creativeworkFields[9].Descriptor()
+	// creativework.DefaultReason holds the default value on creation for the reason field.
+	creativework.DefaultReason = creativeworkDescReason.Default.(string)
+	// creativeworkDescReviewerID is the schema descriptor for reviewer_id field.
+	creativeworkDescReviewerID := creativeworkFields[10].Descriptor()
+	// creativework.DefaultReviewerID holds the default value on creation for the reviewer_id field.
+	creativework.DefaultReviewerID = creativeworkDescReviewerID.Default.(string)
+	// creativeworkDescID is the schema descriptor for id field.
+	creativeworkDescID := creativeworkMixinFields0[0].Descriptor()
+	// creativework.DefaultID holds the default value on creation for the id field.
+	creativework.DefaultID = creativeworkDescID.Default.(func() string)
+	// creativework.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	creativework.IDValidator = creativeworkDescID.Validators[0].(func(string) error)
 	feedbackMixin := schema.Feedback{}.Mixin()
 	feedbackMixinFields0 := feedbackMixin[0].Fields()
 	_ = feedbackMixinFields0
@@ -271,22 +479,28 @@ func init() {
 	job.DefaultUpdatedAt = jobDescUpdatedAt.Default.(func() time.Time)
 	// job.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	job.UpdateDefaultUpdatedAt = jobDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// jobDescTraceParent is the schema descriptor for trace_parent field.
+	jobDescTraceParent := jobFields[2].Descriptor()
+	// job.DefaultTraceParent holds the default value on creation for the trace_parent field.
+	job.DefaultTraceParent = jobDescTraceParent.Default.(string)
+	// job.TraceParentValidator is a validator for the "trace_parent" field. It is called by the builders before save.
+	job.TraceParentValidator = jobDescTraceParent.Validators[0].(func(string) error)
 	// jobDescRequestID is the schema descriptor for request_id field.
-	jobDescRequestID := jobFields[2].Descriptor()
+	jobDescRequestID := jobFields[3].Descriptor()
 	// job.DefaultRequestID holds the default value on creation for the request_id field.
 	job.DefaultRequestID = jobDescRequestID.Default.(string)
 	// job.RequestIDValidator is a validator for the "request_id" field. It is called by the builders before save.
 	job.RequestIDValidator = jobDescRequestID.Validators[0].(func(string) error)
 	// jobDescAttempts is the schema descriptor for attempts field.
-	jobDescAttempts := jobFields[4].Descriptor()
+	jobDescAttempts := jobFields[5].Descriptor()
 	// job.DefaultAttempts holds the default value on creation for the attempts field.
 	job.DefaultAttempts = jobDescAttempts.Default.(int64)
 	// jobDescNextAt is the schema descriptor for next_at field.
-	jobDescNextAt := jobFields[5].Descriptor()
+	jobDescNextAt := jobFields[6].Descriptor()
 	// job.DefaultNextAt holds the default value on creation for the next_at field.
 	job.DefaultNextAt = jobDescNextAt.Default.(func() time.Time)
 	// jobDescLastError is the schema descriptor for last_error field.
-	jobDescLastError := jobFields[6].Descriptor()
+	jobDescLastError := jobFields[7].Descriptor()
 	// job.DefaultLastError holds the default value on creation for the last_error field.
 	job.DefaultLastError = jobDescLastError.Default.(string)
 	// jobDescID is the schema descriptor for id field.
@@ -343,10 +557,54 @@ func init() {
 	marketingsettingsDescOnline := marketingsettingsFields[3].Descriptor()
 	// marketingsettings.DefaultOnline holds the default value on creation for the online field.
 	marketingsettings.DefaultOnline = marketingsettingsDescOnline.Default.(bool)
+	// marketingsettingsDescDailyLimit is the schema descriptor for daily_limit field.
+	marketingsettingsDescDailyLimit := marketingsettingsFields[4].Descriptor()
+	// marketingsettings.DefaultDailyLimit holds the default value on creation for the daily_limit field.
+	marketingsettings.DefaultDailyLimit = marketingsettingsDescDailyLimit.Default.(int)
+	// marketingsettings.DailyLimitValidator is a validator for the "daily_limit" field. It is called by the builders before save.
+	marketingsettings.DailyLimitValidator = marketingsettingsDescDailyLimit.Validators[0].(func(int) error)
+	// marketingsettingsDescCreativeLimit is the schema descriptor for creative_limit field.
+	marketingsettingsDescCreativeLimit := marketingsettingsFields[5].Descriptor()
+	// marketingsettings.DefaultCreativeLimit holds the default value on creation for the creative_limit field.
+	marketingsettings.DefaultCreativeLimit = marketingsettingsDescCreativeLimit.Default.(int)
+	// marketingsettings.CreativeLimitValidator is a validator for the "creative_limit" field. It is called by the builders before save.
+	marketingsettings.CreativeLimitValidator = marketingsettingsDescCreativeLimit.Validators[0].(func(int) error)
+	// marketingsettingsDescCreativeOnline is the schema descriptor for creative_online field.
+	marketingsettingsDescCreativeOnline := marketingsettingsFields[6].Descriptor()
+	// marketingsettings.DefaultCreativeOnline holds the default value on creation for the creative_online field.
+	marketingsettings.DefaultCreativeOnline = marketingsettingsDescCreativeOnline.Default.(bool)
 	// marketingsettingsDescExpiryMinutes is the schema descriptor for expiry_minutes field.
-	marketingsettingsDescExpiryMinutes := marketingsettingsFields[5].Descriptor()
+	marketingsettingsDescExpiryMinutes := marketingsettingsFields[8].Descriptor()
 	// marketingsettings.DefaultExpiryMinutes holds the default value on creation for the expiry_minutes field.
 	marketingsettings.DefaultExpiryMinutes = marketingsettingsDescExpiryMinutes.Default.(int)
+	// marketingsettingsDescSettlementWeekday is the schema descriptor for settlement_weekday field.
+	marketingsettingsDescSettlementWeekday := marketingsettingsFields[10].Descriptor()
+	// marketingsettings.DefaultSettlementWeekday holds the default value on creation for the settlement_weekday field.
+	marketingsettings.DefaultSettlementWeekday = marketingsettingsDescSettlementWeekday.Default.(int)
+	// marketingsettingsDescSettlementMonthDay is the schema descriptor for settlement_month_day field.
+	marketingsettingsDescSettlementMonthDay := marketingsettingsFields[11].Descriptor()
+	// marketingsettings.DefaultSettlementMonthDay holds the default value on creation for the settlement_month_day field.
+	marketingsettings.DefaultSettlementMonthDay = marketingsettingsDescSettlementMonthDay.Default.(int)
+	// marketingsettingsDescSettlementClock is the schema descriptor for settlement_clock field.
+	marketingsettingsDescSettlementClock := marketingsettingsFields[12].Descriptor()
+	// marketingsettings.DefaultSettlementClock holds the default value on creation for the settlement_clock field.
+	marketingsettings.DefaultSettlementClock = marketingsettingsDescSettlementClock.Default.(string)
+	// marketingsettingsDescSettlementDelayMinutes is the schema descriptor for settlement_delay_minutes field.
+	marketingsettingsDescSettlementDelayMinutes := marketingsettingsFields[13].Descriptor()
+	// marketingsettings.DefaultSettlementDelayMinutes holds the default value on creation for the settlement_delay_minutes field.
+	marketingsettings.DefaultSettlementDelayMinutes = marketingsettingsDescSettlementDelayMinutes.Default.(int)
+	// marketingsettingsDescPlaybackCutoffClock is the schema descriptor for playback_cutoff_clock field.
+	marketingsettingsDescPlaybackCutoffClock := marketingsettingsFields[14].Descriptor()
+	// marketingsettings.DefaultPlaybackCutoffClock holds the default value on creation for the playback_cutoff_clock field.
+	marketingsettings.DefaultPlaybackCutoffClock = marketingsettingsDescPlaybackCutoffClock.Default.(string)
+	// marketingsettingsDescPlaybackCutoffMinutes is the schema descriptor for playback_cutoff_minutes field.
+	marketingsettingsDescPlaybackCutoffMinutes := marketingsettingsFields[15].Descriptor()
+	// marketingsettings.DefaultPlaybackCutoffMinutes holds the default value on creation for the playback_cutoff_minutes field.
+	marketingsettings.DefaultPlaybackCutoffMinutes = marketingsettingsDescPlaybackCutoffMinutes.Default.(int)
+	// marketingsettingsDescPlaybackDeferralPeriods is the schema descriptor for playback_deferral_periods field.
+	marketingsettingsDescPlaybackDeferralPeriods := marketingsettingsFields[16].Descriptor()
+	// marketingsettings.DefaultPlaybackDeferralPeriods holds the default value on creation for the playback_deferral_periods field.
+	marketingsettings.DefaultPlaybackDeferralPeriods = marketingsettingsDescPlaybackDeferralPeriods.Default.(int)
 	// marketingsettingsDescID is the schema descriptor for id field.
 	marketingsettingsDescID := marketingsettingsMixinFields0[0].Descriptor()
 	// marketingsettings.DefaultID holds the default value on creation for the id field.
@@ -430,12 +688,24 @@ func init() {
 	notification.DefaultUpdatedAt = notificationDescUpdatedAt.Default.(func() time.Time)
 	// notification.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	notification.UpdateDefaultUpdatedAt = notificationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// notificationDescDeliveryReason is the schema descriptor for delivery_reason field.
+	notificationDescDeliveryReason := notificationFields[3].Descriptor()
+	// notification.DefaultDeliveryReason holds the default value on creation for the delivery_reason field.
+	notification.DefaultDeliveryReason = notificationDescDeliveryReason.Default.(string)
+	// notificationDescWechatCode is the schema descriptor for wechat_code field.
+	notificationDescWechatCode := notificationFields[4].Descriptor()
+	// notification.DefaultWechatCode holds the default value on creation for the wechat_code field.
+	notification.DefaultWechatCode = notificationDescWechatCode.Default.(int)
+	// notificationDescChoiceID is the schema descriptor for choice_id field.
+	notificationDescChoiceID := notificationFields[5].Descriptor()
+	// notification.DefaultChoiceID holds the default value on creation for the choice_id field.
+	notification.DefaultChoiceID = notificationDescChoiceID.Default.(string)
 	// notificationDescReferenceID is the schema descriptor for reference_id field.
-	notificationDescReferenceID := notificationFields[3].Descriptor()
+	notificationDescReferenceID := notificationFields[8].Descriptor()
 	// notification.DefaultReferenceID holds the default value on creation for the reference_id field.
 	notification.DefaultReferenceID = notificationDescReferenceID.Default.(string)
 	// notificationDescRead is the schema descriptor for read field.
-	notificationDescRead := notificationFields[4].Descriptor()
+	notificationDescRead := notificationFields[9].Descriptor()
 	// notification.DefaultRead holds the default value on creation for the read field.
 	notification.DefaultRead = notificationDescRead.Default.(bool)
 	// notificationDescID is the schema descriptor for id field.
@@ -491,12 +761,20 @@ func init() {
 	operatorDescDisabled := operatorFields[3].Descriptor()
 	// operator.DefaultDisabled holds the default value on creation for the disabled field.
 	operator.DefaultDisabled = operatorDescDisabled.Default.(bool)
+	// operatorDescAllPages is the schema descriptor for all_pages field.
+	operatorDescAllPages := operatorFields[4].Descriptor()
+	// operator.DefaultAllPages holds the default value on creation for the all_pages field.
+	operator.DefaultAllPages = operatorDescAllPages.Default.(bool)
+	// operatorDescAllEndpoints is the schema descriptor for all_endpoints field.
+	operatorDescAllEndpoints := operatorFields[5].Descriptor()
+	// operator.DefaultAllEndpoints holds the default value on creation for the all_endpoints field.
+	operator.DefaultAllEndpoints = operatorDescAllEndpoints.Default.(bool)
 	// operatorDescPages is the schema descriptor for pages field.
-	operatorDescPages := operatorFields[4].Descriptor()
+	operatorDescPages := operatorFields[6].Descriptor()
 	// operator.DefaultPages holds the default value on creation for the pages field.
 	operator.DefaultPages = operatorDescPages.Default.([]string)
 	// operatorDescEndpoints is the schema descriptor for endpoints field.
-	operatorDescEndpoints := operatorFields[5].Descriptor()
+	operatorDescEndpoints := operatorFields[7].Descriptor()
 	// operator.DefaultEndpoints holds the default value on creation for the endpoints field.
 	operator.DefaultEndpoints = operatorDescEndpoints.Default.([]string)
 	// operatorDescID is the schema descriptor for id field.
@@ -597,6 +875,33 @@ func init() {
 	submission.DefaultID = submissionDescID.Default.(func() string)
 	// submission.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	submission.IDValidator = submissionDescID.Validators[0].(func(string) error)
+	subscriptionchoiceMixin := schema.SubscriptionChoice{}.Mixin()
+	subscriptionchoiceMixinFields0 := subscriptionchoiceMixin[0].Fields()
+	_ = subscriptionchoiceMixinFields0
+	subscriptionchoiceFields := schema.SubscriptionChoice{}.Fields()
+	_ = subscriptionchoiceFields
+	// subscriptionchoiceDescCreatedAt is the schema descriptor for created_at field.
+	subscriptionchoiceDescCreatedAt := subscriptionchoiceMixinFields0[1].Descriptor()
+	// subscriptionchoice.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscriptionchoice.DefaultCreatedAt = subscriptionchoiceDescCreatedAt.Default.(func() time.Time)
+	// subscriptionchoiceDescRemembered is the schema descriptor for remembered field.
+	subscriptionchoiceDescRemembered := subscriptionchoiceFields[6].Descriptor()
+	// subscriptionchoice.DefaultRemembered holds the default value on creation for the remembered field.
+	subscriptionchoice.DefaultRemembered = subscriptionchoiceDescRemembered.Default.(string)
+	// subscriptionchoiceDescErrorCode is the schema descriptor for error_code field.
+	subscriptionchoiceDescErrorCode := subscriptionchoiceFields[8].Descriptor()
+	// subscriptionchoice.DefaultErrorCode holds the default value on creation for the error_code field.
+	subscriptionchoice.DefaultErrorCode = subscriptionchoiceDescErrorCode.Default.(int)
+	// subscriptionchoiceDescUsedBy is the schema descriptor for used_by field.
+	subscriptionchoiceDescUsedBy := subscriptionchoiceFields[9].Descriptor()
+	// subscriptionchoice.DefaultUsedBy holds the default value on creation for the used_by field.
+	subscriptionchoice.DefaultUsedBy = subscriptionchoiceDescUsedBy.Default.(string)
+	// subscriptionchoiceDescID is the schema descriptor for id field.
+	subscriptionchoiceDescID := subscriptionchoiceMixinFields0[0].Descriptor()
+	// subscriptionchoice.DefaultID holds the default value on creation for the id field.
+	subscriptionchoice.DefaultID = subscriptionchoiceDescID.Default.(func() string)
+	// subscriptionchoice.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	subscriptionchoice.IDValidator = subscriptionchoiceDescID.Validators[0].(func(string) error)
 	taskMixin := schema.Task{}.Mixin()
 	taskMixinHooks2 := taskMixin[2].Hooks()
 	task.Hooks[0] = taskMixinHooks2[0]
@@ -608,6 +913,8 @@ func init() {
 	_ = taskMixinFields1
 	taskMixinFields2 := taskMixin[2].Fields()
 	_ = taskMixinFields2
+	taskMixinFields3 := taskMixin[3].Fields()
+	_ = taskMixinFields3
 	taskFields := schema.Task{}.Fields()
 	_ = taskFields
 	// taskDescCreatedAt is the schema descriptor for created_at field.
@@ -624,6 +931,10 @@ func init() {
 	taskDescDeleted := taskMixinFields2[0].Descriptor()
 	// task.DefaultDeleted holds the default value on creation for the deleted field.
 	task.DefaultDeleted = taskDescDeleted.Default.(bool)
+	// taskDescDisplayNumber is the schema descriptor for display_number field.
+	taskDescDisplayNumber := taskMixinFields3[0].Descriptor()
+	// task.DisplayNumberValidator is a validator for the "display_number" field. It is called by the builders before save.
+	task.DisplayNumberValidator = taskDescDisplayNumber.Validators[0].(func(int64) error)
 	// taskDescCurrentVersionID is the schema descriptor for current_version_id field.
 	taskDescCurrentVersionID := taskFields[0].Descriptor()
 	// task.DefaultCurrentVersionID holds the default value on creation for the current_version_id field.
@@ -638,6 +949,29 @@ func init() {
 	task.DefaultID = taskDescID.Default.(func() string)
 	// task.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	task.IDValidator = taskDescID.Validators[0].(func(string) error)
+	tasknumbercounterMixin := schema.TaskNumberCounter{}.Mixin()
+	tasknumbercounterMixinFields0 := tasknumbercounterMixin[0].Fields()
+	_ = tasknumbercounterMixinFields0
+	tasknumbercounterFields := schema.TaskNumberCounter{}.Fields()
+	_ = tasknumbercounterFields
+	// tasknumbercounterDescCreatedAt is the schema descriptor for created_at field.
+	tasknumbercounterDescCreatedAt := tasknumbercounterMixinFields0[1].Descriptor()
+	// tasknumbercounter.DefaultCreatedAt holds the default value on creation for the created_at field.
+	tasknumbercounter.DefaultCreatedAt = tasknumbercounterDescCreatedAt.Default.(func() time.Time)
+	// tasknumbercounterDescName is the schema descriptor for name field.
+	tasknumbercounterDescName := tasknumbercounterFields[0].Descriptor()
+	// tasknumbercounter.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	tasknumbercounter.NameValidator = tasknumbercounterDescName.Validators[0].(func(string) error)
+	// tasknumbercounterDescLastNumber is the schema descriptor for last_number field.
+	tasknumbercounterDescLastNumber := tasknumbercounterFields[1].Descriptor()
+	// tasknumbercounter.LastNumberValidator is a validator for the "last_number" field. It is called by the builders before save.
+	tasknumbercounter.LastNumberValidator = tasknumbercounterDescLastNumber.Validators[0].(func(int64) error)
+	// tasknumbercounterDescID is the schema descriptor for id field.
+	tasknumbercounterDescID := tasknumbercounterMixinFields0[0].Descriptor()
+	// tasknumbercounter.DefaultID holds the default value on creation for the id field.
+	tasknumbercounter.DefaultID = tasknumbercounterDescID.Default.(func() string)
+	// tasknumbercounter.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	tasknumbercounter.IDValidator = tasknumbercounterDescID.Validators[0].(func(string) error)
 	taskversionMixin := schema.TaskVersion{}.Mixin()
 	taskversionMixinFields0 := taskversionMixin[0].Fields()
 	_ = taskversionMixinFields0
